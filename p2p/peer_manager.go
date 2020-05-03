@@ -2,12 +2,12 @@ package p2p
 
 import (
 	"context"
-	"ddrp/crypto"
-	"ddrp/log"
-	"ddrp/service"
-	"ddrp/store"
-	"ddrp/util"
 	"fmt"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/service"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/util"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/sync/semaphore"

@@ -2,8 +2,8 @@ package rpc
 
 import (
 	"context"
-	apiv1 "ddrp/rpc/v1"
 	"encoding/hex"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
 	"io"
 )
 

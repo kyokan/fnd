@@ -1,11 +1,11 @@
 package protocol
 
 import (
-	"ddrp/blob"
-	"ddrp/crypto"
-	"ddrp/log"
-	"ddrp/p2p"
-	"ddrp/wire"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/pkg/errors"
 	"sync"
 	"time"

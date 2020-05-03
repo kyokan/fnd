@@ -1,9 +1,9 @@
 package protocol
 
 import (
-	"ddrp/crypto"
-	"ddrp/testutil/testcrypto"
 	"encoding/json"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"

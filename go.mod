@@ -1,4 +1,4 @@
-module ddrp
+module github.com/ddrp-org/ddrp
 
 go 1.12
 

@@ -2,11 +2,11 @@ package mockapp
 
 import (
 	"crypto/rand"
-	"ddrp/blob"
-	"ddrp/crypto"
-	"ddrp/store"
-	"ddrp/testutil/testfs"
-	"ddrp/wire"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/testutil/testfs"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 	"io"

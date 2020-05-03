@@ -2,9 +2,9 @@ package rpc
 
 import (
 	"context"
-	"ddrp/blob"
-	"ddrp/crypto"
-	apiv1 "ddrp/rpc/v1"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
 	"github.com/pkg/errors"
 	"io"
 	"time"

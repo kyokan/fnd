@@ -1,7 +1,7 @@
 package wire
 
 import (
-	"ddrp/blob"
+	"github.com/ddrp-org/ddrp/blob"
 	"testing"
 )
 

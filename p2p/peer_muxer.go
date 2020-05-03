@@ -1,11 +1,11 @@
 package p2p
 
 import (
-	"ddrp/crypto"
-	"ddrp/log"
-	"ddrp/util"
-	"ddrp/wire"
 	"fmt"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/pkg/errors"
 	"sync"
 	"sync/atomic"

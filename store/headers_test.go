@@ -2,8 +2,8 @@ package store
 
 import (
 	"crypto/rand"
-	"ddrp/blob"
-	"ddrp/crypto"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 	"testing"

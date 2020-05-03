@@ -2,12 +2,12 @@ package p2p
 
 import (
 	"context"
-	"ddrp/crypto"
-	"ddrp/testutil"
-	"ddrp/testutil/testcrypto"
-	"ddrp/wire"
 	"errors"
 	"fmt"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/testutil"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net"

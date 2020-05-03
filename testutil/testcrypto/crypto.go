@@ -2,9 +2,9 @@ package testcrypto
 
 import (
 	"crypto/rand"
-	"ddrp/crypto"
 	"encoding/hex"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

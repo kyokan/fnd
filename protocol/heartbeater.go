@@ -2,11 +2,11 @@ package protocol
 
 import (
 	"bytes"
-	"ddrp/crypto"
-	"ddrp/log"
-	"ddrp/service"
-	"ddrp/version"
 	"encoding/json"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/service"
+	"github.com/ddrp-org/ddrp/version"
 	"github.com/pkg/errors"
 	"net/http"
 	"sync"

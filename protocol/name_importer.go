@@ -2,12 +2,12 @@ package protocol
 
 import (
 	"bytes"
-	"ddrp/config"
-	"ddrp/log"
-	"ddrp/store"
 	"encoding/hex"
 	"fmt"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/ddrp-org/ddrp/config"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/store"
 	"github.com/mslipper/handshake/client"
 	"github.com/mslipper/handshake/dns"
 	"github.com/mslipper/handshake/primitives"

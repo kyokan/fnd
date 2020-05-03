@@ -1,11 +1,11 @@
 package blob
 
 import (
-	"ddrp/cli"
-	"ddrp/rpc"
-	apiv1 "ddrp/rpc/v1"
-	"ddrp/store"
 	"encoding/json"
+	"github.com/ddrp-org/ddrp/cli"
+	"github.com/ddrp-org/ddrp/rpc"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"github.com/ddrp-org/ddrp/store"
 	"github.com/spf13/cobra"
 	"math"
 	"os"

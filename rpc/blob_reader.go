@@ -2,9 +2,9 @@ package rpc
 
 import (
 	"context"
-	"ddrp/blob"
-	apiv1 "ddrp/rpc/v1"
 	"errors"
+	"github.com/ddrp-org/ddrp/blob"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
 	"io"
 )
 

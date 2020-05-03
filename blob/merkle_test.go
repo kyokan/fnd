@@ -3,8 +3,8 @@ package blob
 import (
 	"bytes"
 	"crypto/rand"
-	"ddrp/testutil/testfs"
 	"encoding/hex"
+	"github.com/ddrp-org/ddrp/testutil/testfs"
 	"github.com/stretchr/testify/require"
 	"io"
 	"testing"

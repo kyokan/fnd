@@ -1,8 +1,8 @@
 package testutil
 
 import (
-	"ddrp/testutil/testcrypto"
-	"ddrp/wire"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/stretchr/testify/require"
 	"io"
 	"net"

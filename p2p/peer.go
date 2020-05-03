@@ -3,9 +3,9 @@ package p2p
 import (
 	"bufio"
 	"context"
-	"ddrp/log"
-	"ddrp/wire"
 	"errors"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/wire"
 	"golang.org/x/time/rate"
 	"io"
 	"math"

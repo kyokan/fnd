@@ -1,8 +1,8 @@
 package wire
 
 import (
-	"ddrp/blob"
-	"ddrp/crypto"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/ddrp-org/dwire"
 	"io"
 )

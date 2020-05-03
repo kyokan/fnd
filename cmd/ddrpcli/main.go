@@ -1,6 +1,6 @@
 package main
 
-import "ddrp/cmd/ddrpcli/cmd"
+import "github.com/ddrp-org/ddrp/cmd/ddrpcli/cmd"
 
 func main() {
 	cmd.Execute()

@@ -1,7 +1,7 @@
 package blob
 
 import (
-	"ddrp/crypto"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/ddrp-org/dwire"
 	"golang.org/x/crypto/blake2b"
 	"time"

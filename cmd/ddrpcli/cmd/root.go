@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"ddrp/cli"
-	"ddrp/cmd/ddrpcli/cmd/blob"
-	"ddrp/cmd/ddrpcli/cmd/net"
-	"ddrp/cmd/ddrpcli/cmd/unsafe"
 	"fmt"
+	"github.com/ddrp-org/ddrp/cli"
+	"github.com/ddrp-org/ddrp/cmd/ddrpcli/cmd/blob"
+	"github.com/ddrp-org/ddrp/cmd/ddrpcli/cmd/net"
+	"github.com/ddrp-org/ddrp/cmd/ddrpcli/cmd/unsafe"
 	"github.com/spf13/cobra"
 	"os"
 )

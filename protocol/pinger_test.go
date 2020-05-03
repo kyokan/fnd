@@ -2,11 +2,11 @@ package protocol
 
 import (
 	"context"
-	"ddrp/crypto"
-	"ddrp/p2p"
-	"ddrp/testutil"
-	"ddrp/testutil/testcrypto"
-	"ddrp/wire"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/testutil"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/stretchr/testify/require"
 	"io"
 	"io/ioutil"

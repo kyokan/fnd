@@ -1,9 +1,9 @@
 package protocol
 
 import (
-	"ddrp/blob"
-	"ddrp/store"
-	"ddrp/testutil/testfs"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/testutil/testfs"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

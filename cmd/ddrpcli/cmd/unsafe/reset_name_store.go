@@ -1,9 +1,9 @@
 package unsafe
 
 import (
-	"ddrp/config"
-	"ddrp/store"
 	"fmt"
+	"github.com/ddrp-org/ddrp/config"
+	"github.com/ddrp-org/ddrp/store"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

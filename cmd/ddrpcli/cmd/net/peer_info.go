@@ -1,11 +1,11 @@
 package net
 
 import (
-	"ddrp/cli"
-	"ddrp/rpc"
-	apiv1 "ddrp/rpc/v1"
 	"encoding/json"
 	"fmt"
+	"github.com/ddrp-org/ddrp/cli"
+	"github.com/ddrp-org/ddrp/rpc"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"os"

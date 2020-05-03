@@ -2,10 +2,10 @@ package rpc
 
 import (
 	"context"
-	"ddrp/crypto"
-	apiv1 "ddrp/rpc/v1"
-	"ddrp/store"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/ddrp-org/ddrp/crypto"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"github.com/ddrp-org/ddrp/store"
 	"github.com/pkg/errors"
 	"io"
 	"time"

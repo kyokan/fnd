@@ -1,8 +1,8 @@
 package protocol
 
 import (
-	"ddrp/testutil/testcrypto"
 	"fmt"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

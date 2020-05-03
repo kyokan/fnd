@@ -3,10 +3,10 @@ package blob
 import (
 	"bufio"
 	"bytes"
-	"ddrp/cli"
-	"ddrp/rpc"
-	apiv1 "ddrp/rpc/v1"
 	"fmt"
+	"github.com/ddrp-org/ddrp/cli"
+	"github.com/ddrp-org/ddrp/rpc"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"io"

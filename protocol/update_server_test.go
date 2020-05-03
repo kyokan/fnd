@@ -1,14 +1,14 @@
 package protocol
 
 import (
-	"ddrp/blob"
-	"ddrp/crypto"
-	"ddrp/p2p"
-	"ddrp/store"
-	"ddrp/testutil"
-	"ddrp/testutil/testcrypto"
-	"ddrp/util"
-	"ddrp/wire"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/testutil"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 	"io"

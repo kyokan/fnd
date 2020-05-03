@@ -2,8 +2,8 @@ package wire
 
 import (
 	"bytes"
-	"ddrp/crypto"
 	"fmt"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/ddrp-org/dwire"
 	"io"
 	"time"

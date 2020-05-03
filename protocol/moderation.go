@@ -1,9 +1,9 @@
 package protocol
 
 import (
-	"ddrp/blob"
-	"ddrp/log"
-	"ddrp/store"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/store"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"time"

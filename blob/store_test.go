@@ -2,7 +2,7 @@ package blob
 
 import (
 	"crypto/rand"
-	"ddrp/testutil/testfs"
+	"github.com/ddrp-org/ddrp/testutil/testfs"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/blake2b"
 	"io"

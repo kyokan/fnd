@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"ddrp/cli"
-	"ddrp/config"
 	"fmt"
+	"github.com/ddrp-org/ddrp/cli"
+	"github.com/ddrp-org/ddrp/config"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"os"

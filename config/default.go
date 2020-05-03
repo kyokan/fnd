@@ -2,7 +2,7 @@ package config
 
 import (
 	"bytes"
-	"ddrp/log"
+	"github.com/ddrp-org/ddrp/log"
 	"github.com/pkg/errors"
 	"io"
 	"os"

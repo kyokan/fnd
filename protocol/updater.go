@@ -1,13 +1,13 @@
 package protocol
 
 import (
-	"ddrp/blob"
-	"ddrp/config"
-	"ddrp/log"
-	"ddrp/p2p"
-	"ddrp/store"
-	"ddrp/util"
-	"ddrp/wire"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/config"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"sync"

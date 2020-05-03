@@ -1,13 +1,13 @@
 package protocol
 
 import (
-	"ddrp/crypto"
-	"ddrp/p2p"
-	"ddrp/store"
-	"ddrp/testutil/mockapp"
-	"ddrp/util"
-	"ddrp/wire"
 	"errors"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/testutil/mockapp"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 	"testing"

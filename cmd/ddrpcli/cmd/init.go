@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"ddrp/cli"
 	"fmt"
+	"github.com/ddrp-org/ddrp/cli"
 	"github.com/spf13/cobra"
 )
 
