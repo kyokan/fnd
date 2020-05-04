@@ -201,12 +201,13 @@ func (s *Server) ListPeers(req *apiv1.ListPeersReq, stream apiv1.DDRPv1_ListPeer
 		}
 
 		peerRes := &apiv1.ListPeersRes{
-			PeerID:    peer.ID[:],
-			Ip:        peer.IP,
-			Banned:    peer.IsBanned(),
-			Connected: connected,
-			TxBytes:   txBytes,
-			RxBytes:   rxBytes,
+			PeerID:      peer.ID[:],
+			Ip:          peer.IP,
+			Banned:      peer.IsBanned(),
+			Whitelisted: peer.Whitelisted,
+			Connected:   connected,
+			TxBytes:     txBytes,
+			RxBytes:     rxBytes,
 		}
 		if err := stream.Send(peerRes); err != nil {
 			return err
