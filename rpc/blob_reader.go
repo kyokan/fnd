@@ -43,10 +43,35 @@ func (b *BlobReader) Read(p []byte) (int, error) {
 		return 0, io.EOF
 	}
 	toRead := len(p)
-	if b.off+int64(len(p)) > blob.Size {
-		toRead = blob.Size - toRead
+	if b.off+int64(toRead) > blob.Size {
+		toRead = blob.Size - int(b.off)
 	}
 	n, err := b.ReadAt(p[:toRead], b.off)
 	b.off += int64(n)
 	return n, err
+}
+
+func (b *BlobReader) Seek(off int64, whence int) (int64, error) {
+	switch whence {
+	case io.SeekStart:
+		if b.off > blob.Size {
+			return b.off, errors.New("seek beyond blob bounds")
+		}
+		b.off = off
+	case io.SeekCurrent:
+		next := b.off + off
+		if next > blob.Size {
+			return b.off, errors.New("seek beyond blob bounds")
+		}
+		b.off = next
+	case io.SeekEnd:
+		next := blob.Size - off
+		if next < 0 {
+			return b.off, errors.New("seek beyond blob bounds")
+		}
+		b.off = next
+	default:
+		panic("invalid whence")
+	}
+	return b.off, nil
 }

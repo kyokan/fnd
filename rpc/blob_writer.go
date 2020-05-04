@@ -108,9 +108,6 @@ func (b *BlobWriter) WriteAt(p []byte, off int64) (int, error) {
 		clientErr = errors.New("write beyond blob bounds")
 		n = blob.Size - int(off)
 	}
-	if n <= 0 {
-		return 0, clientErr
-	}
 
 	res, err := b.client.WriteAt(context.Background(), &apiv1.WriteAtReq{
 		TxID:   b.txID,
