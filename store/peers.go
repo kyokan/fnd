@@ -20,6 +20,7 @@ type Peer struct {
 	Verify              bool
 	InboundBannedUntil  time.Time
 	OutboundBannedUntil time.Time
+	Whitelisted         bool
 }
 
 func (p *Peer) MarshalJSON() ([]byte, error) {
@@ -66,7 +67,7 @@ func (p *Peer) UnmarshalJSON(b []byte) error {
 
 func (p *Peer) IsBanned() bool {
 	now := time.Now()
-	return p.InboundBannedUntil.After(now) || p.OutboundBannedUntil.After(now)
+	return !p.Whitelisted && (p.InboundBannedUntil.After(now) || p.OutboundBannedUntil.After(now))
 }
 
 var (
@@ -74,6 +75,7 @@ var (
 	peerDataPrefix   = Prefixer(string(peersPrefix("peer")))
 	peerInBanPrefix  = Prefixer(string(peersPrefix("inbound-ban")))
 	peerOutBanPrefix = Prefixer(string(peersPrefix("outbound-ban")))
+	whitelistPrefix  = Prefixer(string(peersPrefix("whitelist")))
 )
 
 func SetPeer(db *leveldb.DB, id crypto.Hash, ip string, verify bool) error {
@@ -116,11 +118,14 @@ func (ps *PeerStream) Next() (*Peer, error) {
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		return nil, errors.Wrap(err, "error getting outbound ban state during stream")
 	}
+	whitelisted, err := ps.db.Has(whitelistPrefix(peer.IP), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting whitelist state during stream")
+	}
 	peer.InboundBannedUntil = mustDecodeTime(inRes)
 	peer.OutboundBannedUntil = mustDecodeTime(outRes)
-
-	now := time.Now()
-	if !ps.includeBanned && (peer.InboundBannedUntil.After(now) || peer.OutboundBannedUntil.After(now)) {
+	peer.Whitelisted = whitelisted
+	if !ps.includeBanned && peer.IsBanned() {
 		return ps.Next()
 	}
 	return peer, nil
@@ -196,7 +201,35 @@ func UnbanInboundPeerTx(tx *leveldb.Transaction, ip string) error {
 	return nil
 }
 
+func WhitelistPeerTx(tx *leveldb.Transaction, ip string) error {
+	if err := tx.Put(whitelistPrefix(ip), []byte{0x01}, nil); err != nil {
+		return errors.Wrap(err, "error whitelisting peer")
+	}
+	return nil
+}
+
+func UnwhitelistPeerTx(tx *leveldb.Transaction, ip string) error {
+	whitelisted, err := tx.Has(whitelistPrefix(ip), nil)
+	if err != nil {
+		return errors.Wrap(err, "error checking whitelist state")
+	}
+	if !whitelisted {
+		return nil
+	}
+	if err := tx.Delete(whitelistPrefix(ip), nil); err != nil {
+		return errors.Wrap(err, "error unwhitelisting peer")
+	}
+	return nil
+}
+
 func IsBanned(db *leveldb.DB, ip string) (bool, bool, error) {
+	whitelisted, err := db.Has(whitelistPrefix(ip), nil)
+	if err != nil {
+		return false, false, errors.Wrap(err, "error getting whitelist state")
+	}
+	if whitelisted {
+		return false, false, nil
+	}
 	now := time.Now()
 	inRes, err := db.Get(peerInBanPrefix(ip), nil)
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {

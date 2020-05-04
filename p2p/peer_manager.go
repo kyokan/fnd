@@ -55,8 +55,8 @@ var (
 
 type PeerManager interface {
 	service.Service
+	PeerDialer
 	AcceptPeer(conn *net.TCPConn) error
-	DialPeer(peerID crypto.Hash, addrStr string, verifyPeerID bool) error
 }
 
 type peerManager struct {
@@ -307,7 +307,7 @@ func (p *peerManager) completeConnection(peerID crypto.Hash, peer Peer, verify b
 		}
 		return errors.Wrap(err, "error completing peer connection")
 	}
-	if err := store.SetPeer(p.db, crypto.Hash(peerID), rIP, verify); err != nil {
+	if err := store.SetPeer(p.db, peerID, rIP, verify); err != nil {
 		p.lgr.Error("error saving peer", "err", err)
 	}
 	p.lgr.Info("peer added", "peer_id", peerID, "direction", peer.Direction())

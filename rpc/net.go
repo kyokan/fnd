@@ -8,12 +8,13 @@ import (
 )
 
 type Peer struct {
-	ID        string
-	IP        string
-	Banned    bool
-	Connected bool
-	TxBytes   uint64
-	RxBytes   uint64
+	ID          string
+	IP          string
+	Banned      bool
+	Whitelisted bool
+	Connected   bool
+	TxBytes     uint64
+	RxBytes     uint64
 }
 
 func ListPeers(client apiv1.DDRPv1Client) ([]*Peer, error) {
@@ -38,12 +39,13 @@ func ListPeersContext(ctx context.Context, client apiv1.DDRPv1Client) ([]*Peer, 
 		}
 
 		peers = append(peers, &Peer{
-			ID:        hex.EncodeToString(res.PeerID),
-			IP:        res.Ip,
-			Banned:    res.Banned,
-			Connected: res.Connected,
-			TxBytes:   res.TxBytes,
-			RxBytes:   res.RxBytes,
+			ID:          hex.EncodeToString(res.PeerID),
+			IP:          res.Ip,
+			Banned:      res.Banned,
+			Whitelisted: res.Whitelisted,
+			Connected:   res.Connected,
+			TxBytes:     res.TxBytes,
+			RxBytes:     res.RxBytes,
 		})
 	}
 	return peers, nil

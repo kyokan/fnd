@@ -17,6 +17,7 @@ import (
 	"github.com/mslipper/handshake/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/syndtr/goleveldb/leveldb"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -213,6 +214,23 @@ var startCmd = &cobra.Command{
 				err := http.ListenAndServe("localhost:6060", nil)
 				lgr.Error("error starting profiler", "err", err)
 			}()
+		}
+
+		err = store.WithTx(db, func(tx *leveldb.Transaction) error {
+			for _, seed := range seeds {
+				if err := store.WhitelistPeerTx(tx, seed.IP); err != nil {
+					return err
+				}
+			}
+			for _, seed := range dnsSeeds {
+				if err := store.WhitelistPeerTx(tx, seed); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			return errors.Wrap(err, "error whitelisting seed peers")
 		}
 
 		lgr.Info("dialing seed peers")

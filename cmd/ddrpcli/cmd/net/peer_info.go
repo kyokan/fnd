@@ -12,12 +12,13 @@ import (
 )
 
 type peerJSON struct {
-	ID        string `json:"id"`
-	IP        string `json:"ip"`
-	Banned    bool   `json:"banned"`
-	Connected bool   `json:"connected"`
-	TxBytes   int    `json:"tx_bytes"`
-	RxBytes   int    `json:"rx_bytes"`
+	ID          string `json:"id"`
+	IP          string `json:"ip"`
+	Banned      bool   `json:"banned"`
+	Whitelisted bool   `json:"whitelisted"`
+	Connected   bool   `json:"connected"`
+	TxBytes     int    `json:"tx_bytes"`
+	RxBytes     int    `json:"rx_bytes"`
 }
 
 var peerInfoCmd = &cobra.Command{
@@ -39,12 +40,13 @@ var peerInfoCmd = &cobra.Command{
 			encoder := json.NewEncoder(os.Stdout)
 			for _, peer := range peers {
 				jsonPeer := &peerJSON{
-					ID:        peer.ID,
-					IP:        peer.IP,
-					Banned:    peer.Banned,
-					Connected: peer.Connected,
-					TxBytes:   int(peer.TxBytes),
-					RxBytes:   int(peer.RxBytes),
+					ID:          peer.ID,
+					IP:          peer.IP,
+					Banned:      peer.Banned,
+					Whitelisted: peer.Whitelisted,
+					Connected:   peer.Connected,
+					TxBytes:     int(peer.TxBytes),
+					RxBytes:     int(peer.RxBytes),
 				}
 
 				if err := encoder.Encode(jsonPeer); err != nil {
@@ -57,24 +59,18 @@ var peerInfoCmd = &cobra.Command{
 				"Peer ID",
 				"IP",
 				"Banned",
+				"Whitelisted",
 				"Connected",
 				"Tx Bytes",
 				"Rx Bytes",
 			})
 			for _, res := range peers {
-				bannedText := "FALSE"
-				if res.Banned {
-					bannedText = "TRUE"
-				}
-				connectedText := "FALSE"
-				if res.Connected {
-					connectedText = "TRUE"
-				}
 				table.Append([]string{
 					res.ID,
 					res.IP,
-					bannedText,
-					connectedText,
+					boolToStr(res.Banned),
+					boolToStr(res.Whitelisted),
+					boolToStr(res.Connected),
 					bandwidthToStr(res.TxBytes),
 					bandwidthToStr(res.RxBytes),
 				})
@@ -103,6 +99,13 @@ func bandwidthToStr(stat uint64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %cB", float64(stat)/float64(div), "kMGTPE"[exp])
+}
+
+func boolToStr(val bool) string {
+	if val {
+		return "TRUE"
+	}
+	return "FALSE"
 }
 
 func init() {

@@ -69,6 +69,7 @@ message ListPeersRes {
     bool connected = 4;
     uint64 txBytes = 5;
     uint64 rxBytes = 6;
+    bool whitelisted = 7;
 }
 
 message CheckoutReq {

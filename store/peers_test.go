@@ -10,6 +10,7 @@ import (
 
 func TestPeers(t *testing.T) {
 	db, done := setupLevelDB(t)
+	defer done()
 
 	idsIPs := map[crypto.Hash]string{
 		crypto.Rand32(): "127.0.0.1",
@@ -66,8 +67,46 @@ func TestPeers(t *testing.T) {
 
 	streamedPeers = getAllPeers(t, db, false)
 	require.Equal(t, 1, len(streamedPeers))
+}
 
-	done()
+func TestPeers_Whitelisting(t *testing.T) {
+	db, done := setupLevelDB(t)
+	defer done()
+
+	dur := 10 * time.Minute
+	require.NoError(t, WithTx(db, func(tx *leveldb.Transaction) error {
+		if err := SetPeerTx(tx, crypto.Rand32(), "127.0.0.1", false); err != nil {
+			return err
+		}
+		if err := SetPeerTx(tx, crypto.Rand32(), "127.0.0.2", false); err != nil {
+			return err
+		}
+		if err := WhitelistPeerTx(tx, "127.0.0.1"); err != nil {
+			return err
+		}
+		if err := BanInboundPeerTx(tx, "127.0.0.1", dur); err != nil {
+			return err
+		}
+		if err := BanInboundPeerTx(tx, "127.0.0.2", dur); err != nil {
+			return err
+		}
+		return nil
+	}))
+
+	inBan, outBan, err := IsBanned(db, "127.0.0.1")
+	require.NoError(t, err)
+	require.False(t, inBan)
+	require.False(t, outBan)
+
+	inBan, outBan, err = IsBanned(db, "127.0.0.2")
+	require.NoError(t, err)
+	require.True(t, inBan)
+	require.False(t, outBan)
+
+	streamedPeers := getAllPeers(t, db, false)
+	require.Equal(t, 1, len(streamedPeers))
+	require.Equal(t, "127.0.0.1", streamedPeers[0].IP)
+	require.True(t, streamedPeers[0].Whitelisted)
 }
 
 func getAllPeers(t *testing.T, db *leveldb.DB, includeBanned bool) []*Peer {
