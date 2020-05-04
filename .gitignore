@@ -2,5 +2,4 @@ build
 .terraform
 proto_bindings
 docs/build
-**/*.pb.go
 dev.db

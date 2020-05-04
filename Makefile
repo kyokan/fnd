@@ -41,6 +41,7 @@ clean:
 
 fmt:
 	go mod tidy
+	goimports -w .
 	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -name '*.pb.go' | xargs gofmt -w -s
 .PHONY: fmt
 
