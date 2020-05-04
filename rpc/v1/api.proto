@@ -10,7 +10,7 @@ service DDRPv1 {
     rpc ListPeers (ListPeersReq) returns (stream ListPeersRes);
 
     rpc Checkout (CheckoutReq) returns (CheckoutRes);
-    rpc Write (stream WriteReq) returns (Empty);
+    rpc WriteAt (WriteReq) returns (Empty);
     rpc Truncate (TruncateReq) returns (Empty);
     rpc PreCommit (PreCommitReq) returns (PreCommitRes);
     rpc Commit (CommitReq) returns (CommitRes);

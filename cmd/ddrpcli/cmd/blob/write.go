@@ -40,8 +40,15 @@ var writeCmd = &cobra.Command{
 
 		name := args[0]
 		wr := rpc.NewBlobWriter(apiv1.NewDDRPv1Client(conn), signer, name)
-		wr.Truncate = truncate
-		wr.Broadcast = broadcast
+
+		if err := wr.Open(); err != nil {
+			return err
+		}
+		if truncate {
+			if err := wr.Truncate(); err != nil {
+				return err
+			}
+		}
 		var rd io.Reader
 		if len(args) < 2 {
 			if isatty.IsTerminal(os.Stdin.Fd()) {
@@ -55,7 +62,7 @@ var writeCmd = &cobra.Command{
 		if _, err := io.Copy(wr, rd); err != nil {
 			return err
 		}
-		if err := wr.Close(); err != nil {
+		if err := wr.Commit(broadcast); err != nil {
 			return err
 		}
 

@@ -77,6 +77,7 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 	return &store.BlobInfo{
 		Name:         res.Name,
 		PublicKey:    pub,
+		ImportHeight: int(res.ImportHeight),
 		Timestamp:    time.Unix(int64(res.Timestamp), 0),
 		MerkleRoot:   merkleRoot,
 		ReservedRoot: reservedRoot,

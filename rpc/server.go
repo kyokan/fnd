@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"google.golang.org/grpc"
-	"io"
 	"net"
 	"strconv"
 	"sync/atomic"
@@ -236,27 +235,17 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 	}, nil
 }
 
-func (s *Server) Write(stream apiv1.DDRPv1_WriteServer) error {
-	for {
-		req, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return errors.Wrap(err, "error receiving write request")
-		}
-
-		awaiting := s.txStore.Get(strconv.FormatUint(uint64(req.TxID), 32)).(*awaitingTx)
-		if awaiting == nil {
-			return errors.New("transaction ID not found")
-		}
-		tx := awaiting.tx
-		_, err = tx.WriteAt(req.Data, int64(req.Offset))
-		if err != nil {
-			return errors.Wrap(err, "error writing to transaction")
-		}
+func (s *Server) WriteAt(ctx context.Context, req *apiv1.WriteReq) (*apiv1.Empty, error) {
+	awaiting := s.txStore.Get(strconv.FormatUint(uint64(req.TxID), 32)).(*awaitingTx)
+	if awaiting == nil {
+		return nil, errors.New("transaction ID not found")
 	}
-	return nil
+	tx := awaiting.tx
+	_, err := tx.WriteAt(req.Data, int64(req.Offset))
+	if err != nil {
+		return nil, errors.Wrap(err, "error writing to transaction")
+	}
+	return emptyRes, nil
 }
 
 func (s *Server) Truncate(ctx context.Context, req *apiv1.TruncateReq) (*apiv1.Empty, error) {

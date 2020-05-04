@@ -10,119 +10,161 @@ import (
 	"time"
 )
 
-const (
-	BlobWriterMaxChunkSize = 1 * 1024 * 1024
-)
-
 type BlobWriter struct {
-	Client      apiv1.DDRPv1Client
-	Signer      crypto.Signer
-	Name        string
-	Timeout     time.Duration
-	StartOffset int
-	Truncate    bool
-	Broadcast   bool
-	writeClient apiv1.DDRPv1_WriteClient
-	txID        uint32
-	offset      int
+	client    apiv1.DDRPv1Client
+	signer    crypto.Signer
+	name      string
+	txID      uint32
+	opened    bool
+	committed bool
+	offset    int64
 }
 
 func NewBlobWriter(client apiv1.DDRPv1Client, signer crypto.Signer, name string) *BlobWriter {
 	return &BlobWriter{
-		Client:    client,
-		Signer:    signer,
-		Name:      name,
-		Broadcast: true,
+		client: client,
+		signer: signer,
+		name:   name,
 	}
 }
 
-func (b *BlobWriter) Write(p []byte) (int, error) {
-	if b.writeClient == nil {
-		ctx := context.Background()
-		checkoutRes, err := b.Client.Checkout(ctx, &apiv1.CheckoutReq{
-			Name: b.Name,
-		})
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to check out blob")
-		}
-
-		if b.Truncate {
-			_, err = b.Client.Truncate(ctx, &apiv1.TruncateReq{
-				TxID: checkoutRes.TxID,
-			})
-			if err != nil {
-				return 0, errors.Wrap(err, "failed to truncate blob")
-			}
-		}
-
-		b.txID = checkoutRes.TxID
-		wc, err := b.Client.Write(context.Background())
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to open write stream")
-		}
-		b.writeClient = wc
-		b.offset = b.StartOffset
+func (b *BlobWriter) Open() error {
+	if b.opened {
+		panic("writer already open")
 	}
-
-	toWrite := len(p)
-	if toWrite == 0 {
-		return 0, nil
+	if b.committed {
+		panic("writer committed")
 	}
-
-	var writeErr error
-	remaining := blob.Size - b.offset
-	if toWrite > remaining {
-		writeErr = io.EOF
-		toWrite = remaining
-	}
-	if toWrite > BlobWriterMaxChunkSize {
-		writeErr = errors.New("chunk size too large")
-		toWrite = BlobWriterMaxChunkSize
-	}
-
-	err := b.writeClient.Send(&apiv1.WriteReq{
-		TxID:   b.txID,
-		Offset: uint32(b.offset),
-		Data:   p[:toWrite],
+	checkoutRes, err := b.client.Checkout(context.Background(), &apiv1.CheckoutReq{
+		Name: b.name,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to send write request")
+		return errors.Wrap(err, "failed to check out blob")
 	}
-
-	b.offset += toWrite
-	return toWrite, writeErr
+	b.txID = checkoutRes.TxID
+	b.opened = true
+	return nil
 }
 
-func (b *BlobWriter) Close() error {
-	if b.writeClient == nil {
-		return nil
+func (b *BlobWriter) Truncate() error {
+	if !b.opened {
+		panic("writer not open")
 	}
-
-	if _, err := b.writeClient.CloseAndRecv(); err != nil {
-		return errors.Wrap(err, "failed to close write stream")
+	if b.committed {
+		panic("writer committed")
 	}
-	ctx := context.Background()
-	precommitRes, err := b.Client.PreCommit(ctx, &apiv1.PreCommitReq{
+	_, err := b.client.Truncate(context.Background(), &apiv1.TruncateReq{
 		TxID: b.txID,
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to perform precommit")
+		return errors.Wrap(err, "error truncating blob")
+	}
+	return nil
+}
+
+func (b *BlobWriter) Seek(offset int64, whence int) (int64, error) {
+	if !b.opened {
+		panic("writer not open")
+	}
+	if b.committed {
+		panic("writer committed")
+	}
+
+	switch whence {
+	case io.SeekStart:
+		if b.offset > blob.Size {
+			return b.offset, errors.New("seek beyond blob bounds")
+		}
+		b.offset = offset
+	case io.SeekCurrent:
+		next := b.offset + offset
+		if next > blob.Size {
+			return b.offset, errors.New("seek beyond blob bounds")
+		}
+		b.offset = next
+	case io.SeekEnd:
+		next := blob.Size - offset
+		if next < 0 {
+			return b.offset, errors.New("seek beyond blob bounds")
+		}
+		b.offset = next
+	default:
+		panic("invalid whence")
+	}
+	return b.offset, nil
+}
+
+func (b *BlobWriter) WriteAt(p []byte, off int64) (int, error) {
+	if !b.opened {
+		panic("writer not open")
+	}
+	if b.committed {
+		panic("writer committed")
+	}
+
+	var clientErr error
+	n := len(p)
+	if off+int64(n) > blob.Size {
+		clientErr = errors.New("write beyond blob bounds")
+		n = blob.Size - int(off)
+	}
+	if n <= 0 {
+		return 0, clientErr
+	}
+
+	_, err := b.client.WriteAt(context.Background(), &apiv1.WriteReq{
+		TxID:   b.txID,
+		Offset: uint32(b.offset),
+		Data:   p[:n],
+	})
+	if err != nil {
+		return 0, errors.Wrap(err, "error writing blob")
+	}
+	return n, clientErr
+}
+
+func (b *BlobWriter) Write(p []byte) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+
+	n, err := b.WriteAt(p, b.offset)
+	b.offset += int64(n)
+	if err != nil {
+		return n, errors.Wrap(err, "error writing blob")
+	}
+	return n, nil
+}
+
+func (b *BlobWriter) Commit(broadcast bool) error {
+	if !b.opened {
+		panic("writer not open")
+	}
+	if b.committed {
+		panic("writer committed")
+	}
+	precommitRes, err := b.client.PreCommit(context.Background(), &apiv1.PreCommitReq{
+		TxID: b.txID,
+	})
+	if err != nil {
+		return errors.Wrap(err, "error retrieving precommit")
 	}
 	ts := time.Now()
 	var mr crypto.Hash
 	copy(mr[:], precommitRes.MerkleRoot)
-	sig, err := blob.SignSeal(b.Signer, b.Name, ts, mr, crypto.ZeroHash)
+	sig, err := blob.SignSeal(b.signer, b.name, ts, mr, crypto.ZeroHash)
 	if err != nil {
-		return errors.Wrap(err, "failed to sign merkle root")
+		return errors.Wrap(err, "error sealing blob")
 	}
-	_, err = b.Client.Commit(ctx, &apiv1.CommitReq{
+	_, err = b.client.Commit(context.Background(), &apiv1.CommitReq{
 		TxID:      b.txID,
 		Timestamp: uint64(ts.Unix()),
 		Signature: sig[:],
-		Broadcast: b.Broadcast,
+		Broadcast: broadcast,
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to commit blob")
+		return errors.Wrap(err, "error sending commit")
 	}
+	b.committed = true
 	return nil
 }
