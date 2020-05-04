@@ -2,9 +2,9 @@ package util
 
 import (
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/atomic"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -30,9 +30,9 @@ func TestCache_Race(t *testing.T) {
 
 func TestCache_GetSetHas_LazyExpiry(t *testing.T) {
 	cache := NewCache()
-	var reaped atomic.Int32
+	var reaped int32
 	cache.ReaperFunc = func(key string, val interface{}) {
-		reaped.Store(int32(val.(int)))
+		atomic.StoreInt32(&reaped, int32(val.(int)))
 	}
 	assert.False(t, cache.Has("test"))
 	assert.Nil(t, cache.Get("test"))
@@ -46,21 +46,21 @@ func TestCache_GetSetHas_LazyExpiry(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	assert.Nil(t, cache.Get("test"))
 	assert.False(t, cache.Has("test"))
-	assert.EqualValues(t, 123, reaped.Load())
+	assert.EqualValues(t, 123, atomic.LoadInt32(&reaped))
 }
 
 func TestCache_GetSetHas_ProactiveExpiry(t *testing.T) {
 	cache := NewCache()
-	var reaped atomic.Int32
+	var reaped int32
 	cache.ReaperFunc = func(key string, val interface{}) {
-		reaped.Store(int32(val.(int)))
+		atomic.StoreInt32(&reaped, int32(val.(int)))
 	}
 	cache.ReapInterval = 50 * time.Millisecond
 	cache.Set("test", 123, 10)
 	time.Sleep(80 * time.Millisecond)
 	assert.False(t, cache.Has("test"))
 	assert.Nil(t, cache.Get("test"))
-	assert.EqualValues(t, 123, reaped.Load())
+	assert.EqualValues(t, 123, atomic.LoadInt32(&reaped))
 }
 
 func TestCache_Del(t *testing.T) {

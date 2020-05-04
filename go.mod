@@ -23,7 +23,6 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/syndtr/goleveldb v1.0.0
-	go.uber.org/atomic v1.4.0
 	golang.org/x/crypto v0.0.0-20200422194213-44a606286825
 	golang.org/x/net v0.0.0-20190923162816-aa69164e4478
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
