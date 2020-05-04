@@ -41,6 +41,7 @@ s3cmd put "$build_dir/ddrp-$version-linux-amd64.tgz" s3://ddrp-releases/ddrp-lin
 s3cmd setacl s3://ddrp-releases/ddrp-linux-amd64.tgz --acl-public
 s3cmd put "$build_dir/ddrp-$version-linux-amd64.tgz.sig" s3://ddrp-releases/ddrp-linux-amd64.tgz.sig
 s3cmd setacl s3://ddrp-releases/ddrp-linux-amd64.tgz.sig --acl-public
-cd "$build_dir" && shasum -a 256 "ddrp-$version-linux-amd64.tgz" > /tmp/ddrp-linux-amd64.tgz.sum.txt && cd "$DIR"
+cp "$build_dir/ddrp-$version-linux-amd64.tgz" "$build_dir/ddrp-linux-amd64.tgz"
+cd "$build_dir" && shasum -a 256 "ddrp-linux-amd64.tgz" > /tmp/ddrp-linux-amd64.tgz.sum.txt && cd "$DIR"
 s3cmd put /tmp/ddrp-linux-amd64.tgz.sum.txt s3://ddrp-releases/ddrp-linux-amd64.tgz.sum.txt
 s3cmd setacl s3://ddrp-releases/ddrp-linux-amd64.tgz.sum.txt --acl-public
