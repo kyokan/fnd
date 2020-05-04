@@ -112,13 +112,16 @@ func (b *BlobWriter) WriteAt(p []byte, off int64) (int, error) {
 		return 0, clientErr
 	}
 
-	_, err := b.client.WriteAt(context.Background(), &apiv1.WriteReq{
+	res, err := b.client.WriteAt(context.Background(), &apiv1.WriteAtReq{
 		TxID:   b.txID,
 		Offset: uint32(b.offset),
 		Data:   p[:n],
 	})
 	if err != nil {
 		return 0, errors.Wrap(err, "error writing blob")
+	}
+	if res.WriteErr != "" {
+		return int(res.BytesWritten), errors.Wrap(errors.New(res.WriteErr), "error writing blob")
 	}
 	return n, clientErr
 }

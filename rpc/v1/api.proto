@@ -10,7 +10,7 @@ service DDRPv1 {
     rpc ListPeers (ListPeersReq) returns (stream ListPeersRes);
 
     rpc Checkout (CheckoutReq) returns (CheckoutRes);
-    rpc WriteAt (WriteReq) returns (Empty);
+    rpc WriteAt (WriteAtReq) returns (WriteAtRes);
     rpc Truncate (TruncateReq) returns (Empty);
     rpc PreCommit (PreCommitReq) returns (PreCommitRes);
     rpc Commit (CommitReq) returns (CommitRes);
@@ -79,10 +79,15 @@ message CheckoutRes {
     uint32 txID = 1;
 }
 
-message WriteReq {
+message WriteAtReq {
     uint32 txID = 1;
     uint32 offset = 2;
     bytes data = 3;
+}
+
+message WriteAtRes {
+    uint32 bytesWritten = 1;
+    string writeErr = 2;
 }
 
 message TruncateReq {

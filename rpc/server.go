@@ -235,17 +235,21 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 	}, nil
 }
 
-func (s *Server) WriteAt(ctx context.Context, req *apiv1.WriteReq) (*apiv1.Empty, error) {
+func (s *Server) WriteAt(ctx context.Context, req *apiv1.WriteAtReq) (*apiv1.WriteAtRes, error) {
 	awaiting := s.txStore.Get(strconv.FormatUint(uint64(req.TxID), 32)).(*awaitingTx)
 	if awaiting == nil {
 		return nil, errors.New("transaction ID not found")
 	}
 	tx := awaiting.tx
-	_, err := tx.WriteAt(req.Data, int64(req.Offset))
-	if err != nil {
-		return nil, errors.Wrap(err, "error writing to transaction")
+	// we want clients to handle partial writes
+	n, err := tx.WriteAt(req.Data, int64(req.Offset))
+	res := &apiv1.WriteAtRes{
+		BytesWritten: uint32(n),
 	}
-	return emptyRes, nil
+	if err != nil {
+		res.WriteErr = err.Error()
+	}
+	return res, nil
 }
 
 func (s *Server) Truncate(ctx context.Context, req *apiv1.TruncateReq) (*apiv1.Empty, error) {
