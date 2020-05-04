@@ -306,7 +306,7 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 	ts := time.Unix(int64(req.Timestamp), 0)
 	h := blob.SealHash(name, ts, mt.Root(), crypto.ZeroHash)
 	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
-		return nil, errors.Wrap(err, "error verifying blob signature")
+		return nil, errors.New("signature verification failed")
 	}
 
 	if !s.nameLocker.TryLock(name) {
