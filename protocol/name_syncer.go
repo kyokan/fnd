@@ -172,7 +172,7 @@ func (ns *NameSyncer) OnSyncError(cb func(name string, err error)) util.Unsubscr
 
 func (ns *NameSyncer) syncName(info *store.NameInfo) {
 	name := info.Name
-	var ownTS time.Time
+	ownTS := time.Unix(0, 0)
 	header, err := store.GetHeader(ns.db, info.Name)
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		ns.lgr.Error(

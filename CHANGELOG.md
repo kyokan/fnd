@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2020-05-04
+## Fixed
+- Fixed initial sync jobs failing due to negative timestamps
+
 ## [0.2.0] - 2020-05-04
 ### Changed
 - DNS and hardcoded seed peers are now whitelisted

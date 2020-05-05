@@ -38,7 +38,7 @@ func (u *UpdateServer) Stop() error {
 
 func (u *UpdateServer) UpdateReqHandler(peerID crypto.Hash, envelope *wire.Envelope) {
 	msg := envelope.Message.(*wire.UpdateReq)
-	u.lgr.Debug("receive update req", "name", msg.Name)
+	u.lgr.Debug("receive update req", "name", msg.Name, "ts", msg.Timestamp)
 
 	if !u.nameLocker.TryRLock(msg.Name) {
 		if err := u.mux.Send(peerID, wire.NewNilUpdate(msg.Name)); err != nil {
