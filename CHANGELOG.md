@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2020-05-06
+## Fixed
+- Fixed a sync bug where truncated blobs were never committed
+
 ## [0.2.1] - 2020-05-04
 ## Fixed
 - Fixed initial sync jobs failing due to negative timestamps

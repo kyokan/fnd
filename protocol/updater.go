@@ -139,6 +139,16 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		return errors.Wrap(err, "error syncing merkle base")
 	}
 
+	bl, err := cfg.BlobStore.Open(item.Name)
+	if err != nil {
+		return errors.Wrap(err, "error getting blob")
+	}
+	defer func() {
+		if err := bl.Close(); err != nil {
+			updaterLogger.Error("error closing blob", "err", err)
+		}
+	}()
+
 	var sectorsNeeded []uint8
 	var prevUpdateTime time.Time
 	var prevTimebank int
@@ -161,6 +171,16 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		payableSectorCount++
 	}
 	if payableSectorCount == 0 {
+		tx, err := bl.Transaction()
+		if err != nil {
+			return errors.Wrap(err, "error starting transaction")
+		}
+		if err := tx.Truncate(); err != nil {
+			return errors.Wrap(err, "error truncating blob")
+		}
+		if err := tx.Commit(); err != nil {
+			return errors.Wrap(err, "error committing blob")
+		}
 		return nil
 	}
 	l.Debug(
@@ -183,15 +203,6 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		return ErrInsufficientTimebank
 	}
 
-	bl, err := cfg.BlobStore.Open(item.Name)
-	if err != nil {
-		return errors.Wrap(err, "error getting blob")
-	}
-	defer func() {
-		if err := bl.Close(); err != nil {
-			updaterLogger.Error("error closing blob", "err", err)
-		}
-	}()
 	tx, err := bl.Transaction()
 	if err != nil {
 		return errors.Wrap(err, "error starting transaction")
