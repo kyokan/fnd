@@ -171,12 +171,18 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		payableSectorCount++
 	}
 	if payableSectorCount == 0 {
+		l.Debug(
+			"no payable sectors, truncating",
+			"count", len(sectorsNeeded),
+		)
 		tx, err := bl.Transaction()
 		if err != nil {
 			return errors.Wrap(err, "error starting transaction")
 		}
-		if err := tx.Truncate(); err != nil {
-			return errors.Wrap(err, "error truncating blob")
+		for _, sectorID := range sectorsNeeded {
+			if err := tx.WriteSector(sectorID, blob.ZeroSector); err != nil {
+				return errors.Wrap(err, "error truncating sector")
+			}
 		}
 		if err := tx.Commit(); err != nil {
 			return errors.Wrap(err, "error committing blob")
