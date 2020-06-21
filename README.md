@@ -1,17 +1,15 @@
-<p align="center">
-	<img src="./logos/logo_transparent_trimmed.png" height="200" />
-</p>
-
-# DDRP: Decentralized Data Replication Protocol
+# go-ddrp
 
 DDRP is a protocol for synchronizing small amounts of data across a decentralized network. Its goal is to create a global, decentralized, and permissionless data commons that allows everyone to store and retrieve data from any node on the network.
 
-This repository contains the protocol's reference implementation.
+This repository contains the protocol's reference implementation in Go.
 
-## Documentation
+## Security Issues
 
-Documentation for both the protocol itself as well as the reference implementation is located at [ddrp.network](https://ddrp.network).
+If you find a vulnerability issue, please report privately to [security@kyokan.io](mailto:security@kyokan.io) describing your issue. Our PGP key's fingerprint is `9FDB 9D49 4A60 87E8 E61A 3F9E 2DCA AB4D D4B6 04F1`. DO NOT file a public issue.
+
+If the issue is a protocol weakness that cannot be immediately exploited or something not yet deployed, just discuss it openly.
 
 ## Getting Started
 
-Check out the [quick start guide](https://ddrp.network/quick_start.html).
+Check out the [documentation](./docs/README.md).
