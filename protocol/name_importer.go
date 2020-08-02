@@ -246,6 +246,9 @@ func ExtractTXTRecordsTx(tx *primitives.Transaction) []*DDRPKeyRecord {
 		}
 
 		var pub *btcec.PublicKey
+		if resource == nil {
+			continue
+		}
 		for _, record := range resource.Records {
 			txt, ok := record.(*dns.TXTRecord)
 			if !ok {
