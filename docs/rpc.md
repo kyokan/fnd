@@ -31,7 +31,7 @@
     - [WriteAtReq](#.WriteAtReq)
     - [WriteAtRes](#.WriteAtRes)
   
-    - [DDRPv1](#.DDRPv1)
+    - [Footnotev1](#.Footnotev1)
   
 - [Scalar Value Types](#scalar-value-types)
 
@@ -452,9 +452,9 @@
  
 
 
-<a name=".DDRPv1"></a>
+<a name=".Footnotev1"></a>
 
-### DDRPv1
+### Footnotev1
 
 
 | Method Name | Request Type | Response Type | Description |

@@ -1,6 +1,6 @@
 # Building From Source
 
-This guide will walk you through building `ddrpd` and `ddrpcli` from
+This guide will walk you through building `fnd` and `fnd-cli` from
 source. Note that installation via our pre-built binaries is usually
 quicker and easier unless you are working on the reference
 implementation itself or are otherwise unable to use them.
@@ -20,10 +20,10 @@ binary:
 Both binaries can be built using the `Makefile` in the root directory of
 the repository. The following `make` targets are relevant:
 
-  - `make all`: Builds both `ddrpd` and `ddrpcli`
-  - `make ddrpd`: Builds only `ddrpd`.
-  - `make ddrpcli`: Builds only `ddrpcli`.
+  - `make all`: Builds both `fnd` and `fnd-cli`
+  - `make fnd`: Builds only `fnd`.
+  - `make fnd-cli`: Builds only `fnd-cli`.
   - `make proto`: Builds only the gRPC service files. This target is
     executed as a dependency of the above targets.
-  - `make install`: Builds both `ddrpd` and `ddrpcli`, then places the
+  - `make install`: Builds both `fnd` and `fnd-cli`, then places the
     binaries in `/usr/local/bin`.
