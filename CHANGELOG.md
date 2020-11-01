@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - rename ddrp to fnd and all other naming variants (FNRecord, fnd-cli, etc)
 - change sector size to 4096
 - remove default heartbeat and seed node
+- change `TXT` formet to `DDRPKEY:<hex-encoded-pubkey>` to `f<base64-encoded-pubkey>`
 
 ## [0.2.2] - 2020-05-06
 ## Fixed

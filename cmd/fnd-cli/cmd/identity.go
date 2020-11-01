@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"encoding/hex"
+	"encoding/base64"
 	"fmt"
 	"fnd/cli"
 	"fnd/config"
@@ -22,8 +22,7 @@ var identityCmd = &cobra.Command{
 			return err
 		}
 		pub := signer.Pub()
-
-		fmt.Println(hex.EncodeToString(pub.SerializeCompressed()))
+		fmt.Println(base64.StdEncoding.EncodeToString(pub.SerializeCompressed()))
 		return nil
 	},
 }

@@ -4,7 +4,7 @@ git_tag := $(shell git describe --tags --abbrev=0)
 ldflags = -X fnd/version.GitCommit=$(git_commit) -X fnd/version.GitTag=$(git_tag)
 build_flags := -ldflags '$(ldflags)'
 
-all: fnd
+all: fnd fnd-cli
 .PHONY: all
 
 all-cross:

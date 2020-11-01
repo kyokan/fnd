@@ -121,7 +121,7 @@ fnd-cli identity
 ```
 
 The output of `fnd-cli identity` is the base64-encoded public key you need
-to put in your TLD's `TXT` record.
+to put in your TLD's `TXT` record with the following format: `f<base64-encoded>`.
 
 ## Step 6: Wait for `fnd` to Sync
 
@@ -140,6 +140,5 @@ around the network.
 ## Next Steps
 
 Now that your node is set up and you have access to a blob, there's lots
-more to do\! Why not check out the [Protocol Specification](https://github.com/ddrp-org/PIPs) to
-learn more about how Footnote works, or the [RPC documentation](./rpc.md) to
+more you can do\! Check out the [RPC documentation](./rpc.md) to
 learn how to integrate your own applications with Footnote.
