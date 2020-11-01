@@ -8,7 +8,7 @@ import (
 )
 
 func NewTempDir(t *testing.T) (string, func()) {
-	dir, err := ioutil.TempDir("", "ddrptest_")
+	dir, err := ioutil.TempDir("", "fndtest_")
 	require.NoError(t, err)
 	return dir, func() {
 		require.NoError(t, os.RemoveAll(dir))
@@ -16,7 +16,7 @@ func NewTempDir(t *testing.T) (string, func()) {
 }
 
 func NewTempFile(t *testing.T) (*os.File, func()) {
-	f, err := ioutil.TempFile("", "ddrptest_")
+	f, err := ioutil.TempFile("", "fndtest_")
 	require.NoError(t, err)
 	return f, func() {
 		require.NoError(t, f.Close())

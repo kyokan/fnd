@@ -3,9 +3,9 @@ package p2p
 import (
 	"context"
 	"errors"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/crypto"
+	"fnd/testutil/testcrypto"
+	"fnd/wire"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"

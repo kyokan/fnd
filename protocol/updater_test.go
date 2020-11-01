@@ -2,12 +2,12 @@ package protocol
 
 import (
 	"errors"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/p2p"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/testutil/mockapp"
-	"github.com/ddrp-org/ddrp/util"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/crypto"
+	"fnd/p2p"
+	"fnd/store"
+	"fnd/testutil/mockapp"
+	"fnd/util"
+	"fnd/wire"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 	"testing"

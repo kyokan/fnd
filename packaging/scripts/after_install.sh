@@ -6,16 +6,16 @@
 
 set -ue
 
-USERNAME="ddrp"
-SERVICE="ddrpd"
+USERNAME="fnd"
+SERVICE="fnd"
 UNIT_FILE="/etc/systemd/system/${SERVICE}.service"
 
 main() {
   echo "Adding ${USERNAME} user..."
   useradd -s /bin/false -M --system $USERNAME
-  echo "Initializing ddrpd config in /etc/ddrpd.."
-  /usr/bin/ddrpd init --home /etc/ddrpd || true
-  chown -R $USERNAME:$USERNAME /etc/ddrpd
+  echo "Initializing fnd config in /etc/fnd.."
+  /usr/bin/fnd init --home /etc/fnd || true
+  chown -R $USERNAME:$USERNAME /etc/fnd
 
   if command -v systemctl >/dev/null 2>&1; then
     rm -f "${UNIT_FILE}"

@@ -6,7 +6,7 @@ import (
 )
 
 func TestLookupDNSSeeds(t *testing.T) {
-	seeds, err := ResolveDNSSeeds("seeds-test.ddrp.network")
+	seeds, err := ResolveDNSSeeds("seeds-test.fnd.network")
 	require.NoError(t, err)
 
 	require.Equal(t, 2, len(seeds))

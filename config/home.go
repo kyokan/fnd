@@ -26,7 +26,7 @@ func EnsureHomeDir(path string) error {
 		return err
 	}
 	if !exists {
-		return errors.New("home directory does not exist - try running ddrpd init")
+		return errors.New("home directory does not exist - try running fnd init")
 	}
 	return nil
 }

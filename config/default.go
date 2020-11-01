@@ -2,7 +2,7 @@ package config
 
 import (
 	"bytes"
-	"github.com/ddrp-org/ddrp/log"
+	"fnd/log"
 	"github.com/pkg/errors"
 	"io"
 	"os"
@@ -16,13 +16,11 @@ var DefaultConfig = Config{
 	EnableProfiler: false,
 	Heartbeat: HeartbeatConfig{
 		Moniker: "",
-		URL:     "https://www.ddrpscan.com/heartbeat",
+		URL:     "",
 	},
 	P2P: P2PConfig{
 		Host: "0.0.0.0",
-		DNSSeeds: []string{
-			"seeds.ddrp.network",
-		},
+		DNSSeeds: []string{},
 		FixedSeeds:          []string{},
 		MaxInboundPeers:     117,
 		MaxOutboundPeers:    8,
@@ -86,7 +84,7 @@ var DefaultConfig = Config{
 	},
 }
 
-const defaultConfigTemplateText = `# DDRPD Config File
+const defaultConfigTemplateText = `# FootnoteD Config File
 
 # List of ban list URLs.
 ban_lists = []
@@ -110,7 +108,7 @@ log_level = "{{.LogLevel}}"
   # Sets the URL the node will heartbeat to.
   url = "{{.Heartbeat.URL}}"
 
-# Configures the connection to the Handshake network. DDRP assumes
+# Configures the connection to the Handshake network. Footnote assumes
 # that HSD is hosted at a url with the following format:
 # <host>:<port>/<base_path>.
 [hns_resolver]
@@ -132,7 +130,7 @@ log_level = "{{.LogLevel}}"
   # Sets the set of domain names to query for seed nodes.
   # A records belonging to nodes in this list will be
   # connected to during node startup.
-  dns_seeds = ["{{index .P2P.DNSSeeds 0}}"]
+  dns_seeds = []
   # Sets the IP this node should listen on. Should be set to 0.0.0.0
   # for all Internet-accessible nodes.
   host = "{{.P2P.Host}}"
@@ -151,7 +149,7 @@ log_level = "{{.LogLevel}}"
 [rpc]
   # Sets the IP this node should listen for RPC requests on.
   # For the most part, this should be set to 127.0.0.1. Exposing
-  # ddrpd's RPC port to the public internet is not safe.
+  # fnd's RPC port to the public internet is not safe.
   host = "{{.RPC.Host}}"
   # Sets the port this node should listen for RPC requests on.
   port = {{.RPC.Port}}
@@ -161,29 +159,29 @@ log_level = "{{.LogLevel}}"
 # defaults.
 [tuning]
 
-  # Configures how often ddrpd will perform heartbeats and
+  # Configures how often fnd will perform heartbeats and
   # when to time out heartbeat requests.
   [tuning.heartbeat]
     interval_ms = {{.Tuning.Heartbeat.IntervalMS}}
     timeout_ms = {{.Tuning.Heartbeat.TimeoutMS}}
 
-  # Configures how ddrpd scans the Handshake blockchain for
-  # new DDRPKEY records.
+  # Configures how fnd scans the Handshake blockchain for
+  # new TXT records.
   [tuning.name_importer]
-    # Sets how often ddrpd scans for new names.
+    # Sets how often fnd scans for new names.
     check_interval_ms = {{.Tuning.NameImporter.CheckIntervalMS}}
-    # Sets how many blocks ddrpd will wait before considering
+    # Sets how many blocks fnd will wait before considering
     # a Handshake name record to be finalized. Changing this
     # value to something lower than the default will lead to
     # the network rejecting updates originating from this node.
     confirmation_depth = {{.Tuning.NameImporter.ConfirmationDepth}}
     # Sets how many blocks should be fetched from HSD concurrently.
     workers = {{.Tuning.NameImporter.Workers}}
-    # Sets the minimum sync percentage ddrpd will accept from HSD before
+    # Sets the minimum sync percentage fnd will accept from HSD before
     # importing names.
     verification_threshold = {{.Tuning.NameImporter.VerificationThreshold}}
 
-  # Configures how ddrpd scans for updates in the background.
+  # Configures how fnd scans for updates in the background.
   [tuning.name_syncer]
     # Sets how often updates will be scanned for.
     interval_ms = {{.Tuning.NameSyncer.IntervalMS}}
@@ -198,61 +196,61 @@ log_level = "{{.LogLevel}}"
     # Sets how many names will be synchronized concurrently.
     workers = {{.Tuning.NameSyncer.Workers}}
 
-  # Configures how ddrpd exchanges peers with the rest of the network.
+  # Configures how fnd exchanges peers with the rest of the network.
   [tuning.peer_exchanger]
-    # Sets how many concurrent dials ddrpd will make when it
+    # Sets how many concurrent dials fnd will make when it
     # receives exchanged peers.
     max_concurrent_dials = {{.Tuning.PeerExchanger.MaxConcurrentDials}}
-    # Sets the maximum number of peers ddrpd will process after
+    # Sets the maximum number of peers fnd will process after
     # receiving exchanged peers.
     max_received_peers = {{.Tuning.PeerExchanger.MaxReceivedPeers}}
-    # Sets the maximum number of peers ddrpd will send after receiving a
+    # Sets the maximum number of peers fnd will send after receiving a
     # request for peers.
     max_sent_peers = {{.Tuning.PeerExchanger.MaxSentPeers}}
-    # Sets how often ddrpd will request new peers.
+    # Sets how often fnd will request new peers.
     request_interval_ms = {{.Tuning.PeerExchanger.RequestIntervalMS}}
-    # Sets how many peers ddrpd will request new peers from during each
+    # Sets how many peers fnd will request new peers from during each
     # peer exchange operation.
     sample_size = {{.Tuning.PeerExchanger.SampleSize}}
 
-  # Configures how ddrpd serves sector data to peers that request it.
+  # Configures how fnd serves sector data to peers that request it.
   [tuning.sector_server]
-    # Sets how often ddrpd will reap in-memory cached sectors.
+    # Sets how often fnd will reap in-memory cached sectors.
     cache_expiry_ms = {{.Tuning.SectorServer.CacheExpiryMS}}
 
-  # Configures how ddrpd synchronizes sectors with remote peers.
+  # Configures how fnd synchronizes sectors with remote peers.
   [tuning.syncer]
-    # Sets how long ddrpd will wait for remote peers to return
+    # Sets how long fnd will wait for remote peers to return
     # sector data before retrying.
     sector_response_timeout_ms = {{.Tuning.Syncer.SectorResponseTimeoutMS}}
-    # Sets how long ddrpd will wait for a remote peers to return
+    # Sets how long fnd will wait for a remote peers to return
     # tree base data before trying another peer.
     tree_base_response_timeout_ms = {{.Tuning.Syncer.TreeBaseResponseTimeoutMS}}
 
-  # Configures how ddrpd manages each name's timebank. The timebank is used
-  # to throttle blob updates. Changing these values after ddrpd has fully
+  # Configures how fnd manages each name's timebank. The timebank is used
+  # to throttle blob updates. Changing these values after fnd has fully
   # synced is undefined behavior.
   [tuning.timebank]
     # Sets how many complete blob updates (i.e., updates that change all 256
-    # sectors) ddrpd will allow per time period.
+    # sectors) fnd will allow per time period.
     full_updates_per_period = {{.Tuning.Timebank.FullUpdatesPerPeriod}}
-    # Sets the minimum amount of time between updates ddrpd will accept.
+    # Sets the minimum amount of time between updates fnd will accept.
     min_update_interval_ms = {{.Tuning.Timebank.MinUpdateIntervalMS}}
     # Sets the time period over which the timebank will be calculated.
     period_ms = {{.Tuning.Timebank.PeriodMS}}
 
-  # Configures how ddrpd enqueues blob updates.
+  # Configures how fnd enqueues blob updates.
   [tuning.update_queue]
     # Sets the maximum length of the update queue.
     max_len = {{.Tuning.UpdateQueue.MaxLen}}
-    # Sets how often ddrpd will reap disposed of queue entries.
+    # Sets how often fnd will reap disposed of queue entries.
     reap_interval_ms = {{.Tuning.UpdateQueue.ReapIntervalMS}}
 
-  # Configures how ddrpd updates blobs.
+  # Configures how fnd updates blobs.
   [tuning.updater]
-    # Sets how often ddrpd will check the update queue for new updates.
+    # Sets how often fnd will check the update queue for new updates.
     poll_interval_ms = {{.Tuning.Updater.PollIntervalMS}}
-    # Sets how many updates ddrpd will process concurrently.
+    # Sets how many updates fnd will process concurrently.
     workers = {{.Tuning.Updater.Workers}}
 `
 

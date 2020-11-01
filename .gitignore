@@ -3,3 +3,4 @@ build
 proto_bindings
 docs/build
 dev.db
+.DS_Store

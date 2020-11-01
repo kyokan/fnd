@@ -2,16 +2,16 @@ package rpc
 
 import (
 	"context"
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"fnd/blob"
+	"fnd/crypto"
+	apiv1 "fnd/rpc/v1"
 	"github.com/pkg/errors"
 	"io"
 	"time"
 )
 
 type BlobWriter struct {
-	client    apiv1.DDRPv1Client
+	client    apiv1.Footnotev1Client
 	signer    crypto.Signer
 	name      string
 	txID      uint32
@@ -20,7 +20,7 @@ type BlobWriter struct {
 	offset    int64
 }
 
-func NewBlobWriter(client apiv1.DDRPv1Client, signer crypto.Signer, name string) *BlobWriter {
+func NewBlobWriter(client apiv1.Footnotev1Client, signer crypto.Signer, name string) *BlobWriter {
 	return &BlobWriter{
 		client: client,
 		signer: signer,

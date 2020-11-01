@@ -2,8 +2,8 @@ package wire
 
 import (
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/dwire"
+	"fnd/crypto"
+	"fnd.localhost/dwire"
 	"io"
 )
 

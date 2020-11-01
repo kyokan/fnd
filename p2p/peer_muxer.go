@@ -2,10 +2,10 @@ package p2p
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/util"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/crypto"
+	"fnd/log"
+	"fnd/util"
+	"fnd/wire"
 	"github.com/pkg/errors"
 	"sync"
 	"sync/atomic"

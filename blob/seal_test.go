@@ -2,8 +2,8 @@ package blob
 
 import (
 	"encoding/hex"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"fnd/crypto"
+	"fnd/testutil/testcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"

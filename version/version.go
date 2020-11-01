@@ -7,5 +7,5 @@ var GitTag string
 var UserAgent string
 
 func init() {
-	UserAgent = fmt.Sprintf("ddrpd/%s+%s", GitTag, GitCommit)
+	UserAgent = fmt.Sprintf("fnd/%s+%s", GitTag, GitCommit)
 }

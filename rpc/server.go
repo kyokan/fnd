@@ -2,14 +2,14 @@ package rpc
 
 import (
 	"context"
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/p2p"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/util"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/blob"
+	"fnd/crypto"
+	"fnd/log"
+	"fnd/p2p"
+	apiv1 "fnd/rpc/v1"
+	"fnd/store"
+	"fnd/util"
+	"fnd/wire"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"google.golang.org/grpc"
@@ -92,7 +92,7 @@ func (s *Server) Start() error {
 		return err
 	}
 	s.srv = grpc.NewServer()
-	apiv1.RegisterDDRPv1Server(s.srv, s)
+	apiv1.RegisterFootnotev1Server(s.srv, s)
 	go s.srv.Serve(lis)
 	return nil
 }
@@ -175,7 +175,7 @@ func (s *Server) UnbanPeer(_ context.Context, req *apiv1.UnbanPeerReq) (*apiv1.E
 	return emptyRes, nil
 }
 
-func (s *Server) ListPeers(req *apiv1.ListPeersReq, stream apiv1.DDRPv1_ListPeersServer) error {
+func (s *Server) ListPeers(req *apiv1.ListPeersReq, stream apiv1.Footnotev1_ListPeersServer) error {
 	connectedPeers := s.mux.Peers()
 	storedPeers, err := store.StreamPeers(s.db, true)
 	if err != nil {
@@ -408,7 +408,7 @@ func (s *Server) GetBlobInfo(_ context.Context, req *apiv1.BlobInfoReq) (*apiv1.
 	}, nil
 }
 
-func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.DDRPv1_ListBlobInfoServer) error {
+func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.Footnotev1_ListBlobInfoServer) error {
 	stream, err := store.StreamBlobInfo(s.db, req.Start)
 	if err != nil {
 		return errors.Wrap(err, "error opening header stream")

@@ -1,15 +1,16 @@
 package protocol
 
 import (
+	"fmt"
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/config"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/p2p"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/wire"
-	"github.com/mslipper/handshake/primitives"
+	"fnd/blob"
+	"fnd/config"
+	"fnd/crypto"
+	"fnd/log"
+	"fnd/p2p"
+	"fnd/store"
+	"fnd/wire"
+	"fnd.localhost/handshake/primitives"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
@@ -116,6 +117,9 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 		headerReceivedAt = header.ReceivedAt
 	}
 
+	fmt.Println(update)
+	fmt.Println(update.Timestamp)
+	fmt.Println(storedTimestamp)
 	if storedTimestamp.After(update.Timestamp) {
 		return ErrUpdateQueueStaleTimestamp
 	}
