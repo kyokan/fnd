@@ -1,15 +1,15 @@
 package blob
 
 import (
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/dwire"
+	"fnd/crypto"
+	"fnd.localhost/dwire"
 	"golang.org/x/crypto/blake2b"
 	"time"
 )
 
 func SealHash(name string, ts time.Time, merkleRoot crypto.Hash, reservedRoot crypto.Hash) crypto.Hash {
 	h, _ := blake2b.New256(nil)
-	if _, err := h.Write([]byte("DDRPBLOB")); err != nil {
+	if _, err := h.Write([]byte("FNBLOB")); err != nil {
 		panic(err)
 	}
 	if err := dwire.EncodeField(h, name); err != nil {

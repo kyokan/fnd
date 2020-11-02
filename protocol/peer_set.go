@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/crypto"
 	"sync"
 )
 

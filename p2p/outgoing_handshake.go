@@ -2,9 +2,9 @@ package p2p
 
 import (
 	"context"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/version"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/crypto"
+	"fnd/version"
+	"fnd/wire"
 	"github.com/pkg/errors"
 	"time"
 )

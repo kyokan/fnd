@@ -2,8 +2,8 @@ package p2p
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/service"
+	"fnd/log"
+	"fnd/service"
 	"github.com/pkg/errors"
 	"net"
 	"sync"

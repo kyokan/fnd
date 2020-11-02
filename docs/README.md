@@ -1,13 +1,16 @@
 Table of Contents
 =================
 
+  * [Building From Source](./building_from_source.md)
+    * [Step 1: Gather Required Software](./building_from_source.md#step-1-gather-required-software)
+    * [Step 2: Build The Project](./building_from_source.md#step-2-build-the-project)
   * [Quick Start](./quick_start.md)
     * [Step 1: Instal `hsd`](./quick_start.md#step-1-install-hsd)
     * [Step 2: Get the Binaires](./quick_start.md#step-2-get-the-binaries)
-    * [Step 3: Initialize `ddrpd`](./quick_start.md#step-3-initialize-ddrpd)
-    * [Step 4: Start `ddrpd`](./quick_start.md#step-4-start-ddrpd)
+    * [Step 3: Initialize `fnd`](./quick_start.md#step-3-initialize-fnd)
+    * [Step 4: Start `fnd`](./quick_start.md#step-4-start-fnd)
     * [Step 5: Update Your Handshake Name](./quick_start.md#step-5-update-your-handshake-name)
-    * [Step 6: Wait for `ddrpd` to Sync](./quick_start.md#step-6-wait-for-ddrpd-to-sync)
+    * [Step 6: Wait for `fnd` to Sync](./quick_start.md#step-6-wait-for-fnd-to-sync)
     * [Step 7: Read/Write Your Blob](./quick_start.md#step-7-readwrite-your-blob)
     * [Next Steps](./quick_start.md#next-steps)
   * [Configuration](./configuration.md)
@@ -20,6 +23,3 @@ Table of Contents
     * [Daemonization](./node_operations.md#daemonization)
     * [Logging](./node_operations.md#logging)
     * [Banning Names](./node_operations.md#banning-names)
-  * [Building From Source](./building_from_source.md)
-    * [Step 1: Gather Required Software](./building_from_source.md#step-1-gather-required-software)
-    * [Step 2: Build The Project](./building_from_source.md#step-2-build-the-project)

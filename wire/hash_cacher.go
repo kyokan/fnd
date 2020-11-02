@@ -2,8 +2,8 @@ package wire
 
 import (
 	"bytes"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/dwire"
+	"fnd/crypto"
+	"fnd.localhost/dwire"
 	"sync"
 )
 

@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"fnd/testutil/testcrypto"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 	"testing"

@@ -2,8 +2,8 @@ package wire
 
 import (
 	"encoding/hex"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/dwire"
+	"fnd/crypto"
+	"fnd.localhost/dwire"
 	"github.com/stretchr/testify/require"
 	"io"
 	"sync"

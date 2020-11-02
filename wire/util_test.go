@@ -3,8 +3,8 @@ package wire
 import (
 	"bytes"
 	"fmt"
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/blob"
+	"fnd/crypto"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"testing"

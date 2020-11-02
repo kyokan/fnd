@@ -3,17 +3,17 @@ package protocol
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/base64"
 	"fmt"
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/ddrp-org/ddrp/config"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/mslipper/handshake/client"
-	"github.com/mslipper/handshake/dns"
-	"github.com/mslipper/handshake/primitives"
+	"fnd/config"
+	"fnd/log"
+	"fnd/store"
+	"fnd.localhost/handshake/client"
+	"fnd.localhost/handshake/dns"
+	"fnd.localhost/handshake/primitives"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -196,13 +196,13 @@ func (n *NameImporter) fetchBlocks(start int, count int) ([]*primitives.Block, e
 	return partition, nil
 }
 
-type DDRPKeyRecord struct {
+type FNRecord struct {
 	NameHash  string
 	PublicKey *btcec.PublicKey
 }
 
-func ExtractTXTRecordsBlock(block *primitives.Block) []*DDRPKeyRecord {
-	uniqRecords := make(map[string]*DDRPKeyRecord)
+func ExtractTXTRecordsBlock(block *primitives.Block) []*FNRecord {
+	uniqRecords := make(map[string]*FNRecord)
 	var order []string
 	for _, tx := range block.Transactions {
 		records := ExtractTXTRecordsTx(tx)
@@ -213,15 +213,15 @@ func ExtractTXTRecordsBlock(block *primitives.Block) []*DDRPKeyRecord {
 			uniqRecords[rec.NameHash] = rec
 		}
 	}
-	out := make([]*DDRPKeyRecord, len(uniqRecords))
+	out := make([]*FNRecord, len(uniqRecords))
 	for i := 0; i < len(order); i++ {
 		out[i] = uniqRecords[order[i]]
 	}
 	return out
 }
 
-func ExtractTXTRecordsTx(tx *primitives.Transaction) []*DDRPKeyRecord {
-	var out []*DDRPKeyRecord
+func ExtractTXTRecordsTx(tx *primitives.Transaction) []*FNRecord {
+	var out []*FNRecord
 	for _, vOut := range tx.Outputs {
 		covenant := vOut.Covenant
 		var resource *dns.Resource
@@ -255,7 +255,7 @@ func ExtractTXTRecordsTx(tx *primitives.Transaction) []*DDRPKeyRecord {
 				continue
 			}
 			for _, entry := range txt.Entries {
-				p, err := ParseDDRPKeyRecord(entry)
+				p, err := ParseFNRecord(entry)
 				if err != nil {
 					continue
 				}
@@ -267,7 +267,7 @@ func ExtractTXTRecordsTx(tx *primitives.Transaction) []*DDRPKeyRecord {
 			continue
 		}
 
-		out = append(out, &DDRPKeyRecord{
+		out = append(out, &FNRecord{
 			NameHash:  hex.EncodeToString(nh),
 			PublicKey: pub,
 		})
@@ -275,18 +275,19 @@ func ExtractTXTRecordsTx(tx *primitives.Transaction) []*DDRPKeyRecord {
 	return out
 }
 
-func ParseDDRPKeyRecord(record string) (*btcec.PublicKey, error) {
-	splits := strings.Split(record, ":")
-	if len(splits) != 2 {
+func ParseFNRecord(record string) (*btcec.PublicKey, error) {
+	if len(record) != 45 {
 		return nil, errors.New("mal-formed txt record")
 	}
-	if splits[0] != "DDRPKEY" {
+	prefix := record[0:1]
+	pubkeyb64 := record[1:]
+	if prefix != "f" {
 		return nil, errors.New("mal-formed record sigil")
 	}
-	if len(splits[1]) != 66 {
+	if len(pubkeyb64) != 44 {
 		return nil, errors.New("invalid public key length")
 	}
-	keyBytes, err := hex.DecodeString(splits[1])
+	keyBytes, err := base64.StdEncoding.DecodeString(pubkeyb64)
 	if err != nil {
 		return nil, errors.New("mal-formed public key")
 	}

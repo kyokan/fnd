@@ -2,8 +2,8 @@ package protocol
 
 import (
 	"encoding/json"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"fnd/crypto"
+	"fnd/testutil/testcrypto"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
@@ -37,7 +37,7 @@ func TestHeartbeater_SendHeartbeats(t *testing.T) {
 	beat := <-resCh
 	require.Equal(t, "test moniker", beat.Moniker)
 	require.Equal(t, peerID, beat.PeerID)
-	require.Equal(t, "ddrpd/+", beat.UserAgent)
+	require.Equal(t, "fnd/+", beat.UserAgent)
 
 	require.NoError(t, heartbeater.Stop())
 	server.Close()
