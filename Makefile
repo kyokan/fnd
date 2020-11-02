@@ -11,7 +11,8 @@ all-cross:
 	GOOS=darwin GOARCH=amd64 go build $(build_flags) -o ./build/fnd-darwin-amd64 ./cmd/fnd/main.go
 	GOOS=darwin GOARCH=amd64 go build $(build_flags) -o ./build/fnd-cli-darwin-amd64 ./cmd/fnd-cli/main.go
 	GOOS=linux GOARCH=amd64 go build $(build_flags) -o ./build/fnd-linux-amd64 ./cmd/fnd/main.go
-	GOOS=windows GOARCH=amd64 go build $(build_flags) -o ./build/fnd.exe ./cmd/fnd/main.go
+	GOOS=windows GOARCH=amd64 go build $(build_flags) -o ./build/fnd-win-amd64.exe ./cmd/fnd/main.go
+	GOOS=windows GOARCH=amd64 go build $(build_flags) -o ./build/fnd-cli-win-amd64.exe ./cmd/fnd/main.go
 	GOOS=linux GOARCH=amd64 go build $(build_flags) -o ./build/fnd-cli-linux-amd64 ./cmd/fnd-cli/main.go
 .PHONY: all-cross
 
