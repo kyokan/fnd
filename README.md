@@ -4,7 +4,7 @@ Footnote is a protocol for synchronizing different types of messages across a pe
 
 ## Getting Started
 
-Check out the [documentations](./docs/README.md) for build and start up instruction.
+Check out the [documentation](./docs/README.md) for build and start-up instructions.
 
 ## Current Seed(s)
 Add the following seed to join the current network.

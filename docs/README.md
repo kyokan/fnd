@@ -5,7 +5,7 @@ Table of Contents
     * [Step 1: Gather Required Software](./building_from_source.md#step-1-gather-required-software)
     * [Step 2: Build The Project](./building_from_source.md#step-2-build-the-project)
   * [Quick Start](./quick_start.md)
-    * [Step 1: Instal `hsd`](./quick_start.md#step-1-install-hsd)
+    * [Step 1: Install `hsd`](./quick_start.md#step-1-install-hsd)
     * [Step 2: Get the Binaires](./quick_start.md#step-2-get-the-binaries)
     * [Step 3: Initialize `fnd`](./quick_start.md#step-3-initialize-fnd)
     * [Step 4: Start `fnd`](./quick_start.md#step-4-start-fnd)
