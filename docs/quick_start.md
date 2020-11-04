@@ -28,26 +28,7 @@ the Handshake network.
 
 ## Step 2: Get the Binaries
 
-You can find precompiled binaries for your system and their PGP
-signature on our [GitHub
-Releases](https://github.com/kyokan/ddrp/releases) page. Download the
-`.tgz` archive and PGP signature for your system, then verify the
-archive using the command below:
-
-``` bash
-gpg --verify ddrp-<os>-<arch>.tgz.sig ddrp-<os>-<arch>.tgz
-```
-
-You should see output that looks like the following. Make sure to verfiy
-that the outputted key ID is `D4B604F1`:
-
-    gpg: Signature made Tue Jan  7 19:29:04 2020 PST using RSA key ID D4B604F1
-    gpg: Good signature from "Kyokan Security <security@kyokan.io>"
-
-If everything checks out, it's time to extract the archive onto your
-`PATH`. To do this, run the following commands (note that they assume
-`/usr/local/bin` is on your `$PATH`, if it isn't substitute it for a
-directory that is):
+You can find precompiled binaries on our [GitHub Releases](https://github.com/kyokan/fnd/releases) page. Download the `.tgz` archive and extract the archive onto your `PATH`. To do this, run the following commands (note that they assume `/usr/local/bin` is on your `$PATH`, if it isn't substitute it for a directory that is):
 
 ``` bash
 tar -C /usr/local/bin -xzvf ddrp-<os>-<arch>.tgz

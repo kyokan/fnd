@@ -1,13 +1,13 @@
 # fnd
 
-Footnote is a protocol for synchronizing different types of messages across a peer-to-peer network. This repository contains the source code for `fnd` - the protocol's reference implementation in Go.
+FootNote Daemon - `fnd` is a reference implementation of a [Footnote](https://github.com/kyokan/footnote) node.
 
 ## Getting Started
 
-Check out the [documentation](./docs/README.md) for build and start-up instructions.
+Check out the [documentation](./docs/README.md) for build instructions.
 
-## Current Seed(s)
-Add the following seed to join the current network.
+## Initial Seeds (Last Updated: 11/05)
+Add the these seed nodes to join the current network.
 
 ### US West
 - `3b755ceafc5811f0a50e102c96169b062ad1295edea0adf675e8647963acf89e@64.225.89.142`
