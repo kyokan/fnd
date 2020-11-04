@@ -28,10 +28,12 @@ the Handshake network.
 
 ## Step 2: Get the Binaries
 
-You can find precompiled binaries on our [GitHub Releases](https://github.com/kyokan/fnd/releases) page. Download the `.tgz` archive and extract the archive onto your `PATH`. To do this, run the following commands (note that they assume `/usr/local/bin` is on your `$PATH`, if it isn't substitute it for a directory that is):
+You can find precompiled binaries on our [GitHub Releases](https://github.com/kyokan/fnd/releases) page. Download the binary to your `$PATH`. You can do this manually, or with following commands (note that they assume `/usr/local/bin` is on your `$PATH`, if it isn't substitute it for a directory that is):
 
 ``` bash
-tar -C /usr/local/bin -xzvf ddrp-<os>-<arch>.tgz
+# Update version, os, and $PATH as you see fit
+curl -O https://github.com/kyokan/fnd/releases/download/0.3.0/fnd-darwin-amd64 > /usr/local/bin/fnd
+curl -O https://github.com/kyokan/fnd/releases/download/0.3.0/fnd-cli-darwin-amd64 > /usr/local/bin/fnd-cli
 ```
 
 You should now be able to run `fnd`, the Footnote node software, and
