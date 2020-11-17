@@ -147,7 +147,7 @@ var startCmd = &cobra.Command{
 		updateQueue.MaxLen = int32(cfg.Tuning.UpdateQueue.MaxLen)
 		updateQueue.MinUpdateInterval = config.ConvertDuration(cfg.Tuning.Timebank.MinUpdateIntervalMS, time.Millisecond)
 
-		updater := protocol.NewUpdater(mux, db, updateQueue, nameLocker, bs)
+		updater := protocol.NewUpdater(mux, db, updateQueue, nameLocker, bs, cfg.Tuning.Timebank)
 		updater.PollInterval = config.ConvertDuration(cfg.Tuning.Updater.PollIntervalMS, time.Millisecond)
 		updater.Workers = cfg.Tuning.Updater.Workers
 
