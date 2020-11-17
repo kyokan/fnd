@@ -35,9 +35,10 @@ type Updater struct {
 	quitCh       chan struct{}
 	wg           sync.WaitGroup
 	lgr          log.Logger
+	cfg 		 config.TimebankConfig
 }
 
-func NewUpdater(mux *p2p.PeerMuxer, db *leveldb.DB, queue *UpdateQueue, nameLocker util.MultiLocker, bs blob.Store) *Updater {
+func NewUpdater(mux *p2p.PeerMuxer, db *leveldb.DB, queue *UpdateQueue, nameLocker util.MultiLocker, bs blob.Store, cfg config.TimebankConfig) *Updater {
 	return &Updater{
 		PollInterval: config.ConvertDuration(config.DefaultConfig.Tuning.Updater.PollIntervalMS, time.Millisecond),
 		Workers:      config.DefaultConfig.Tuning.Updater.Workers,
@@ -49,6 +50,7 @@ func NewUpdater(mux *p2p.PeerMuxer, db *leveldb.DB, queue *UpdateQueue, nameLock
 		obs:          util.NewObservable(),
 		quitCh:       make(chan struct{}),
 		lgr:          log.WithModule("updater"),
+		cfg: 		  cfg,
 	}
 }
 
@@ -90,7 +92,7 @@ func (u *Updater) runWorker() {
 				BlobStore:  u.bs,
 				Item:       item,
 			}
-			if err := UpdateBlob(cfg); err != nil {
+			if err := UpdateBlob(cfg, u.cfg); err != nil {
 				u.obs.Emit("update:processed", item, err)
 				u.lgr.Error("error processing update", "name", item.Name, "err", err)
 				continue
@@ -111,7 +113,7 @@ type UpdateConfig struct {
 	Item       *UpdateQueueItem
 }
 
-func UpdateBlob(cfg *UpdateConfig) error {
+func UpdateBlob(cfg *UpdateConfig, timebankConfig config.TimebankConfig) error {
 	l := updaterLogger.Sub("name", cfg.Item.Name)
 	item := cfg.Item
 	defer item.Dispose()
@@ -197,8 +199,8 @@ func UpdateBlob(cfg *UpdateConfig) error {
 
 	newTimebank := CheckTimebank(&TimebankParams{
 		TimebankDuration:     48 * time.Hour,
-		MinUpdateInterval:    2 * time.Minute,
-		FullUpdatesPerPeriod: 2,
+		MinUpdateInterval:    time.Duration(timebankConfig.MinUpdateIntervalMS),
+		FullUpdatesPerPeriod: timebankConfig.FullUpdatesPerPeriod,
 	}, prevUpdateTime, prevTimebank, payableSectorCount)
 	l.Debug(
 		"calculated new timebank",
