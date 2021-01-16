@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"crypto/rand"
 	"errors"
-	"fnd/blob"
-	"fnd/crypto"
-	"fnd/testutil/mockapp"
-	"fnd/util"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/testutil/mockapp"
+	"github.com/ddrp-org/ddrp/util"
+
+	"github.com/stretchr/testify/require"
 )
 
 type syncTreeBasesSetup struct {

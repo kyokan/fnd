@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"fnd/blob"
+	"github.com/ddrp-org/ddrp/blob"
 	"github.com/stretchr/testify/mock"
 )
 

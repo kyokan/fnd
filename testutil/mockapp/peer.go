@@ -1,10 +1,10 @@
 package mockapp
 
 import (
-	"fnd/crypto"
-	"fnd/p2p"
-	"fnd/testutil"
-	"fnd/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/testutil"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

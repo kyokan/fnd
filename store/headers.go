@@ -4,44 +4,51 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"sync"
+	"time"
+
 	"github.com/btcsuite/btcd/btcec"
-	"fnd/blob"
-	"fnd/crypto"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"sync"
-	"time"
 )
 
 type Header struct {
-	Name         string
-	Timestamp    time.Time
-	MerkleRoot   crypto.Hash
-	Signature    crypto.Signature
-	ReservedRoot crypto.Hash
-	ReceivedAt   time.Time
-	Timebank     int
+	Name          string
+	EpochHeight   uint16
+	SectorSize    uint16
+	SectorTipHash crypto.Hash
+	Signature     crypto.Signature
+	ReservedRoot  crypto.Hash
+	EpochStartAt  time.Time
+	Banned        bool
+	BannedAt      time.Time
 }
 
 func (h *Header) MarshalJSON() ([]byte, error) {
 	out := &struct {
 		Name         string    `json:"name"`
-		Timestamp    time.Time `json:"timestamp"`
+		EpochHeight  uint16    `json:"epoch_height"`
+		SectorSize   uint16    `json:"sector_size"`
 		MerkleRoot   string    `json:"merkle_root"`
 		Signature    string    `json:"signature"`
 		ReservedRoot string    `json:"reserved_root"`
-		ReceivedAt   time.Time `json:"received_at"`
-		Timebank     int       `json:"timebank"`
+		EpochStartAt time.Time `json:"epoch_start_at"`
+		Banned       bool      `json:"banned"`
+		BannedAt     time.Time `json:"banned_at"`
 	}{
 		h.Name,
-		h.Timestamp,
-		h.MerkleRoot.String(),
+		h.EpochHeight,
+		h.SectorSize,
+		h.SectorTipHash.String(),
 		h.Signature.String(),
 		h.ReservedRoot.String(),
-		h.ReceivedAt,
-		h.Timebank,
+		h.EpochStartAt,
+		h.Banned,
+		h.BannedAt,
 	}
 
 	return json.Marshal(out)
@@ -50,12 +57,14 @@ func (h *Header) MarshalJSON() ([]byte, error) {
 func (h *Header) UnmarshalJSON(b []byte) error {
 	in := &struct {
 		Name         string    `json:"name"`
-		Timestamp    time.Time `json:"timestamp"`
+		EpochHeight  uint16    `json:"epoch_height"`
+		SectorSize   uint16    `json:"sector_size"`
 		MerkleRoot   string    `json:"merkle_root"`
 		Signature    string    `json:"signature"`
 		ReservedRoot string    `json:"reserved_root"`
-		ReceivedAt   time.Time `json:"received_at"`
-		Timebank     int       `json:"timebank"`
+		EpochStartAt time.Time `json:"epoch_start_at"`
+		Banned       bool      `json:"banned"`
+		BannedAt     time.Time `json:"banned_at"`
 	}{}
 	if err := json.Unmarshal(b, in); err != nil {
 		return err
@@ -86,20 +95,22 @@ func (h *Header) UnmarshalJSON(b []byte) error {
 	}
 
 	h.Name = in.Name
-	h.Timestamp = in.Timestamp
-	h.MerkleRoot = mr
+	h.EpochHeight = in.EpochHeight
+	h.SectorSize = in.SectorSize
+	h.SectorTipHash = mr
 	h.Signature = sig
 	h.ReservedRoot = rr
-	h.ReceivedAt = in.ReceivedAt
-	h.Timebank = in.Timebank
+	h.EpochStartAt = in.EpochStartAt
+	h.Banned = in.Banned
+	h.BannedAt = in.BannedAt
 	return nil
 }
 
 var (
-	headersPrefix          = Prefixer("headers")
-	headerCountKey         = Prefixer(string(headersPrefix("count")))()
-	headerMerkleBasePrefix = Prefixer(string(headersPrefix("merkle-base")))
-	headerDataPrefix       = Prefixer(string(headersPrefix("header")))
+	headersPrefix            = Prefixer("headers")
+	headerCountKey           = Prefixer(string(headersPrefix("count")))()
+	headerSectorHashesPrefix = Prefixer(string(headersPrefix("sector-hashes")))
+	headerDataPrefix         = Prefixer(string(headersPrefix("header")))
 )
 
 func GetHeaderCount(db *leveldb.DB) (int, error) {
@@ -138,11 +149,22 @@ func GetHeader(db *leveldb.DB, name string) (*Header, error) {
 	return header, nil
 }
 
-func GetMerkleBase(db *leveldb.DB, name string) (blob.MerkleBase, error) {
-	var base blob.MerkleBase
-	baseB, err := db.Get(headerMerkleBasePrefix(name), nil)
+func GetSectorHash(db *leveldb.DB, name string, index uint16) (crypto.Hash, error) {
+	hashes, err := GetSectorHashes(db, name)
 	if err != nil {
-		return base, errors.Wrap(err, "error getting merkle base")
+		return crypto.ZeroHash, err
+	}
+	if int(index) > len(hashes) {
+		return crypto.ZeroHash, errors.Wrap(err, "error getting index")
+	}
+	return hashes[index], nil
+}
+
+func GetSectorHashes(db *leveldb.DB, name string) (blob.SectorHashes, error) {
+	var base blob.SectorHashes
+	baseB, err := db.Get(headerSectorHashesPrefix(name), nil)
+	if err != nil {
+		return base, errors.Wrap(err, "error getting sector hashes")
 	}
 	if err := base.Decode(bytes.NewReader(baseB)); err != nil {
 		panic(err)
@@ -150,17 +172,17 @@ func GetMerkleBase(db *leveldb.DB, name string) (blob.MerkleBase, error) {
 	return base, nil
 }
 
-func SetHeaderTx(tx *leveldb.Transaction, header *Header, merkleBase blob.MerkleBase) error {
+func SetHeaderTx(tx *leveldb.Transaction, header *Header, sectorHashes blob.SectorHashes) error {
 	var buf bytes.Buffer
-	if err := merkleBase.Encode(&buf); err != nil {
+	if err := sectorHashes.Encode(&buf); err != nil {
 		return errors.Wrap(err, "error encoding merkle tree")
 	}
 	exists, err := tx.Has(headerDataPrefix(header.Name), nil)
 	if err != nil {
 		return errors.Wrap(err, "error checking header existence")
 	}
-	if err := tx.Put(headerMerkleBasePrefix(header.Name), buf.Bytes(), nil); err != nil {
-		return errors.Wrap(err, "error writing merkle tree")
+	if err := tx.Put(headerSectorHashesPrefix(header.Name), buf.Bytes(), nil); err != nil {
+		return errors.Wrap(err, "error writing sector hashes")
 	}
 	if err := tx.Put(headerDataPrefix(header.Name), mustMarshalJSON(header), nil); err != nil {
 		return errors.Wrap(err, "error writing header tree")
@@ -177,12 +199,12 @@ type BlobInfo struct {
 	Name         string           `json:"name"`
 	PublicKey    *btcec.PublicKey `json:"public_key"`
 	ImportHeight int              `json:"import_height"`
-	Timestamp    time.Time        `json:"timestamp"`
+	EpochHeight  uint16           `json:"epoch_height"`
+	SectorSize   uint16           `json:"sector_size"`
 	MerkleRoot   crypto.Hash      `json:"merkle_root"`
 	Signature    crypto.Signature `json:"signature"`
 	ReservedRoot crypto.Hash      `json:"reserved_root"`
 	ReceivedAt   time.Time        `json:"received_at"`
-	Timebank     int              `json:"timebank"`
 }
 
 func (b *BlobInfo) MarshalJSON() ([]byte, error) {
@@ -190,22 +212,22 @@ func (b *BlobInfo) MarshalJSON() ([]byte, error) {
 		Name         string    `json:"name"`
 		PublicKey    string    `json:"public_key"`
 		ImportHeight int       `json:"import_height"`
-		Timestamp    time.Time `json:"timestamp"`
+		EpochHeight  uint16    `json:"epoch_height"`
+		SectorSize   uint16    `json:"sector_size"`
 		MerkleRoot   string    `json:"merkle_root"`
 		Signature    string    `json:"signature"`
 		ReservedRoot string    `json:"reserved_root"`
 		ReceivedAt   time.Time `json:"received_at"`
-		Timebank     int       `json:"timebank"`
 	}{
 		b.Name,
 		hex.EncodeToString(b.PublicKey.SerializeCompressed()),
 		b.ImportHeight,
-		b.Timestamp,
+		b.EpochHeight,
+		b.SectorSize,
 		hex.EncodeToString(b.MerkleRoot[:]),
 		hex.EncodeToString(b.Signature[:]),
 		hex.EncodeToString(b.ReservedRoot[:]),
 		b.ReceivedAt,
-		b.Timebank,
 	}
 
 	return json.Marshal(jsonInfo)
@@ -231,12 +253,12 @@ func (bis *BlobInfoStream) Next() (*BlobInfo, error) {
 		Name:         header.Name,
 		PublicKey:    nameInfo.PublicKey,
 		ImportHeight: nameInfo.ImportHeight,
-		Timestamp:    header.Timestamp,
-		MerkleRoot:   header.MerkleRoot,
+		EpochHeight:  header.EpochHeight,
+		SectorSize:   header.SectorSize,
+		MerkleRoot:   header.SectorTipHash,
 		Signature:    header.Signature,
 		ReservedRoot: header.ReservedRoot,
-		ReceivedAt:   header.ReceivedAt,
-		Timebank:     header.Timebank,
+		ReceivedAt:   header.EpochStartAt,
 	}, nil
 }
 

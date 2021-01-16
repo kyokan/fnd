@@ -1,18 +1,19 @@
 package protocol
 
 import (
-	"fnd/config"
-	"fnd/crypto"
-	"fnd/log"
-	"fnd/p2p"
-	"fnd/store"
-	"fnd/util"
-	"fnd/wire"
-	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/ddrp-org/ddrp/config"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
@@ -172,7 +173,7 @@ func (ns *NameSyncer) OnSyncError(cb func(name string, err error)) util.Unsubscr
 
 func (ns *NameSyncer) syncName(info *store.NameInfo) {
 	name := info.Name
-	ownTS := time.Unix(0, 0)
+	ownEpoch := uint16(0)
 	header, err := store.GetHeader(ns.db, info.Name)
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		ns.lgr.Error(
@@ -182,7 +183,7 @@ func (ns *NameSyncer) syncName(info *store.NameInfo) {
 		return
 	}
 	if err == nil {
-		ownTS = header.Timestamp
+		ownEpoch = header.EpochHeight
 	}
 
 	isEnvelopeCh := make(chan bool)
@@ -196,8 +197,9 @@ func (ns *NameSyncer) syncName(info *store.NameInfo) {
 	})
 
 	recips, _ := p2p.BroadcastRandom(ns.mux, ns.SampleSize, &wire.UpdateReq{
-		Name:      name,
-		Timestamp: ownTS,
+		Name:        name,
+		EpochHeight: ownEpoch,
+		SectorSize:  uint16(0), // FIXME
 	})
 	sampleSize := len(recips)
 

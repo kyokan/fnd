@@ -1,7 +1,7 @@
 package wire
 
 import (
-	"fnd/crypto"
+	"github.com/ddrp-org/ddrp/crypto"
 	"io"
 )
 

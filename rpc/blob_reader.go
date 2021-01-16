@@ -3,18 +3,18 @@ package rpc
 import (
 	"context"
 	"errors"
-	"fnd/blob"
-	apiv1 "fnd/rpc/v1"
+	"github.com/ddrp-org/ddrp/blob"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
 	"io"
 )
 
 type BlobReader struct {
-	client apiv1.Footnotev1Client
+	client apiv1.DDRPv1Client
 	name   string
 	off    int64
 }
 
-func NewBlobReader(client apiv1.Footnotev1Client, name string) *BlobReader {
+func NewBlobReader(client apiv1.DDRPv1Client, name string) *BlobReader {
 	return &BlobReader{
 		client: client,
 		name:   name,

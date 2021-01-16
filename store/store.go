@@ -1,7 +1,7 @@
 package store
 
 import (
-	"fnd/log"
+	"github.com/ddrp-org/ddrp/log"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 )

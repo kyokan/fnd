@@ -1,9 +1,10 @@
 package wire
 
 import (
-	"fnd/crypto"
-	"fnd.localhost/dwire"
 	"io"
+
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/dwire"
 )
 
 type Message interface {
@@ -21,10 +22,8 @@ const (
 	MessageTypePing
 	MessageTypeUpdate
 	MessageTypeNilUpdate
-	MessageTypeTreeBaseReq
-	MessageTypeTreeBaseRes
-	MessageTypeSectorReq
-	MessageTypeSectorRes
+	MessageTypeBlobReq
+	MessageTypeBlobRes
 	MessageTypePeerReq
 	MessageTypePeerRes
 	MessageTypeUpdateReq
@@ -43,14 +42,10 @@ func (t MessageType) String() string {
 		return "Update"
 	case MessageTypeNilUpdate:
 		return "NilUpdate"
-	case MessageTypeTreeBaseReq:
-		return "TreeBaseReq"
-	case MessageTypeTreeBaseRes:
-		return "TreeBaseRes"
-	case MessageTypeSectorReq:
-		return "SectorReq"
-	case MessageTypeSectorRes:
-		return "SectorRes"
+	case MessageTypeBlobReq:
+		return "BlobReq"
+	case MessageTypeBlobRes:
+		return "BlobRes"
 	case MessageTypePeerReq:
 		return "PeerReq"
 	case MessageTypePeerRes:

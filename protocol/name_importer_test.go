@@ -2,30 +2,30 @@ package protocol
 
 import (
 	"fmt"
-	"fnd/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func TestParseFNRecord(t *testing.T) {
+func TestParseDDRPKeyRecord(t *testing.T) {
 	invalid := []string{
-		"f000000000000000000000000000000000000000000000000000000000000000000",
-		"fwhateverwhateverwhateverwhateverwhateverwhateverwhateverwhateverwh",
-		"f",
-		"f",
-		"fwhatever",
-		"f",
+		"DDRPKEY:000000000000000000000000000000000000000000000000000000000000000000",
+		"DDRPKEY:whateverwhateverwhateverwhateverwhateverwhateverwhateverwhateverwh",
+		"DDRPKEY",
+		"DDRPKEY:",
+		"DDRPKEY:whatever",
+		"DDRPKEY",
 		"",
 		"wibble",
 	}
 	for _, rec := range invalid {
-		_, err := ParseFNRecord(rec)
+		_, err := ParseDDRPKeyRecord(rec)
 		require.Error(t, err)
 	}
 
 	_, expPub := testcrypto.RandKey()
-	rec := fmt.Sprintf("f%x", expPub.SerializeCompressed())
-	actPub, err := ParseFNRecord(rec)
+	rec := fmt.Sprintf("DDRPKEY:%x", expPub.SerializeCompressed())
+	actPub, err := ParseDDRPKeyRecord(rec)
 	require.NoError(t, err)
 	require.True(t, expPub.IsEqual(actPub))
 }

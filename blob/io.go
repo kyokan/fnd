@@ -1,8 +1,9 @@
 package blob
 
 import (
-	"github.com/pkg/errors"
 	"io"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -47,7 +48,7 @@ func WriteBlobAt(w io.WriterAt, b []byte, off int64) (int, error) {
 	return w.WriteAt(b, off)
 }
 
-func WriteSector(w io.WriterAt, id uint8, sector Sector) error {
+func WriteSector(w io.WriterAt, id uint16, sector Sector) error {
 	_, err := w.WriteAt(sector[:], int64(id)*int64(SectorLen))
 	return err
 }

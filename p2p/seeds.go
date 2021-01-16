@@ -1,7 +1,7 @@
 package p2p
 
 import (
-	"fnd/crypto"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/pkg/errors"
 	"net"
 	"strings"

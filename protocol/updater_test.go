@@ -1,17 +1,20 @@
 package protocol
 
 import (
+	"crypto/rand"
 	"errors"
-	"fnd/crypto"
-	"fnd/p2p"
-	"fnd/store"
-	"fnd/testutil/mockapp"
-	"fnd/util"
-	"fnd/wire"
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
 	"testing"
 	"time"
+
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/testutil/mockapp"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type updaterTestSetup struct {
@@ -36,7 +39,8 @@ func TestUpdater(t *testing.T) {
 					setup.rs.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
-					ts,
+					CurrentEpoch(name),
+					blob.SectorCount,
 					ts,
 				)
 				cfg := &UpdateConfig{
@@ -48,12 +52,13 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:         name,
-						Timestamp:    update.Timestamp,
-						MerkleRoot:   update.MerkleRoot,
-						ReservedRoot: update.ReservedRoot,
-						Signature:    update.Signature,
-						Pub:          setup.tp.RemoteSigner.Pub(),
+						Name:          name,
+						EpochHeight:   update.EpochHeight,
+						SectorSize:    update.SectorSize,
+						SectorTipHash: update.SectorTipHash,
+						ReservedRoot:  update.ReservedRoot,
+						Signature:     update.Signature,
+						Pub:           setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -64,26 +69,30 @@ func TestUpdater(t *testing.T) {
 			"syncs sectors when the local node has an older blob",
 			func(t *testing.T, setup *updaterTestSetup) {
 				ts := time.Now()
-				// insert the blob locally, ensuring that
-				// there will be enough time bank
-				mockapp.FillBlobRandom(
+				epochHeight := CurrentEpoch(name)
+				sectorSize := uint16(10)
+				mockapp.FillBlobReader(
 					t,
 					setup.ls.DB,
 					setup.ls.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
+					epochHeight,
+					sectorSize,
 					ts.Add(-48*time.Hour),
-					ts.Add(-48*time.Hour),
+					mockapp.NullReader,
 				)
 				// create the new blob remotely
-				update := mockapp.FillBlobRandom(
+				update := mockapp.FillBlobReader(
 					t,
 					setup.rs.DB,
 					setup.rs.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
+					epochHeight,
+					sectorSize+10,
 					ts,
-					ts,
+					mockapp.NullReader,
 				)
 				cfg := &UpdateConfig{
 					Mux:        setup.tp.LocalMux,
@@ -94,12 +103,13 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:         name,
-						Timestamp:    update.Timestamp,
-						MerkleRoot:   update.MerkleRoot,
-						ReservedRoot: update.ReservedRoot,
-						Signature:    update.Signature,
-						Pub:          setup.tp.RemoteSigner.Pub(),
+						Name:          name,
+						EpochHeight:   update.EpochHeight,
+						SectorSize:    update.SectorSize,
+						SectorTipHash: update.SectorTipHash,
+						ReservedRoot:  update.ReservedRoot,
+						Signature:     update.Signature,
+						Pub:           setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -107,16 +117,73 @@ func TestUpdater(t *testing.T) {
 			},
 		},
 		{
-			"aborts sync if the new timestamp is equal to the stored timestamp",
+			"aborts sync when there is a sector tip hash mismatch",
 			func(t *testing.T, setup *updaterTestSetup) {
 				ts := time.Now()
+				epochHeight := CurrentEpoch(name)
+				sectorSize := uint16(10)
+				mockapp.FillBlobReader(
+					t,
+					setup.ls.DB,
+					setup.ls.BlobStore,
+					setup.tp.RemoteSigner,
+					name,
+					epochHeight,
+					sectorSize,
+					ts.Add(-48*time.Hour),
+					rand.Reader,
+				)
+				// create the new blob remotely
+				update := mockapp.FillBlobReader(
+					t,
+					setup.rs.DB,
+					setup.rs.BlobStore,
+					setup.tp.RemoteSigner,
+					name,
+					epochHeight,
+					sectorSize+10,
+					ts,
+					rand.Reader,
+				)
+				cfg := &UpdateConfig{
+					Mux:        setup.tp.LocalMux,
+					DB:         setup.ls.DB,
+					NameLocker: util.NewMultiLocker(),
+					BlobStore:  setup.ls.BlobStore,
+					Item: &UpdateQueueItem{
+						PeerIDs: NewPeerSet([]crypto.Hash{
+							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
+						}),
+						Name:          name,
+						EpochHeight:   update.EpochHeight,
+						SectorSize:    update.SectorSize,
+						SectorTipHash: update.SectorTipHash,
+						ReservedRoot:  update.ReservedRoot,
+						Signature:     update.Signature,
+						Pub:           setup.tp.RemoteSigner.Pub(),
+					},
+				}
+				err := UpdateBlob(cfg)
+				require.NotNil(t, err)
+				require.True(t, errors.Is(err, ErrUpdaterSectorTipHashMismatch))
+				header, err := store.GetHeader(setup.ls.DB, name)
+				require.True(t, header.Banned)
+			},
+		},
+		{
+			"aborts sync if the new sector size is equal to the stored sector size",
+			func(t *testing.T, setup *updaterTestSetup) {
+				ts := time.Now()
+				epochHeight := CurrentEpoch(name)
+				sectorSize := uint16(0)
 				update := mockapp.FillBlobRandom(
 					t,
 					setup.ls.DB,
 					setup.ls.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
-					ts,
+					epochHeight,
+					sectorSize,
 					ts,
 				)
 				cfg := &UpdateConfig{
@@ -128,14 +195,22 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:         name,
-						Timestamp:    update.Timestamp,
-						MerkleRoot:   update.MerkleRoot,
-						ReservedRoot: update.ReservedRoot,
-						Signature:    update.Signature,
-						Pub:          setup.tp.RemoteSigner.Pub(),
+						Name:          name,
+						EpochHeight:   update.EpochHeight,
+						SectorSize:    update.SectorSize,
+						SectorTipHash: update.SectorTipHash,
+						ReservedRoot:  update.ReservedRoot,
+						Signature:     update.Signature,
+						Pub:           setup.tp.RemoteSigner.Pub(),
 					},
 				}
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					return store.SetHeaderTx(tx, &store.Header{
+						Name:        name,
+						EpochHeight: epochHeight,
+						SectorSize:  sectorSize,
+					}, blob.ZeroSectorHashes)
+				}))
 				err := UpdateBlob(cfg)
 				require.NotNil(t, err)
 				require.True(t, errors.Is(err, ErrUpdaterAlreadySynchronized))
@@ -155,59 +230,13 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name: name,
+						Name:        name,
+						EpochHeight: CurrentEpoch(name),
 					},
 				}
 				err := UpdateBlob(cfg)
 				require.NotNil(t, err)
 				require.True(t, errors.Is(err, ErrNameLocked))
-			},
-		},
-		{
-			"aborts sync if there is insufficient time bank to support the update",
-			func(t *testing.T, setup *updaterTestSetup) {
-				ts := time.Now()
-				// insert the blob locally, ensuring that
-				// there will be enough time bank
-				mockapp.FillBlobRandom(
-					t,
-					setup.ls.DB,
-					setup.ls.BlobStore,
-					setup.tp.RemoteSigner,
-					name,
-					ts.Add(-12*time.Hour),
-					ts.Add(-12*time.Hour),
-				)
-				// create the new blob remotely
-				update := mockapp.FillBlobRandom(
-					t,
-					setup.rs.DB,
-					setup.rs.BlobStore,
-					setup.tp.RemoteSigner,
-					name,
-					ts,
-					ts,
-				)
-				cfg := &UpdateConfig{
-					Mux:        setup.tp.LocalMux,
-					DB:         setup.ls.DB,
-					NameLocker: util.NewMultiLocker(),
-					BlobStore:  setup.ls.BlobStore,
-					Item: &UpdateQueueItem{
-						PeerIDs: NewPeerSet([]crypto.Hash{
-							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
-						}),
-						Name:         name,
-						Timestamp:    update.Timestamp,
-						MerkleRoot:   update.MerkleRoot,
-						ReservedRoot: update.ReservedRoot,
-						Signature:    update.Signature,
-						Pub:          setup.tp.RemoteSigner.Pub(),
-					},
-				}
-				err := UpdateBlob(cfg)
-				require.Error(t, err)
-				require.True(t, errors.Is(err, ErrInsufficientTimebank))
 			},
 		},
 		{
@@ -217,6 +246,8 @@ func TestUpdater(t *testing.T) {
 					return store.SetLastNameImportHeightTx(tx, 100)
 				}))
 				ts := time.Now()
+				epochHeight := CurrentEpoch(name)
+				sectorSize := uint16(0)
 				updateCh := make(chan struct{})
 				unsub := setup.tp.RemoteMux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeUpdate, func(id crypto.Hash, envelope *wire.Envelope) {
 					updateCh <- struct{}{}
@@ -228,7 +259,8 @@ func TestUpdater(t *testing.T) {
 					setup.rs.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
-					ts,
+					epochHeight,
+					sectorSize,
 					ts,
 				)
 				cfg := &UpdateConfig{
@@ -240,13 +272,14 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:         name,
-						Timestamp:    update.Timestamp,
-						MerkleRoot:   update.MerkleRoot,
-						ReservedRoot: update.ReservedRoot,
-						Signature:    update.Signature,
-						Pub:          setup.tp.RemoteSigner.Pub(),
-						Height:       101,
+						Name:          name,
+						EpochHeight:   update.EpochHeight,
+						SectorSize:    update.SectorSize,
+						SectorTipHash: update.SectorTipHash,
+						ReservedRoot:  update.ReservedRoot,
+						Signature:     update.Signature,
+						Pub:           setup.tp.RemoteSigner.Pub(),
+						Height:        101,
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -266,6 +299,8 @@ func TestUpdater(t *testing.T) {
 					return store.SetLastNameImportHeightTx(tx, 100)
 				}))
 				ts := time.Now()
+				epochHeight := CurrentEpoch(name)
+				sectorSize := uint16(0)
 				updateCh := make(chan *wire.Envelope, 1)
 				unsub := setup.tp.RemoteMux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeUpdate, func(id crypto.Hash, envelope *wire.Envelope) {
 					updateCh <- envelope
@@ -277,7 +312,8 @@ func TestUpdater(t *testing.T) {
 					setup.rs.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
-					ts,
+					epochHeight,
+					sectorSize,
 					ts,
 				)
 				cfg := &UpdateConfig{
@@ -289,13 +325,14 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:         name,
-						Timestamp:    update.Timestamp,
-						MerkleRoot:   update.MerkleRoot,
-						ReservedRoot: update.ReservedRoot,
-						Signature:    update.Signature,
-						Pub:          setup.tp.RemoteSigner.Pub(),
-						Height:       80,
+						Name:          name,
+						EpochHeight:   update.EpochHeight,
+						SectorSize:    update.SectorSize,
+						SectorTipHash: update.SectorTipHash,
+						ReservedRoot:  update.ReservedRoot,
+						Signature:     update.Signature,
+						Pub:           setup.tp.RemoteSigner.Pub(),
+						Height:        80,
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -305,8 +342,6 @@ func TestUpdater(t *testing.T) {
 				case envelope := <-updateCh:
 					msg := envelope.Message.(*wire.Update)
 					require.Equal(t, name, msg.Name)
-					require.Equal(t, update.MerkleRoot, msg.MerkleRoot)
-					require.Equal(t, update.Signature, msg.Signature)
 				case <-timeout.C:
 					t.Fail()
 				}

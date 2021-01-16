@@ -1,17 +1,18 @@
 package protocol
 
 import (
-	"fnd/blob"
-	"fnd/crypto"
-	"fnd/p2p"
-	"fnd/store"
-	"fnd/testutil"
-	"fnd/testutil/testcrypto"
-	"fnd/wire"
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
 	"testing"
 	"time"
+
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/testutil"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/wire"
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
@@ -19,19 +20,22 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 	defer done()
 
 	identicalHeader := signHeader(t, &store.Header{
-		Name:       "identical",
-		Timestamp:  time.Unix(1, 0),
-		ReceivedAt: time.Unix(1, 0),
+		Name:        "identical",
+		EpochHeight: uint16(0),
+		SectorSize:  uint16(1),
+		EpochStartAt:  time.Unix(1, 0),
 	})
 	throttledHeader := signHeader(t, &store.Header{
-		Name:       "throttled",
-		Timestamp:  time.Unix(1, 0),
-		ReceivedAt: time.Now(),
+		Name:        "throttled",
+		EpochHeight: uint16(0),
+		SectorSize:  uint16(1),
+		EpochStartAt:  time.Now(),
 	})
 	staleHeader := signHeader(t, &store.Header{
-		Name:       "stale",
-		Timestamp:  time.Unix(100, 0),
-		ReceivedAt: time.Unix(1, 0),
+		Name:        "stale",
+		EpochHeight: uint16(0),
+		SectorSize:  uint16(100),
+		EpochStartAt:  time.Unix(1, 0),
 	})
 
 	headers := []*store.Header{
@@ -55,7 +59,7 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 			if err := store.SetNameInfoTx(tx, header.Name, pub, 10); err != nil {
 				return err
 			}
-			if err := store.SetHeaderTx(tx, header, blob.ZeroMerkleBase); err != nil {
+			if err := store.SetHeaderTx(tx, header, blob.ZeroSectorHashes); err != nil {
 				return err
 			}
 		}
@@ -88,11 +92,12 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 		{
 			"bad signature",
 			&wire.Update{
-				Name:         identicalHeader.Name,
-				Timestamp:    identicalHeader.Timestamp.Add(10 * time.Second),
-				MerkleRoot:   identicalHeader.MerkleRoot,
-				ReservedRoot: identicalHeader.ReservedRoot,
-				Signature:    identicalHeader.Signature,
+				Name:          identicalHeader.Name,
+				EpochHeight:   identicalHeader.EpochHeight,
+				SectorSize:    identicalHeader.SectorSize + 10,
+				SectorTipHash: identicalHeader.SectorTipHash,
+				ReservedRoot:  identicalHeader.ReservedRoot,
+				Signature:     identicalHeader.Signature,
 			},
 			func(t *testing.T, err error) {
 				require.Contains(t, err.Error(), "signature is invalid")
@@ -101,35 +106,25 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 		{
 			"identical",
 			&wire.Update{
-				Name:         identicalHeader.Name,
-				Timestamp:    identicalHeader.Timestamp,
-				MerkleRoot:   identicalHeader.MerkleRoot,
-				ReservedRoot: identicalHeader.ReservedRoot,
-				Signature:    identicalHeader.Signature,
+				Name:          identicalHeader.Name,
+				EpochHeight:   identicalHeader.EpochHeight,
+				SectorSize:    identicalHeader.SectorSize,
+				SectorTipHash: identicalHeader.SectorTipHash,
+				ReservedRoot:  identicalHeader.ReservedRoot,
+				Signature:     identicalHeader.Signature,
 			},
 			func(t *testing.T, err error) {
 				require.Equal(t, ErrUpdateQueueIdenticalTimestamp, err)
 			},
 		},
 		{
-			"throttled",
-			signUpdate(t, &wire.Update{
-				Name:         throttledHeader.Name,
-				Timestamp:    throttledHeader.Timestamp.Add(10 * time.Second),
-				MerkleRoot:   throttledHeader.MerkleRoot,
-				ReservedRoot: identicalHeader.ReservedRoot,
-			}),
-			func(t *testing.T, err error) {
-				require.Equal(t, ErrUpdateQueueThrottled, err)
-			},
-		},
-		{
 			"stale",
 			signUpdate(t, &wire.Update{
-				Name:         staleHeader.Name,
-				Timestamp:    staleHeader.Timestamp.Add(-10 * time.Second),
-				MerkleRoot:   throttledHeader.MerkleRoot,
-				ReservedRoot: identicalHeader.ReservedRoot,
+				Name:          staleHeader.Name,
+				EpochHeight:   staleHeader.EpochHeight,
+				SectorSize:    staleHeader.SectorSize - 10,
+				SectorTipHash: throttledHeader.SectorTipHash,
+				ReservedRoot:  identicalHeader.ReservedRoot,
 			}),
 			func(t *testing.T, err error) {
 				require.Equal(t, ErrUpdateQueueStaleTimestamp, err)
@@ -149,9 +144,10 @@ func TestUpdateQueue_Enqueue_InvalidAfterEnqueue(t *testing.T) {
 	defer done()
 
 	header := signHeader(t, &store.Header{
-		Name:       "somename",
-		Timestamp:  time.Unix(100, 0),
-		ReceivedAt: time.Unix(1, 0),
+		Name:        "somename",
+		EpochHeight: uint16(0),
+		SectorSize:  uint16(100),
+		EpochStartAt:  time.Unix(1, 0),
 	})
 
 	_, pub := testcrypto.FixedKey(t)
@@ -162,7 +158,7 @@ func TestUpdateQueue_Enqueue_InvalidAfterEnqueue(t *testing.T) {
 		if err := store.SetNameInfoTx(tx, header.Name, pub, 10); err != nil {
 			return err
 		}
-		if err := store.SetHeaderTx(tx, header, blob.ZeroMerkleBase); err != nil {
+		if err := store.SetHeaderTx(tx, header, blob.ZeroSectorHashes); err != nil {
 			return err
 		}
 		return nil
@@ -170,17 +166,20 @@ func TestUpdateQueue_Enqueue_InvalidAfterEnqueue(t *testing.T) {
 
 	queue := NewUpdateQueue(p2p.NewPeerMuxer(testutil.TestMagic, testcrypto.FixedSigner(t)), db)
 	require.NoError(t, queue.Enqueue(crypto.Rand32(), signUpdate(t, &wire.Update{
-		Name:      header.Name,
-		Timestamp: header.Timestamp.Add(1 * time.Second),
+		Name:        header.Name,
+		EpochHeight: header.EpochHeight,
+		SectorSize:  header.SectorSize + 1,
 	})))
 	require.Equal(t, ErrUpdateQueueStaleTimestamp, queue.Enqueue(crypto.Rand32(), signUpdate(t, &wire.Update{
-		Name:      header.Name,
-		Timestamp: header.Timestamp.Add(-10 * time.Second),
+		Name:        header.Name,
+		EpochHeight: header.EpochHeight,
+		SectorSize:  header.SectorSize - 10,
 	})))
 	require.Equal(t, ErrUpdateQueueSpltBrain, queue.Enqueue(crypto.Rand32(), signUpdate(t, &wire.Update{
-		Name:       header.Name,
-		Timestamp:  header.Timestamp.Add(1 * time.Second),
-		MerkleRoot: crypto.Rand32(),
+		Name:          header.Name,
+		EpochHeight:   header.EpochHeight,
+		SectorSize:    header.SectorSize + 1,
+		SectorTipHash: crypto.Rand32(),
 	})))
 }
 
@@ -189,9 +188,10 @@ func TestUpdateQueue_EnqueueDequeue(t *testing.T) {
 	defer done()
 
 	header := signHeader(t, &store.Header{
-		Name:       "somename",
-		Timestamp:  time.Unix(100, 0),
-		ReceivedAt: time.Unix(1, 0),
+		Name:        "somename",
+		EpochHeight: uint16(0),
+		SectorSize:  uint16(100),
+		EpochStartAt:  time.Unix(1, 0),
 	})
 
 	_, pub := testcrypto.FixedKey(t)
@@ -202,7 +202,7 @@ func TestUpdateQueue_EnqueueDequeue(t *testing.T) {
 		if err := store.SetNameInfoTx(tx, header.Name, pub, 10); err != nil {
 			return err
 		}
-		if err := store.SetHeaderTx(tx, header, blob.ZeroMerkleBase); err != nil {
+		if err := store.SetHeaderTx(tx, header, blob.ZeroSectorHashes); err != nil {
 			return err
 		}
 		return nil
@@ -214,8 +214,9 @@ func TestUpdateQueue_EnqueueDequeue(t *testing.T) {
 	}
 	queue := NewUpdateQueue(p2p.NewPeerMuxer(testutil.TestMagic, testcrypto.FixedSigner(t)), db)
 	update := signUpdate(t, &wire.Update{
-		Name:      header.Name,
-		Timestamp: header.Timestamp.Add(time.Second),
+		Name:        header.Name,
+		EpochHeight: header.EpochHeight,
+		SectorSize:  header.SectorSize + 1,
 	})
 	for _, pid := range pids {
 		require.NoError(t, queue.Enqueue(pid, update))
@@ -226,8 +227,9 @@ func TestUpdateQueue_EnqueueDequeue(t *testing.T) {
 		require.True(t, item.PeerIDs.Has(pid))
 	}
 	require.Equal(t, update.Name, item.Name)
-	require.Equal(t, update.Timestamp, item.Timestamp)
-	require.Equal(t, update.MerkleRoot, item.MerkleRoot)
+	require.Equal(t, update.EpochHeight, item.EpochHeight)
+	require.Equal(t, update.SectorSize, item.SectorSize)
+	require.Equal(t, update.SectorTipHash, item.SectorTipHash)
 	require.Equal(t, update.ReservedRoot, item.ReservedRoot)
 	require.Equal(t, update.Signature, item.Signature)
 	require.True(t, pub.IsEqual(item.Pub))
@@ -235,14 +237,14 @@ func TestUpdateQueue_EnqueueDequeue(t *testing.T) {
 }
 
 func signHeader(t *testing.T, header *store.Header) *store.Header {
-	sig, err := blob.SignSeal(testcrypto.FixedSigner(t), header.Name, header.Timestamp, header.MerkleRoot, header.ReservedRoot)
+	sig, err := blob.SignSeal(testcrypto.FixedSigner(t), header.Name, header.EpochHeight, header.SectorSize, header.SectorTipHash, header.ReservedRoot)
 	require.NoError(t, err)
 	header.Signature = sig
 	return header
 }
 
 func signUpdate(t *testing.T, update *wire.Update) *wire.Update {
-	sig, err := blob.SignSeal(testcrypto.FixedSigner(t), update.Name, update.Timestamp, update.MerkleRoot, update.ReservedRoot)
+	sig, err := blob.SignSeal(testcrypto.FixedSigner(t), update.Name, update.EpochHeight, update.SectorSize, update.SectorTipHash, update.ReservedRoot)
 	require.NoError(t, err)
 	update.Signature = sig
 	return update

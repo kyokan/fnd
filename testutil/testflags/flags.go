@@ -6,7 +6,7 @@ import (
 )
 
 func IntegrationTest(t *testing.T) {
-	_, ok := os.LookupEnv("Footnote_ENABLE_INTEGRATION_TESTS")
+	_, ok := os.LookupEnv("DDRP_ENABLE_INTEGRATION_TESTS")
 	if !ok {
 		t.SkipNow()
 	}
@@ -14,7 +14,7 @@ func IntegrationTest(t *testing.T) {
 }
 
 func HandshakeTest(t *testing.T) {
-	_, ok := os.LookupEnv("Footnote_ENABLE_HANDSHAKE_TESTS")
+	_, ok := os.LookupEnv("DDRP_ENABLE_HANDSHAKE_TESTS")
 	if !ok {
 		t.SkipNow()
 	}

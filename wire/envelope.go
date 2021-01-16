@@ -3,10 +3,11 @@ package wire
 import (
 	"bytes"
 	"fmt"
-	"fnd/crypto"
-	"fnd.localhost/dwire"
 	"io"
 	"time"
+
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/dwire"
 )
 
 type Envelope struct {
@@ -82,14 +83,10 @@ func (e *Envelope) Decode(r io.Reader) error {
 		msg = &Update{}
 	case MessageTypeNilUpdate:
 		msg = &NilUpdate{}
-	case MessageTypeTreeBaseReq:
-		msg = &TreeBaseReq{}
-	case MessageTypeTreeBaseRes:
-		msg = &TreeBaseRes{}
-	case MessageTypeSectorReq:
-		msg = &SectorReq{}
-	case MessageTypeSectorRes:
-		msg = &SectorRes{}
+	case MessageTypeBlobReq:
+		msg = &BlobReq{}
+	case MessageTypeBlobRes:
+		msg = &BlobRes{}
 	case MessageTypePeerReq:
 		msg = &PeerReq{}
 	case MessageTypePeerRes:

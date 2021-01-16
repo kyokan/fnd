@@ -1,9 +1,10 @@
 package blob
 
 import (
-	"github.com/stretchr/testify/require"
 	"io"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type zeroReader struct{}
@@ -110,7 +111,7 @@ func TestReadSector(t *testing.T) {
 		},
 		{
 			255,
-			16711680,
+			65280,
 		},
 	}
 	r := &readerWrapper{
@@ -189,7 +190,7 @@ func TestWriteSector(t *testing.T) {
 		},
 		{
 			255,
-			16711680,
+			65280,
 		},
 	}
 	w := &writerWrapper{

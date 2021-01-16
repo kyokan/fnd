@@ -2,18 +2,19 @@ package store
 
 import (
 	"crypto/rand"
-	"fnd/blob"
-	"fnd/crypto"
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
 	"testing"
 	"time"
+
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func TestHeaders_GetSet(t *testing.T) {
 	db, done := setupLevelDB(t)
 
-	var expMB blob.MerkleBase
+	var expMB blob.SectorHashes
 	_, err := rand.Read(expMB[0][:])
 	require.NoError(t, err)
 
@@ -23,12 +24,12 @@ func TestHeaders_GetSet(t *testing.T) {
 
 	expHeader := &Header{
 		Name:         "foo",
-		Timestamp:    time.Unix(10, 0),
-		MerkleRoot:   crypto.Rand32(),
+		EpochHeight:  uint16(0),
+		SectorSize:   uint16(0),
+		SectorTipHash:   crypto.Rand32(),
 		Signature:    sig,
 		ReservedRoot: crypto.Rand32(),
-		ReceivedAt:   time.Unix(11, 0),
-		Timebank:     100,
+		EpochStartAt:   time.Unix(11, 0),
 	}
 	_, err = GetHeader(db, "foo")
 	require.Error(t, err)
@@ -38,12 +39,13 @@ func TestHeaders_GetSet(t *testing.T) {
 	actHeader, err := GetHeader(db, "foo")
 	require.NoError(t, err)
 	require.Equal(t, expHeader.Name, actHeader.Name)
-	require.Equal(t, expHeader.Timestamp.Unix(), actHeader.Timestamp.Unix())
-	require.Equal(t, expHeader.MerkleRoot, actHeader.MerkleRoot)
+	require.Equal(t, expHeader.EpochHeight, actHeader.EpochHeight)
+	require.Equal(t, expHeader.SectorSize, actHeader.SectorSize)
+	require.Equal(t, expHeader.SectorTipHash, actHeader.SectorTipHash)
 	require.Equal(t, expHeader.Signature, actHeader.Signature)
 	require.Equal(t, expHeader.ReservedRoot, actHeader.ReservedRoot)
-	require.Equal(t, expHeader.ReceivedAt.Unix(), actHeader.ReceivedAt.Unix())
-	actMB, err := GetMerkleBase(db, "foo")
+	require.Equal(t, expHeader.EpochStartAt.Unix(), actHeader.EpochStartAt.Unix())
+	actMB, err := GetSectorHashes(db, "foo")
 	require.NoError(t, err)
 	require.Equal(t, expMB, actMB)
 

@@ -2,21 +2,23 @@ package rpc
 
 import (
 	"context"
-	"fnd/blob"
-	"fnd/crypto"
-	"fnd/log"
-	"fnd/p2p"
-	apiv1 "fnd/rpc/v1"
-	"fnd/store"
-	"fnd/util"
-	"fnd/wire"
-	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/protocol"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -92,7 +94,7 @@ func (s *Server) Start() error {
 		return err
 	}
 	s.srv = grpc.NewServer()
-	apiv1.RegisterFootnotev1Server(s.srv, s)
+	apiv1.RegisterDDRPv1Server(s.srv, s)
 	go s.srv.Serve(lis)
 	return nil
 }
@@ -175,7 +177,7 @@ func (s *Server) UnbanPeer(_ context.Context, req *apiv1.UnbanPeerReq) (*apiv1.E
 	return emptyRes, nil
 }
 
-func (s *Server) ListPeers(req *apiv1.ListPeersReq, stream apiv1.Footnotev1_ListPeersServer) error {
+func (s *Server) ListPeers(req *apiv1.ListPeersReq, stream apiv1.DDRPv1_ListPeersServer) error {
 	connectedPeers := s.mux.Peers()
 	storedPeers, err := store.StreamPeers(s.db, true)
 	if err != nil {
@@ -221,6 +223,19 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 	if err != nil {
 		return nil, err
 	}
+	var epochHeight, sectorSize uint16
+	var sectorTipHash crypto.Hash = blob.ZeroHash
+	header, err := store.GetHeader(s.db, req.Name)
+	if err != nil {
+		epochHeight = protocol.CurrentEpoch(req.Name)
+	} else {
+		epochHeight = header.EpochHeight
+		sectorSize = header.SectorSize
+		sectorTipHash = header.SectorTipHash
+	}
+
+	bl.Seek(sectorSize)
+
 	tx, err := bl.Transaction()
 	if err != nil {
 		return nil, err
@@ -232,56 +247,28 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 	}, TransactionExpiry)
 
 	return &apiv1.CheckoutRes{
-		TxID: txID,
+		TxID:          txID,
+		EpochHeight:   uint32(epochHeight),
+		SectorSize:    uint32(sectorSize),
+		SectorTipHash: sectorTipHash.Bytes(),
 	}, nil
 }
 
-func (s *Server) WriteAt(ctx context.Context, req *apiv1.WriteAtReq) (*apiv1.WriteAtRes, error) {
+func (s *Server) WriteSector(ctx context.Context, req *apiv1.WriteSectorReq) (*apiv1.WriteSectorRes, error) {
 	awaiting := s.txStore.Get(strconv.FormatUint(uint64(req.TxID), 32)).(*awaitingTx)
 	if awaiting == nil {
 		return nil, errors.New("transaction ID not found")
 	}
 	tx := awaiting.tx
 	// we want clients to handle partial writes
-	n, err := tx.WriteAt(req.Data, int64(req.Offset))
-	res := &apiv1.WriteAtRes{
-		BytesWritten: uint32(n),
-	}
+	var sector blob.Sector
+	copy(sector[:], req.Data)
+	err := tx.WriteSector(sector)
+	res := &apiv1.WriteSectorRes{}
 	if err != nil {
 		res.WriteErr = err.Error()
 	}
 	return res, nil
-}
-
-func (s *Server) Truncate(ctx context.Context, req *apiv1.TruncateReq) (*apiv1.Empty, error) {
-	awaiting := s.txStore.Get(strconv.FormatUint(uint64(req.TxID), 32)).(*awaitingTx)
-	if awaiting == nil {
-		return nil, errors.New("transaction ID not found")
-	}
-
-	tx := awaiting.tx
-	if err := tx.Truncate(); err != nil {
-		return nil, errors.Wrap(err, "error truncating blob")
-	}
-
-	return emptyRes, nil
-}
-
-func (s *Server) PreCommit(ctx context.Context, req *apiv1.PreCommitReq) (*apiv1.PreCommitRes, error) {
-	awaiting := s.txStore.Get(strconv.FormatUint(uint64(req.TxID), 32))
-	if awaiting == nil {
-		return nil, errors.New("transaction ID not found")
-	}
-
-	tx := awaiting.(*awaitingTx).tx
-	mt, err := blob.Merkleize(blob.NewReader(tx))
-	if err != nil {
-		return nil, errors.Wrap(err, "error generating blob merkle root")
-	}
-
-	return &apiv1.PreCommitRes{
-		MerkleRoot: mt.Root().Bytes(),
-	}, nil
 }
 
 func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.CommitRes, error) {
@@ -297,15 +284,26 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting name info")
 	}
-	mt, err := blob.Merkleize(blob.NewReader(tx))
+
+	epochHeight := uint16(req.EpochHeight)
+	sectorSize := uint16(req.SectorSize)
+	sectorTipHash, err := crypto.NewHashFromBytes(req.SectorTipHash)
 	if err != nil {
-		return nil, errors.Wrap(err, "error generating blob merkle root")
+		return nil, errors.Wrap(err, "error parsing sector tip hash")
+	}
+
+	hashes, err := blob.SerialHash(blob.NewReader(tx), crypto.ZeroHash, sectorSize)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting sector hashes")
+	}
+
+	if hashes.Tip() != sectorTipHash {
+		return nil, errors.New("sector tip hash mismatch")
 	}
 
 	var sig crypto.Signature
 	copy(sig[:], req.Signature)
-	ts := time.Unix(int64(req.Timestamp), 0)
-	h := blob.SealHash(name, ts, mt.Root(), crypto.ZeroHash)
+	h := blob.SealHash(name, epochHeight, sectorSize, sectorTipHash, crypto.ZeroHash)
 	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
 		return nil, errors.New("signature verification failed")
 	}
@@ -317,13 +315,14 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 
 	err = store.WithTx(s.db, func(tx *leveldb.Transaction) error {
 		return store.SetHeaderTx(tx, &store.Header{
-			Name:         name,
-			Timestamp:    ts,
-			MerkleRoot:   mt.Root(),
-			Signature:    sig,
-			ReservedRoot: crypto.ZeroHash,
-			ReceivedAt:   time.Now(),
-		}, mt.ProtocolBase())
+			Name:          name,
+			EpochHeight:   epochHeight,
+			SectorSize:    sectorSize,
+			SectorTipHash: sectorTipHash,
+			Signature:     sig,
+			ReservedRoot:  crypto.ZeroHash,
+			EpochStartAt:  time.Now(),
+		}, hashes)
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "error storing header")
@@ -340,10 +339,11 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 	var recips []crypto.Hash
 	if req.Broadcast {
 		recips, _ = p2p.GossipAll(s.mux, &wire.Update{
-			Name:       name,
-			Timestamp:  ts,
-			MerkleRoot: mt.Root(),
-			Signature:  sig,
+			Name:          name,
+			EpochHeight:   epochHeight,
+			SectorSize:    sectorSize,
+			SectorTipHash: sectorTipHash,
+			Signature:     sig,
 		})
 	}
 	s.lgr.Info("committed blob", "name", name, "recipient_count", len(recips))
@@ -399,16 +399,16 @@ func (s *Server) GetBlobInfo(_ context.Context, req *apiv1.BlobInfoReq) (*apiv1.
 		Name:         name,
 		PublicKey:    info.PublicKey.SerializeCompressed(),
 		ImportHeight: uint32(info.ImportHeight),
-		Timestamp:    uint64(header.Timestamp.Unix()),
-		MerkleRoot:   header.MerkleRoot[:],
+		EpochHeight:  uint32(header.EpochHeight),
+		SectorSize:   uint32(header.SectorSize),
+		MerkleRoot:   header.SectorTipHash[:],
 		ReservedRoot: header.ReservedRoot[:],
-		ReceivedAt:   uint64(header.ReceivedAt.Unix()),
+		ReceivedAt:   uint64(header.EpochStartAt.Unix()),
 		Signature:    header.Signature[:],
-		Timebank:     uint32(header.Timebank),
 	}, nil
 }
 
-func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.Footnotev1_ListBlobInfoServer) error {
+func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.DDRPv1_ListBlobInfoServer) error {
 	stream, err := store.StreamBlobInfo(s.db, req.Start)
 	if err != nil {
 		return errors.Wrap(err, "error opening header stream")
@@ -427,12 +427,12 @@ func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.Footnotev1_L
 			Name:         info.Name,
 			PublicKey:    info.PublicKey.SerializeCompressed(),
 			ImportHeight: uint32(info.ImportHeight),
-			Timestamp:    uint64(info.Timestamp.Unix()),
+			EpochHeight:  uint32(info.EpochHeight),
+			SectorSize:   uint32(info.SectorSize),
 			MerkleRoot:   info.MerkleRoot[:],
 			ReservedRoot: info.ReservedRoot[:],
 			ReceivedAt:   uint64(info.ReceivedAt.Unix()),
 			Signature:    info.Signature[:],
-			Timebank:     uint32(info.Timebank),
 		}
 		if err = srv.Send(res); err != nil {
 			return errors.Wrap(err, "error sending info")
@@ -447,10 +447,11 @@ func (s *Server) SendUpdate(_ context.Context, req *apiv1.SendUpdateReq) (*apiv1
 	}
 
 	recips, _ := p2p.GossipAll(s.mux, &wire.Update{
-		Name:       req.Name,
-		Timestamp:  header.Timestamp,
-		MerkleRoot: header.MerkleRoot,
-		Signature:  header.Signature,
+		Name:          req.Name,
+		EpochHeight:   header.EpochHeight,
+		SectorSize:    header.SectorSize,
+		SectorTipHash: header.SectorTipHash,
+		Signature:     header.Signature,
 	})
 
 	return &apiv1.SendUpdateRes{

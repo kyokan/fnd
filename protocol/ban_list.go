@@ -2,7 +2,7 @@ package protocol
 
 import (
 	"bufio"
-	"fnd.localhost/handshake/primitives"
+	"github.com/mslipper/handshake/primitives"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
@@ -22,8 +22,8 @@ func ParseBanListVersion(line string) (int, error) {
 	if len(splits) != 2 {
 		return 0, errors.New("ban list version must consist of two colon-separated components")
 	}
-	if splits[0] != "FNBAN" {
-		return 0, errors.New("ban list version must start with FNBAN")
+	if splits[0] != "DDRPBAN" {
+		return 0, errors.New("ban list version must start with DDRPBAN")
 	}
 	if !verRegex.MatchString(splits[1]) {
 		return 0, errors.New("ban list version must end with v followed by a digit")

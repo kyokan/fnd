@@ -1,24 +1,30 @@
 package protocol
 
 import (
-	"fnd/blob"
-	"fnd/config"
-	"fnd/log"
-	"fnd/p2p"
-	"fnd/store"
-	"fnd/util"
-	"fnd/wire"
-	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
 	"time"
+
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/config"
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/log"
+	"github.com/ddrp-org/ddrp/p2p"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/util"
+	"github.com/ddrp-org/ddrp/wire"
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
-	ErrUpdaterAlreadySynchronized = errors.New("updater already synchronized")
-	ErrUpdaterMerkleRootMismatch  = errors.New("updater merkle root mismatch")
-	ErrNameLocked                 = errors.New("name is locked")
-	ErrInsufficientTimebank       = errors.New("insufficient timebank")
+	ErrUpdaterAlreadySynchronized   = errors.New("updater already synchronized")
+	ErrUpdaterSectorTipHashMismatch = errors.New("updater sector tip hash mismatch")
+	ErrNameLocked                   = errors.New("name is locked")
+	ErrNameBanned                   = errors.New("name is banned")
+	ErrInvalidEpochCurrent          = errors.New("name epoch invalid current")
+	ErrInvalidEpochThrottled        = errors.New("name epoch invalid throttled")
+	ErrInvalidEpochBackdated        = errors.New("name epoch invalid backdated")
+	ErrInvalidEpochFuturedated      = errors.New("name epoch invalid futuredated")
 
 	updaterLogger = log.WithModule("updater")
 )
@@ -119,25 +125,52 @@ func UpdateBlob(cfg *UpdateConfig) error {
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		return errors.Wrap(err, "error getting header")
 	}
-	if header != nil && header.Timestamp.Equal(item.Timestamp) {
+	if header != nil && header.EpochHeight == item.EpochHeight && header.SectorSize == item.SectorSize {
 		return ErrUpdaterAlreadySynchronized
+	}
+
+	var prevHash crypto.Hash = blob.ZeroHash
+	var epochHeight, sectorSize uint16
+	var epochUpdated bool
+	if header != nil {
+		epochHeight = header.EpochHeight
+		sectorSize = header.SectorSize
+		prevHash = header.SectorTipHash
+	}
+
+	if item.EpochHeight < epochHeight {
+		return ErrInvalidEpochBackdated
+	}
+
+	if item.EpochHeight > epochHeight {
+		if header != nil && header.Banned {
+			if header.BannedAt.Add(7 * 24 * time.Duration(time.Hour)).After(time.Now()) {
+				return ErrNameBanned
+			}
+
+			if item.EpochHeight >= CurrentEpoch(item.Name) {
+				return ErrInvalidEpochCurrent
+			}
+		}
+
+		if header != nil && time.Now().Before(header.EpochStartAt.Add(7*24*time.Duration(time.Hour))) {
+			if item.EpochHeight != CurrentEpoch(item.Name) {
+				return ErrInvalidEpochThrottled
+			}
+		}
+		if item.EpochHeight > CurrentEpoch(item.Name) {
+			return ErrInvalidEpochFuturedated
+		}
+
+		// Sync the entire blob on epoch rollover
+		epochUpdated = true
+		sectorSize = 0
 	}
 
 	if !cfg.NameLocker.TryLock(item.Name) {
 		return ErrNameLocked
 	}
 	defer cfg.NameLocker.Unlock(item.Name)
-
-	newMerkleBase, err := SyncTreeBases(&SyncTreeBasesOpts{
-		Timeout:    DefaultSyncerTreeBaseResTimeout,
-		Mux:        cfg.Mux,
-		Peers:      item.PeerIDs,
-		MerkleRoot: item.MerkleRoot,
-		Name:       item.Name,
-	})
-	if err != nil {
-		return errors.Wrap(err, "error syncing merkle base")
-	}
 
 	bl, err := cfg.BlobStore.Open(item.Name)
 	if err != nil {
@@ -149,65 +182,7 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		}
 	}()
 
-	var sectorsNeeded []uint8
-	var prevUpdateTime time.Time
-	var prevTimebank int
-	var payableSectorCount int
-	if header == nil {
-		sectorsNeeded = blob.ZeroMerkleBase.DiffWith(newMerkleBase)
-	} else {
-		base, err := store.GetMerkleBase(cfg.DB, item.Name)
-		if err != nil {
-			return errors.Wrap(err, "error getting merkle base")
-		}
-		sectorsNeeded = base.DiffWith(newMerkleBase)
-		prevUpdateTime = header.ReceivedAt
-		prevTimebank = header.Timebank
-	}
-	for _, sectorID := range sectorsNeeded {
-		if newMerkleBase[sectorID] == blob.EmptyBlobBaseHash {
-			continue
-		}
-		payableSectorCount++
-	}
-	if payableSectorCount == 0 {
-		l.Debug(
-			"no payable sectors, truncating",
-			"count", len(sectorsNeeded),
-		)
-		tx, err := bl.Transaction()
-		if err != nil {
-			return errors.Wrap(err, "error starting transaction")
-		}
-		for _, sectorID := range sectorsNeeded {
-			if err := tx.WriteSector(sectorID, blob.ZeroSector); err != nil {
-				return errors.Wrap(err, "error truncating sector")
-			}
-		}
-		if err := tx.Commit(); err != nil {
-			return errors.Wrap(err, "error committing blob")
-		}
-		return nil
-	}
-	l.Debug(
-		"calculated needed sectors",
-		"total", len(sectorsNeeded),
-		"payable", payableSectorCount,
-	)
-
-	newTimebank := CheckTimebank(&TimebankParams{
-		TimebankDuration:     48 * time.Hour,
-		MinUpdateInterval:    2 * time.Minute,
-		FullUpdatesPerPeriod: 2,
-	}, prevUpdateTime, prevTimebank, payableSectorCount)
-	l.Debug(
-		"calculated new timebank",
-		"prev", prevTimebank,
-		"new", newTimebank,
-	)
-	if newTimebank == -1 {
-		return ErrInsufficientTimebank
-	}
+	bl.Seek(sectorSize)
 
 	tx, err := bl.Transaction()
 	if err != nil {
@@ -215,12 +190,14 @@ func UpdateBlob(cfg *UpdateConfig) error {
 	}
 
 	err = SyncSectors(&SyncSectorsOpts{
-		Timeout:       DefaultSyncerSectorResTimeout,
+		Timeout:       DefaultSyncerBlobResTimeout,
 		Mux:           cfg.Mux,
 		Tx:            tx,
 		Peers:         item.PeerIDs,
-		MerkleBase:    newMerkleBase,
-		SectorsNeeded: sectorsNeeded,
+		EpochHeight:   epochHeight,
+		SectorSize:    sectorSize,
+		SectorTipHash: item.SectorTipHash,
+		PrevHash:      prevHash,
 		Name:          item.Name,
 	})
 	if err != nil {
@@ -229,31 +206,59 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		}
 		return errors.Wrap(err, "error during sync")
 	}
-
-	tree, err := blob.Merkleize(blob.NewReader(tx))
+	tree, err := blob.SerialHash(blob.NewReader(tx), blob.ZeroHash, item.SectorSize)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			updaterLogger.Error("error rolling back blob transaction", "err", err)
 		}
-		return errors.Wrap(err, "error calculating new blob merkle root")
+		return errors.Wrap(err, "error calculating new blob sector tip hash")
 	}
-	if tree.Root() != item.MerkleRoot {
+	if tree.Tip() != item.SectorTipHash {
 		if err := tx.Rollback(); err != nil {
 			updaterLogger.Error("error rolling back blob transaction", "err", err)
 		}
-		return ErrUpdaterMerkleRootMismatch
+		err = store.WithTx(cfg.DB, func(tx *leveldb.Transaction) error {
+			return store.SetHeaderTx(tx, &store.Header{
+				Name:          item.Name,
+				EpochHeight:   item.EpochHeight,
+				SectorSize:    item.SectorSize,
+				SectorTipHash: item.SectorTipHash,
+				Signature:     item.Signature,
+				ReservedRoot:  item.ReservedRoot,
+				Banned:        true,
+				BannedAt:      time.Now(),
+			}, blob.ZeroSectorHashes)
+		})
+		return ErrUpdaterSectorTipHashMismatch
+	}
+
+	var sectorsNeeded uint16
+
+	if header == nil {
+		sectorsNeeded = item.SectorSize
+	} else {
+		sectorsNeeded = item.SectorSize - header.SectorSize
+	}
+	l.Debug(
+		"calculated needed sectors",
+		"total", sectorsNeeded,
+	)
+
+	var epochStart time.Time
+	if epochUpdated {
+		epochStart = time.Now()
 	}
 
 	err = store.WithTx(cfg.DB, func(tx *leveldb.Transaction) error {
 		return store.SetHeaderTx(tx, &store.Header{
-			Name:         item.Name,
-			Timestamp:    item.Timestamp,
-			MerkleRoot:   item.MerkleRoot,
-			Signature:    item.Signature,
-			ReservedRoot: item.ReservedRoot,
-			ReceivedAt:   time.Now(),
-			Timebank:     newTimebank,
-		}, tree.ProtocolBase())
+			Name:          item.Name,
+			EpochHeight:   item.EpochHeight,
+			SectorSize:    item.SectorSize,
+			SectorTipHash: item.SectorTipHash,
+			Signature:     item.Signature,
+			ReservedRoot:  item.ReservedRoot,
+			EpochStartAt:  epochStart,
+		}, tree)
 	})
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -274,11 +279,10 @@ func UpdateBlob(cfg *UpdateConfig) error {
 	}
 
 	update := &wire.Update{
-		Name:         item.Name,
-		Timestamp:    item.Timestamp,
-		MerkleRoot:   item.MerkleRoot,
-		Signature:    item.Signature,
-		ReservedRoot: item.ReservedRoot,
+		Name:          item.Name,
+		EpochHeight:   item.EpochHeight,
+		SectorSize:    item.SectorSize,
+		SectorTipHash: item.SectorTipHash,
 	}
 	p2p.GossipAll(cfg.Mux, update)
 	return nil

@@ -2,7 +2,7 @@ package protocol
 
 import (
 	"fmt"
-	"fnd/store"
+	"github.com/ddrp-org/ddrp/store"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 	"io/ioutil"

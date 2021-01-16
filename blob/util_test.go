@@ -1,7 +1,7 @@
 package blob
 
 import (
-	"fnd/testutil/testfs"
+	"github.com/ddrp-org/ddrp/testutil/testfs"
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"

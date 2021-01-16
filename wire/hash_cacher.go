@@ -2,9 +2,10 @@ package wire
 
 import (
 	"bytes"
-	"fnd/crypto"
-	"fnd.localhost/dwire"
 	"sync"
+
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/dwire"
 )
 
 var hashCacherBufPool = sync.Pool{

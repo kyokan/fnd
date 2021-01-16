@@ -1,9 +1,9 @@
 package protocol
 
 import (
-	"fnd/blob"
-	"fnd/store"
-	"fnd/testutil/testfs"
+	"github.com/ddrp-org/ddrp/blob"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/ddrp-org/ddrp/testutil/testfs"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -22,8 +22,8 @@ func TestIngestBanLists(t *testing.T) {
 	require.NoError(t, bl.Close())
 
 	err = IngestBanLists(db, bs, []string{
-		"<path-to-your-banlist1>",
-		"<path-to-your-banlist2>",
+		"https://gist.githubusercontent.com/mslipper/b5d28fe54850be8b879b4064abcacddf/raw/6c412b8bc02a3765b49acf455b6ce32c7a5a4ddd/banlist-test-1",
+		"https://gist.githubusercontent.com/mslipper/cc32c19da426622e156cf771aafa58da/raw/07210f958c01737a139d916c5082dd1bc7724955/banlist-test-2",
 	})
 	require.NoError(t, err)
 

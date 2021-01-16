@@ -1,9 +1,10 @@
 package wire
 
 import (
-	"fnd/crypto"
-	"fnd.localhost/dwire"
 	"io"
+
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/dwire"
 )
 
 type NilUpdate struct {

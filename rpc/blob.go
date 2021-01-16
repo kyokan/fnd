@@ -2,20 +2,21 @@ package rpc
 
 import (
 	"context"
-	"github.com/btcsuite/btcd/btcec"
-	"fnd/crypto"
-	apiv1 "fnd/rpc/v1"
-	"fnd/store"
-	"github.com/pkg/errors"
 	"io"
 	"time"
+
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/ddrp-org/ddrp/crypto"
+	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"github.com/ddrp-org/ddrp/store"
+	"github.com/pkg/errors"
 )
 
-func GetBlobInfo(client apiv1.Footnotev1Client, name string) (*store.BlobInfo, error) {
+func GetBlobInfo(client apiv1.DDRPv1Client, name string) (*store.BlobInfo, error) {
 	return GetBlobInfoContext(context.Background(), client, name)
 }
 
-func GetBlobInfoContext(ctx context.Context, client apiv1.Footnotev1Client, name string) (*store.BlobInfo, error) {
+func GetBlobInfoContext(ctx context.Context, client apiv1.DDRPv1Client, name string) (*store.BlobInfo, error) {
 	res, err := client.GetBlobInfo(ctx, &apiv1.BlobInfoReq{
 		Name: name,
 	})
@@ -25,11 +26,11 @@ func GetBlobInfoContext(ctx context.Context, client apiv1.Footnotev1Client, name
 	return parseBlobInfoRes(res)
 }
 
-func ListBlobInfo(client apiv1.Footnotev1Client, after string, cb func(info *store.BlobInfo) bool) error {
+func ListBlobInfo(client apiv1.DDRPv1Client, after string, cb func(info *store.BlobInfo) bool) error {
 	return ListBlobInfoContext(context.Background(), client, after, cb)
 }
 
-func ListBlobInfoContext(ctx context.Context, client apiv1.Footnotev1Client, start string, cb func(info *store.BlobInfo) bool) error {
+func ListBlobInfoContext(ctx context.Context, client apiv1.DDRPv1Client, start string, cb func(info *store.BlobInfo) bool) error {
 	stream, err := client.ListBlobInfo(ctx, &apiv1.ListBlobInfoReq{
 		Start: start,
 	})
@@ -78,11 +79,11 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 		Name:         res.Name,
 		PublicKey:    pub,
 		ImportHeight: int(res.ImportHeight),
-		Timestamp:    time.Unix(int64(res.Timestamp), 0),
+		EpochHeight:  uint16(res.EpochHeight),
+		SectorSize:   uint16(res.SectorSize),
 		MerkleRoot:   merkleRoot,
 		ReservedRoot: reservedRoot,
 		ReceivedAt:   time.Unix(int64(res.ReceivedAt), 0),
 		Signature:    sig,
-		Timebank:     int(res.Timebank),
 	}, nil
 }

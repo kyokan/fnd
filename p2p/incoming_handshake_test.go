@@ -3,12 +3,12 @@ package p2p
 import (
 	"context"
 	"errors"
-	"fnd/crypto"
-	"fnd/testutil/testcrypto"
-	"fnd/wire"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/ddrp-org/ddrp/crypto"
+	"github.com/ddrp-org/ddrp/wire"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandleIncomingHandshake(t *testing.T) {
@@ -38,35 +38,6 @@ func TestHandleIncomingHandshake(t *testing.T) {
 	<-doneCh
 	<-doneCh
 	setup.Close(t)
-}
-
-func TestHandleIncomingHandshake_InvalidHelloSig(t *testing.T) {
-	ctx := context.Background()
-	setup := initializeHandshakes(t)
-	doneCh := make(chan struct{}, 2)
-	go func() {
-		_, err := HandleIncomingHandshake(ctx, &HandshakeConfig{
-			Magic:           12345,
-			ProtocolVersion: 1,
-			Peer:            setup.inPeer,
-			Signer:          setup.inSigner,
-		})
-		require.True(t, errors.Is(err, ErrInvalidEnvelopeSignature))
-		doneCh <- struct{}{}
-	}()
-	go func() {
-		_, err := HandleOutgoingHandshake(ctx, &HandshakeConfig{
-			Magic:           12345,
-			ProtocolVersion: 1,
-			Peer:            setup.outPeer,
-			Signer:          testcrypto.NewRandomSigner(),
-		})
-		require.True(t, errors.Is(err, ErrPeerClosed))
-		doneCh <- struct{}{}
-	}()
-	<-doneCh
-	setup.Close(t)
-	<-doneCh
 }
 
 func TestHandleIncomingHandshake_InvalidHelloAckNonce(t *testing.T) {

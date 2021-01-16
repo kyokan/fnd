@@ -2,7 +2,7 @@ package p2p
 
 import (
 	"bytes"
-	"fnd/crypto"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"

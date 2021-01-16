@@ -50,6 +50,7 @@ func NewInStorePath(blobsPath string, name string) (Blob, error) {
 	if err != nil {
 		return nil, err
 	}
+	// TODO: Open in append-only mode (O_APPEND)
 	if exists {
 		f, err = os.OpenFile(blobFile, os.O_RDWR, 0666)
 	} else {
@@ -89,6 +90,14 @@ type wrappedBlob struct {
 
 func (w *wrappedBlob) Name() string {
 	return w.blob.Name()
+}
+
+func (w *wrappedBlob) Seek(sectorSize uint16) {
+	w.blob.Seek(sectorSize)
+}
+
+func (w *wrappedBlob) At() uint16 {
+	return w.blob.At()
 }
 
 func (w *wrappedBlob) ReadAt(p []byte, off int64) (n int, err error) {

@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/btcsuite/btcd/btcec"
-	"fnd/crypto"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

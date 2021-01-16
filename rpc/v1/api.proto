@@ -1,7 +1,7 @@
 syntax = "proto3";
 option go_package = "v1";
 
-service Footnotev1 {
+service DDRPv1 {
     rpc GetStatus (Empty) returns (GetStatusRes);
 
     rpc AddPeer (AddPeerReq) returns (Empty);
@@ -10,9 +10,7 @@ service Footnotev1 {
     rpc ListPeers (ListPeersReq) returns (stream ListPeersRes);
 
     rpc Checkout (CheckoutReq) returns (CheckoutRes);
-    rpc WriteAt (WriteAtReq) returns (WriteAtRes);
-    rpc Truncate (TruncateReq) returns (Empty);
-    rpc PreCommit (PreCommitReq) returns (PreCommitRes);
+    rpc WriteSector (WriteSectorReq) returns (WriteSectorRes);
     rpc Commit (CommitReq) returns (CommitRes);
 
     rpc ReadAt (ReadAtReq) returns (ReadAtRes);
@@ -78,32 +76,18 @@ message CheckoutReq {
 
 message CheckoutRes {
     uint32 txID = 1;
+    uint32 epochHeight = 2;
+    uint32 sectorSize = 3;
+    bytes sectorTipHash = 4;
 }
 
-message WriteAtReq {
+message WriteSectorReq {
     uint32 txID = 1;
-    uint32 offset = 2;
-    bytes data = 3;
+    bytes data = 2;
 }
 
-message WriteAtRes {
-    uint32 bytesWritten = 1;
-    string writeErr = 2;
-}
-
-message TruncateReq {
-    uint32 txID = 1;
-}
-
-message TruncateRes {
-}
-
-message PreCommitReq {
-    uint32 txID = 1;
-}
-
-message PreCommitRes {
-    bytes merkleRoot = 1;
+message WriteSectorRes {
+    string writeErr = 1;
 }
 
 message CommitReq {
@@ -111,6 +95,9 @@ message CommitReq {
     uint64 timestamp = 2;
     bytes signature = 3;
     bool broadcast = 4;
+    uint32 epochHeight = 5;
+    uint32 sectorSize = 6;
+    bytes sectorTipHash = 7;
 }
 
 message CommitRes {
@@ -139,12 +126,12 @@ message BlobInfoRes {
     string name = 1;
     bytes publicKey = 2;
     uint32 importHeight = 3;
-    uint64 timestamp = 4;
-    bytes merkleRoot = 5;
-    bytes reservedRoot = 6;
-    uint64 receivedAt = 7;
-    bytes signature = 8;
-    uint32 timebank = 9;
+    uint32 epochHeight = 4; // protobuf doesn't have uint16
+    uint32 sectorSize = 5; //  ditto ^
+    bytes merkleRoot = 6;
+    bytes reservedRoot = 7;
+    uint64 receivedAt = 8;
+    bytes signature = 9;
 }
 
 message SendUpdateReq {

@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"fnd/crypto"
+	"github.com/ddrp-org/ddrp/crypto"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

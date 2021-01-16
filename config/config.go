@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/pelletier/go-toml"
-	"github.com/pkg/errors"
 	"io"
 	"time"
+
+	"github.com/pelletier/go-toml"
+	"github.com/pkg/errors"
 )
 
 type Config struct {
@@ -45,7 +46,6 @@ type HNSResolverConfig struct {
 }
 
 type TuningConfig struct {
-	Timebank      TimebankConfig      `mapstructure:"timebank"`
 	UpdateQueue   UpdateQueueConfig   `mapstructure:"update_queue"`
 	Updater       UpdaterConfig       `mapstructure:"updater"`
 	Syncer        SyncerConfig        `mapstructure:"syncer"`
@@ -54,12 +54,6 @@ type TuningConfig struct {
 	NameImporter  NameImporterConfig  `mapstructure:"name_importer"`
 	Heartbeat     HeartbeaterConfig   `mapstructure:"heartbeat"`
 	NameSyncer    NameSyncerConfig    `mapstructure:"name_syncer"`
-}
-
-type TimebankConfig struct {
-	PeriodMS             int `mapstructure:"period_ms"`
-	MinUpdateIntervalMS  int `mapstructure:"min_update_interval_ms"`
-	FullUpdatesPerPeriod int `mapstructure:"full_updates_per_period"`
 }
 
 type UpdateQueueConfig struct {

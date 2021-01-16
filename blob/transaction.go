@@ -1,11 +1,12 @@
 package blob
 
 import (
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -16,7 +17,7 @@ var (
 type Transaction interface {
 	Readable
 	io.WriterAt
-	WriteSector(id uint8, sector Sector) error
+	WriteSector(sector Sector) error
 	Truncate() error
 	Commit() error
 	Rollback() error
@@ -26,6 +27,7 @@ type Transaction interface {
 type txImpl struct {
 	name        string
 	f           *os.File
+	sectorSize  uint16
 	mu          sync.Mutex
 	cloner      func() (*os.File, error)
 	committer   func(clone *os.File) error
@@ -37,6 +39,10 @@ type txImpl struct {
 
 func (t *txImpl) Name() string {
 	return t.name
+}
+
+func (t *txImpl) SectorSize() uint16 {
+	return t.sectorSize
 }
 
 func (t *txImpl) ReadSector(id uint8) (Sector, error) {
@@ -69,7 +75,7 @@ func (t *txImpl) ReadAt(p []byte, off int64) (int, error) {
 	return ReadBlobAt(t.f, p, off)
 }
 
-func (t *txImpl) WriteSector(id uint8, sector Sector) error {
+func (t *txImpl) WriteSector(sector Sector) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	if t.closed {
@@ -81,7 +87,11 @@ func (t *txImpl) WriteSector(id uint8, sector Sector) error {
 	if err := t.lazyInitialize(); err != nil {
 		return errors.Wrap(err, "error initializing transaction")
 	}
-	return WriteSector(t.f, id, sector)
+	if err := WriteSector(t.f, t.sectorSize, sector); err != nil {
+		return errors.Wrap(err, "error writing sector")
+	}
+	t.sectorSize++
+	return nil
 }
 
 func (t *txImpl) WriteAt(p []byte, off int64) (int, error) {

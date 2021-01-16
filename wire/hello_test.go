@@ -1,7 +1,7 @@
 package wire
 
 import (
-	"fnd/testutil/testcrypto"
+	"github.com/ddrp-org/ddrp/testutil/testcrypto"
 	"testing"
 )
 
