@@ -11,9 +11,9 @@ import (
 
 var resetPeerStoreCmd = &cobra.Command{
 	Use:   "reset-peer-store",
-	Short: "Wipes ddrpd's peer store directly on disk",
+	Short: "Wipes fnd's peer store directly on disk",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		homePath := config.ExpandHomePath(ddrpdHome)
+		homePath := config.ExpandHomePath(fndHome)
 		db, err := store.Open(config.ExpandDBPath(homePath))
 		if err != nil {
 			return errors.Wrap(err, "error opening store")
@@ -30,6 +30,6 @@ var resetPeerStoreCmd = &cobra.Command{
 }
 
 func init() {
-	resetPeerStoreCmd.Flags().StringVar(&ddrpdHome, "ddrpd-home", "~/.ddrpd", "Path to DDRPD's home directory.")
+	resetPeerStoreCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to fnd's home directory.")
 	cmd.AddCommand(resetPeerStoreCmd)
 }

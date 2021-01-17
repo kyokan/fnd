@@ -21,7 +21,7 @@ var readCmd = &cobra.Command{
 			return err
 		}
 
-		br := rpc.NewBlobReader(apiv1.NewDDRPv1Client(conn), name)
+		br := rpc.NewBlobReader(apiv1.NewFootnotev1Client(conn), name)
 		if _, err := io.Copy(os.Stdout, br); err != nil {
 			return err
 		}

@@ -12,7 +12,7 @@ import (
 )
 
 type BlobWriter struct {
-	client        apiv1.DDRPv1Client
+	client        apiv1.Footnotev1Client
 	signer        crypto.Signer
 	name          string
 	epochHeight   uint16
@@ -23,7 +23,7 @@ type BlobWriter struct {
 	committed     bool
 }
 
-func NewBlobWriter(client apiv1.DDRPv1Client, signer crypto.Signer, name string) *BlobWriter {
+func NewBlobWriter(client apiv1.Footnotev1Client, signer crypto.Signer, name string) *BlobWriter {
 	return &BlobWriter{
 		client: client,
 		signer: signer,

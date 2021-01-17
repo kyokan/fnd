@@ -24,7 +24,7 @@ var addPeerCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		grpcClient := apiv1.NewDDRPv1Client(conn)
+		grpcClient := apiv1.NewFootnotev1Client(conn)
 		splits := strings.Split(args[0], "@")
 		if verifyPeerID && len(splits) == 1 {
 			return errors.New("must define a peer ID if the peer ID is to be verified")

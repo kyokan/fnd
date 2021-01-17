@@ -6,7 +6,7 @@
 
 set -ue
 
-SERVICE="ddrpd"
+SERVICE="fnd"
 
 # fix an issue where this script runs on upgrades for rpm
 # see https://github.com/jordansissel/fpm/issues/1175#issuecomment-240086016

@@ -11,9 +11,9 @@ import (
 
 var resetNameStore = &cobra.Command{
 	Use:   "reset-name-store",
-	Short: "Wipes ddrpd's naming data directly on disk",
+	Short: "Wipes fnd's naming data directly on disk",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		homePath := config.ExpandHomePath(ddrpdHome)
+		homePath := config.ExpandHomePath(fndHome)
 		db, err := store.Open(config.ExpandDBPath(homePath))
 		if err != nil {
 			return errors.Wrap(err, "failed to open store")
@@ -30,6 +30,6 @@ var resetNameStore = &cobra.Command{
 }
 
 func init() {
-	resetNameStore.Flags().StringVar(&ddrpdHome, "ddrpd-home", "~/.ddrpd", "Path to DDRPD's home directory.")
+	resetNameStore.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to fnd's home directory.")
 	cmd.AddCommand(resetNameStore)
 }

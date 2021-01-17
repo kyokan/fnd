@@ -95,7 +95,7 @@ func (s *Server) Start() error {
 		return err
 	}
 	s.srv = grpc.NewServer()
-	apiv1.RegisterDDRPv1Server(s.srv, s)
+	apiv1.RegisterFootnotev1Server(s.srv, s)
 	go s.srv.Serve(lis)
 	return nil
 }
@@ -178,7 +178,7 @@ func (s *Server) UnbanPeer(_ context.Context, req *apiv1.UnbanPeerReq) (*apiv1.E
 	return emptyRes, nil
 }
 
-func (s *Server) ListPeers(req *apiv1.ListPeersReq, stream apiv1.DDRPv1_ListPeersServer) error {
+func (s *Server) ListPeers(req *apiv1.ListPeersReq, stream apiv1.Footnotev1_ListPeersServer) error {
 	connectedPeers := s.mux.Peers()
 	storedPeers, err := store.StreamPeers(s.db, true)
 	if err != nil {
@@ -409,7 +409,7 @@ func (s *Server) GetBlobInfo(_ context.Context, req *apiv1.BlobInfoReq) (*apiv1.
 	}, nil
 }
 
-func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.DDRPv1_ListBlobInfoServer) error {
+func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.Footnotev1_ListBlobInfoServer) error {
 	stream, err := store.StreamBlobInfo(s.db, req.Start)
 	if err != nil {
 		return errors.Wrap(err, "error opening header stream")

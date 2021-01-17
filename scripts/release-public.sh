@@ -8,9 +8,9 @@ tag="$(git describe --tags --abbrev=0)"
 version="${tag:1}"
 
 create_tarball() {
-  mv -f "$build_dir/ddrpd-$1-amd64" "$build_dir/ddrpd"
-  mv -f "$build_dir/ddrpcli-$1-amd64" "$build_dir/ddrpcli"
-  tar -czvf "$build_dir/ddrp-$version-$1-amd64.tgz" -C "$build_dir" "ddrpd" "ddrpcli"
+  mv -f "$build_dir/fnd-$1-amd64" "$build_dir/ddrpd"
+  mv -f "$build_dir/fnd-cli-$1-amd64" "$build_dir/fnd-cli"
+  tar -czvf "$build_dir/ddrp-$version-$1-amd64.tgz" -C "$build_dir" "fnd" "fnd-cli"
   gpg2 --detach-sig --default-key D4B604F1 --output "$build_dir/ddrp-$version-$1-amd64.tgz.sig" "$build_dir/ddrp-$version-$1-amd64.tgz"
 }
 

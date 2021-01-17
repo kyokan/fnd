@@ -12,9 +12,9 @@ import (
 
 var resetBlobsCmd = &cobra.Command{
 	Use:   "reset-blobs",
-	Short: "Wipes ddrpd's blob data directly on disk",
+	Short: "Wipes fnd's blob data directly on disk",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		homePath := config.ExpandHomePath(ddrpdHome)
+		homePath := config.ExpandHomePath(fndHome)
 		db, err := store.Open(config.ExpandDBPath(homePath))
 		if err != nil {
 			return errors.Wrap(err, "error opening store")
@@ -38,6 +38,6 @@ var resetBlobsCmd = &cobra.Command{
 }
 
 func init() {
-	resetBlobsCmd.Flags().StringVar(&ddrpdHome, "ddrpd-home", "~/.ddrpd", "Path to DDRPD's home directory.")
+	resetBlobsCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to fnd's home directory.")
 	cmd.AddCommand(resetBlobsCmd)
 }

@@ -24,13 +24,13 @@ type peerJSON struct {
 
 var peerInfoCmd = &cobra.Command{
 	Use:   "peer-info",
-	Short: "Returns information about all peers DDRP has heard of.",
+	Short: "Returns information about all peers Footnote has heard of.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		conn, err := cli.DialRPC(cmd)
 		if err != nil {
 			return err
 		}
-		grpcClient := apiv1.NewDDRPv1Client(conn)
+		grpcClient := apiv1.NewFootnotev1Client(conn)
 		peers, err := rpc.ListPeers(grpcClient)
 		if err != nil {
 			return err

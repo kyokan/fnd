@@ -38,7 +38,7 @@ func TestHeartbeater_SendHeartbeats(t *testing.T) {
 	beat := <-resCh
 	require.Equal(t, "test moniker", beat.Moniker)
 	require.Equal(t, peerID, beat.PeerID)
-	require.Equal(t, "ddrpd/+", beat.UserAgent)
+	require.Equal(t, "fnd/+", beat.UserAgent)
 
 	require.NoError(t, heartbeater.Stop())
 	server.Close()

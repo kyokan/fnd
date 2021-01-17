@@ -1,7 +1,7 @@
 syntax = "proto3";
 option go_package = "v1";
 
-service DDRPv1 {
+service Footnotev1 {
     rpc GetStatus (Empty) returns (GetStatusRes);
 
     rpc AddPeer (AddPeerReq) returns (Empty);

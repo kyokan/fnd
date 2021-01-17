@@ -13,8 +13,8 @@ import (
 var configuredHomeDir string
 
 var rootCmd = &cobra.Command{
-	Use:   "ddrpd",
-	Short: "DDRP Daemon",
+	Use:   "fnd",
+	Short: "fnd Daemon",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if cmd.CalledAs() == "init" {
 			return nil
@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().String(cli.FlagHome, "~/.ddrpd", "Home directory for the daemon's config and database.")
+	rootCmd.PersistentFlags().String(cli.FlagHome, "~/.fnd", "Home directory for the daemon's config and database.")
 }
 
 func Execute() {

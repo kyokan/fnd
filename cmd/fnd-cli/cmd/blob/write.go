@@ -40,7 +40,7 @@ var writeCmd = &cobra.Command{
 		}
 
 		name := args[0]
-		wr := rpc.NewBlobWriter(apiv1.NewDDRPv1Client(conn), signer, name)
+		wr := rpc.NewBlobWriter(apiv1.NewFootnotev1Client(conn), signer, name)
 
 		if err := wr.Open(); err != nil {
 			return err

@@ -17,11 +17,11 @@ type Peer struct {
 	RxBytes     uint64
 }
 
-func ListPeers(client apiv1.DDRPv1Client) ([]*Peer, error) {
+func ListPeers(client apiv1.Footnotev1Client) ([]*Peer, error) {
 	return ListPeersContext(context.Background(), client)
 }
 
-func ListPeersContext(ctx context.Context, client apiv1.DDRPv1Client) ([]*Peer, error) {
+func ListPeersContext(ctx context.Context, client apiv1.Footnotev1Client) ([]*Peer, error) {
 	stream, err := client.ListPeers(ctx, &apiv1.ListPeersReq{})
 	if err != nil {
 		return nil, err
@@ -51,11 +51,11 @@ func ListPeersContext(ctx context.Context, client apiv1.DDRPv1Client) ([]*Peer, 
 	return peers, nil
 }
 
-func BanPeer(client apiv1.DDRPv1Client, ip string, duration int) error {
+func BanPeer(client apiv1.Footnotev1Client, ip string, duration int) error {
 	return BanPeerContext(context.Background(), client, ip, duration)
 }
 
-func BanPeerContext(ctx context.Context, client apiv1.DDRPv1Client, ip string, duration int) error {
+func BanPeerContext(ctx context.Context, client apiv1.Footnotev1Client, ip string, duration int) error {
 	_, err := client.BanPeer(ctx, &apiv1.BanPeerReq{
 		Ip:         ip,
 		DurationMS: uint32(duration),
@@ -63,11 +63,11 @@ func BanPeerContext(ctx context.Context, client apiv1.DDRPv1Client, ip string, d
 	return err
 }
 
-func UnbanPeer(client apiv1.DDRPv1Client, ip string) error {
+func UnbanPeer(client apiv1.Footnotev1Client, ip string) error {
 	return UnbanPeerContext(context.Background(), client, ip)
 }
 
-func UnbanPeerContext(ctx context.Context, client apiv1.DDRPv1Client, ip string) error {
+func UnbanPeerContext(ctx context.Context, client apiv1.Footnotev1Client, ip string) error {
 	_, err := client.UnbanPeer(ctx, &apiv1.UnbanPeerReq{
 		Ip: ip,
 	})
@@ -82,11 +82,11 @@ type Status struct {
 	RxBytes     uint64
 }
 
-func GetStatus(client apiv1.DDRPv1Client) (*Status, error) {
+func GetStatus(client apiv1.Footnotev1Client) (*Status, error) {
 	return GetStatusContext(context.Background(), client)
 }
 
-func GetStatusContext(ctx context.Context, client apiv1.DDRPv1Client) (*Status, error) {
+func GetStatusContext(ctx context.Context, client apiv1.Footnotev1Client) (*Status, error) {
 	res, err := client.GetStatus(ctx, &apiv1.Empty{})
 	if err != nil {
 		return nil, err
@@ -101,11 +101,11 @@ func GetStatusContext(ctx context.Context, client apiv1.DDRPv1Client) (*Status, 
 	}, nil
 }
 
-func AddPeer(client apiv1.DDRPv1Client, peerID string, ip string, verify bool) error {
+func AddPeer(client apiv1.Footnotev1Client, peerID string, ip string, verify bool) error {
 	return AddPeerContext(context.Background(), client, peerID, ip, verify)
 }
 
-func AddPeerContext(ctx context.Context, client apiv1.DDRPv1Client, peerID string, ip string, verify bool) error {
+func AddPeerContext(ctx context.Context, client apiv1.Footnotev1Client, peerID string, ip string, verify bool) error {
 	pIDBytes, err := hex.DecodeString(peerID)
 	if err != nil {
 		return err

@@ -20,7 +20,7 @@ to this peer will be closed.`,
 		if err != nil {
 			return err
 		}
-		grpcClient := apiv1.NewDDRPv1Client(conn)
+		grpcClient := apiv1.NewFootnotev1Client(conn)
 		peerID := args[0]
 		duration, err := strconv.Atoi(args[1])
 		if err != nil {

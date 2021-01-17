@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 var cmd = &cobra.Command{
 	Use:   "blob",
-	Short: "Commands related to DDRP blobs.",
+	Short: "Commands related to Footnote blobs.",
 }
 
 func AddCmd(parent *cobra.Command) {

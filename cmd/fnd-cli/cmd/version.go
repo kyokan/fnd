@@ -10,7 +10,7 @@ import (
 var versionCmd = &cobra.Command{
 	Use: "version",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("ddrpd %s (%s)\n", version.GitTag, version.GitCommit)
+		fmt.Printf("fnd-cli %s (%s)\n", version.GitTag, version.GitCommit)
 		return nil
 	},
 }

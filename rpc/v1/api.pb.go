@@ -1440,38 +1440,39 @@ var file_api_proto_rawDesc = []byte{
 	0x65, 0x22, 0x37, 0x0a, 0x0d, 0x53, 0x65, 0x6e, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52,
 	0x65, 0x73, 0x12, 0x26, 0x0a, 0x0e, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x43,
 	0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0e, 0x72, 0x65, 0x63, 0x69,
-	0x70, 0x69, 0x65, 0x6e, 0x74, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x32, 0xe5, 0x03, 0x0a, 0x06, 0x44,
-	0x44, 0x52, 0x50, 0x76, 0x31, 0x12, 0x22, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x53, 0x74, 0x61, 0x74,
-	0x75, 0x73, 0x12, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0d, 0x2e, 0x47, 0x65, 0x74,
-	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x12, 0x1e, 0x0a, 0x07, 0x41, 0x64, 0x64,
-	0x50, 0x65, 0x65, 0x72, 0x12, 0x0b, 0x2e, 0x41, 0x64, 0x64, 0x50, 0x65, 0x65, 0x72, 0x52, 0x65,
-	0x71, 0x1a, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x1e, 0x0a, 0x07, 0x42, 0x61, 0x6e,
-	0x50, 0x65, 0x65, 0x72, 0x12, 0x0b, 0x2e, 0x42, 0x61, 0x6e, 0x50, 0x65, 0x65, 0x72, 0x52, 0x65,
-	0x71, 0x1a, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x22, 0x0a, 0x09, 0x55, 0x6e, 0x62,
-	0x61, 0x6e, 0x50, 0x65, 0x65, 0x72, 0x12, 0x0d, 0x2e, 0x55, 0x6e, 0x62, 0x61, 0x6e, 0x50, 0x65,
-	0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x2b, 0x0a,
-	0x09, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x65, 0x65, 0x72, 0x73, 0x12, 0x0d, 0x2e, 0x4c, 0x69, 0x73,
-	0x74, 0x50, 0x65, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x0d, 0x2e, 0x4c, 0x69, 0x73, 0x74,
-	0x50, 0x65, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x30, 0x01, 0x12, 0x26, 0x0a, 0x08, 0x43, 0x68,
-	0x65, 0x63, 0x6b, 0x6f, 0x75, 0x74, 0x12, 0x0c, 0x2e, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x6f, 0x75,
-	0x74, 0x52, 0x65, 0x71, 0x1a, 0x0c, 0x2e, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x6f, 0x75, 0x74, 0x52,
-	0x65, 0x73, 0x12, 0x2f, 0x0a, 0x0b, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53, 0x65, 0x63, 0x74, 0x6f,
-	0x72, 0x12, 0x0f, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53, 0x65, 0x63, 0x74, 0x6f, 0x72, 0x52,
-	0x65, 0x71, 0x1a, 0x0f, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53, 0x65, 0x63, 0x74, 0x6f, 0x72,
-	0x52, 0x65, 0x73, 0x12, 0x20, 0x0a, 0x06, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x12, 0x0a, 0x2e,
-	0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x0a, 0x2e, 0x43, 0x6f, 0x6d, 0x6d,
-	0x69, 0x74, 0x52, 0x65, 0x73, 0x12, 0x20, 0x0a, 0x06, 0x52, 0x65, 0x61, 0x64, 0x41, 0x74, 0x12,
-	0x0a, 0x2e, 0x52, 0x65, 0x61, 0x64, 0x41, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x0a, 0x2e, 0x52, 0x65,
-	0x61, 0x64, 0x41, 0x74, 0x52, 0x65, 0x73, 0x12, 0x29, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x42, 0x6c,
-	0x6f, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x0c, 0x2e, 0x42, 0x6c, 0x6f, 0x62, 0x49, 0x6e, 0x66,
-	0x6f, 0x52, 0x65, 0x71, 0x1a, 0x0c, 0x2e, 0x42, 0x6c, 0x6f, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x52,
-	0x65, 0x73, 0x12, 0x30, 0x0a, 0x0c, 0x4c, 0x69, 0x73, 0x74, 0x42, 0x6c, 0x6f, 0x62, 0x49, 0x6e,
-	0x66, 0x6f, 0x12, 0x10, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x42, 0x6c, 0x6f, 0x62, 0x49, 0x6e, 0x66,
-	0x6f, 0x52, 0x65, 0x71, 0x1a, 0x0c, 0x2e, 0x42, 0x6c, 0x6f, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x52,
-	0x65, 0x73, 0x30, 0x01, 0x12, 0x2c, 0x0a, 0x0a, 0x53, 0x65, 0x6e, 0x64, 0x55, 0x70, 0x64, 0x61,
-	0x74, 0x65, 0x12, 0x0e, 0x2e, 0x53, 0x65, 0x6e, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52,
-	0x65, 0x71, 0x1a, 0x0e, 0x2e, 0x53, 0x65, 0x6e, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52,
-	0x65, 0x73, 0x42, 0x04, 0x5a, 0x02, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x69, 0x65, 0x6e, 0x74, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x32, 0xe9, 0x03, 0x0a, 0x0a, 0x46,
+	0x6f, 0x6f, 0x74, 0x6e, 0x6f, 0x74, 0x65, 0x76, 0x31, 0x12, 0x22, 0x0a, 0x09, 0x47, 0x65, 0x74,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0d,
+	0x2e, 0x47, 0x65, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x12, 0x1e, 0x0a,
+	0x07, 0x41, 0x64, 0x64, 0x50, 0x65, 0x65, 0x72, 0x12, 0x0b, 0x2e, 0x41, 0x64, 0x64, 0x50, 0x65,
+	0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x1e, 0x0a,
+	0x07, 0x42, 0x61, 0x6e, 0x50, 0x65, 0x65, 0x72, 0x12, 0x0b, 0x2e, 0x42, 0x61, 0x6e, 0x50, 0x65,
+	0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x22, 0x0a,
+	0x09, 0x55, 0x6e, 0x62, 0x61, 0x6e, 0x50, 0x65, 0x65, 0x72, 0x12, 0x0d, 0x2e, 0x55, 0x6e, 0x62,
+	0x61, 0x6e, 0x50, 0x65, 0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74,
+	0x79, 0x12, 0x2b, 0x0a, 0x09, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x65, 0x65, 0x72, 0x73, 0x12, 0x0d,
+	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x65, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x0d, 0x2e,
+	0x4c, 0x69, 0x73, 0x74, 0x50, 0x65, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x30, 0x01, 0x12, 0x26,
+	0x0a, 0x08, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x6f, 0x75, 0x74, 0x12, 0x0c, 0x2e, 0x43, 0x68, 0x65,
+	0x63, 0x6b, 0x6f, 0x75, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x0c, 0x2e, 0x43, 0x68, 0x65, 0x63, 0x6b,
+	0x6f, 0x75, 0x74, 0x52, 0x65, 0x73, 0x12, 0x2f, 0x0a, 0x0b, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53,
+	0x65, 0x63, 0x74, 0x6f, 0x72, 0x12, 0x0f, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53, 0x65, 0x63,
+	0x74, 0x6f, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x0f, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53, 0x65,
+	0x63, 0x74, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x12, 0x20, 0x0a, 0x06, 0x43, 0x6f, 0x6d, 0x6d, 0x69,
+	0x74, 0x12, 0x0a, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x0a, 0x2e,
+	0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x52, 0x65, 0x73, 0x12, 0x20, 0x0a, 0x06, 0x52, 0x65, 0x61,
+	0x64, 0x41, 0x74, 0x12, 0x0a, 0x2e, 0x52, 0x65, 0x61, 0x64, 0x41, 0x74, 0x52, 0x65, 0x71, 0x1a,
+	0x0a, 0x2e, 0x52, 0x65, 0x61, 0x64, 0x41, 0x74, 0x52, 0x65, 0x73, 0x12, 0x29, 0x0a, 0x0b, 0x47,
+	0x65, 0x74, 0x42, 0x6c, 0x6f, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x0c, 0x2e, 0x42, 0x6c, 0x6f,
+	0x62, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x1a, 0x0c, 0x2e, 0x42, 0x6c, 0x6f, 0x62, 0x49,
+	0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73, 0x12, 0x30, 0x0a, 0x0c, 0x4c, 0x69, 0x73, 0x74, 0x42, 0x6c,
+	0x6f, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x10, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x42, 0x6c, 0x6f,
+	0x62, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x1a, 0x0c, 0x2e, 0x42, 0x6c, 0x6f, 0x62, 0x49,
+	0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73, 0x30, 0x01, 0x12, 0x2c, 0x0a, 0x0a, 0x53, 0x65, 0x6e, 0x64,
+	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x0e, 0x2e, 0x53, 0x65, 0x6e, 0x64, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x1a, 0x0e, 0x2e, 0x53, 0x65, 0x6e, 0x64, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x42, 0x04, 0x5a, 0x02, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1512,30 +1513,30 @@ var file_api_proto_goTypes = []interface{}{
 	(*SendUpdateRes)(nil),   // 21: SendUpdateRes
 }
 var file_api_proto_depIdxs = []int32{
-	0,  // 0: DDRPv1.GetStatus:input_type -> Empty
-	4,  // 1: DDRPv1.AddPeer:input_type -> AddPeerReq
-	5,  // 2: DDRPv1.BanPeer:input_type -> BanPeerReq
-	6,  // 3: DDRPv1.UnbanPeer:input_type -> UnbanPeerReq
-	7,  // 4: DDRPv1.ListPeers:input_type -> ListPeersReq
-	9,  // 5: DDRPv1.Checkout:input_type -> CheckoutReq
-	11, // 6: DDRPv1.WriteSector:input_type -> WriteSectorReq
-	13, // 7: DDRPv1.Commit:input_type -> CommitReq
-	15, // 8: DDRPv1.ReadAt:input_type -> ReadAtReq
-	17, // 9: DDRPv1.GetBlobInfo:input_type -> BlobInfoReq
-	18, // 10: DDRPv1.ListBlobInfo:input_type -> ListBlobInfoReq
-	20, // 11: DDRPv1.SendUpdate:input_type -> SendUpdateReq
-	1,  // 12: DDRPv1.GetStatus:output_type -> GetStatusRes
-	0,  // 13: DDRPv1.AddPeer:output_type -> Empty
-	0,  // 14: DDRPv1.BanPeer:output_type -> Empty
-	0,  // 15: DDRPv1.UnbanPeer:output_type -> Empty
-	8,  // 16: DDRPv1.ListPeers:output_type -> ListPeersRes
-	10, // 17: DDRPv1.Checkout:output_type -> CheckoutRes
-	12, // 18: DDRPv1.WriteSector:output_type -> WriteSectorRes
-	14, // 19: DDRPv1.Commit:output_type -> CommitRes
-	16, // 20: DDRPv1.ReadAt:output_type -> ReadAtRes
-	19, // 21: DDRPv1.GetBlobInfo:output_type -> BlobInfoRes
-	19, // 22: DDRPv1.ListBlobInfo:output_type -> BlobInfoRes
-	21, // 23: DDRPv1.SendUpdate:output_type -> SendUpdateRes
+	0,  // 0: Footnotev1.GetStatus:input_type -> Empty
+	4,  // 1: Footnotev1.AddPeer:input_type -> AddPeerReq
+	5,  // 2: Footnotev1.BanPeer:input_type -> BanPeerReq
+	6,  // 3: Footnotev1.UnbanPeer:input_type -> UnbanPeerReq
+	7,  // 4: Footnotev1.ListPeers:input_type -> ListPeersReq
+	9,  // 5: Footnotev1.Checkout:input_type -> CheckoutReq
+	11, // 6: Footnotev1.WriteSector:input_type -> WriteSectorReq
+	13, // 7: Footnotev1.Commit:input_type -> CommitReq
+	15, // 8: Footnotev1.ReadAt:input_type -> ReadAtReq
+	17, // 9: Footnotev1.GetBlobInfo:input_type -> BlobInfoReq
+	18, // 10: Footnotev1.ListBlobInfo:input_type -> ListBlobInfoReq
+	20, // 11: Footnotev1.SendUpdate:input_type -> SendUpdateReq
+	1,  // 12: Footnotev1.GetStatus:output_type -> GetStatusRes
+	0,  // 13: Footnotev1.AddPeer:output_type -> Empty
+	0,  // 14: Footnotev1.BanPeer:output_type -> Empty
+	0,  // 15: Footnotev1.UnbanPeer:output_type -> Empty
+	8,  // 16: Footnotev1.ListPeers:output_type -> ListPeersRes
+	10, // 17: Footnotev1.Checkout:output_type -> CheckoutRes
+	12, // 18: Footnotev1.WriteSector:output_type -> WriteSectorRes
+	14, // 19: Footnotev1.Commit:output_type -> CommitRes
+	16, // 20: Footnotev1.ReadAt:output_type -> ReadAtRes
+	19, // 21: Footnotev1.GetBlobInfo:output_type -> BlobInfoRes
+	19, // 22: Footnotev1.ListBlobInfo:output_type -> BlobInfoRes
+	21, // 23: Footnotev1.SendUpdate:output_type -> SendUpdateRes
 	12, // [12:24] is the sub-list for method output_type
 	0,  // [0:12] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
@@ -1842,74 +1843,74 @@ var _ grpc.ClientConnInterface
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
-// DDRPv1Client is the client API for DDRPv1 service.
+// Footnotev1Client is the client API for Footnotev1 service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type DDRPv1Client interface {
+type Footnotev1Client interface {
 	GetStatus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetStatusRes, error)
 	AddPeer(ctx context.Context, in *AddPeerReq, opts ...grpc.CallOption) (*Empty, error)
 	BanPeer(ctx context.Context, in *BanPeerReq, opts ...grpc.CallOption) (*Empty, error)
 	UnbanPeer(ctx context.Context, in *UnbanPeerReq, opts ...grpc.CallOption) (*Empty, error)
-	ListPeers(ctx context.Context, in *ListPeersReq, opts ...grpc.CallOption) (DDRPv1_ListPeersClient, error)
+	ListPeers(ctx context.Context, in *ListPeersReq, opts ...grpc.CallOption) (Footnotev1_ListPeersClient, error)
 	Checkout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutRes, error)
 	WriteSector(ctx context.Context, in *WriteSectorReq, opts ...grpc.CallOption) (*WriteSectorRes, error)
 	Commit(ctx context.Context, in *CommitReq, opts ...grpc.CallOption) (*CommitRes, error)
 	ReadAt(ctx context.Context, in *ReadAtReq, opts ...grpc.CallOption) (*ReadAtRes, error)
 	GetBlobInfo(ctx context.Context, in *BlobInfoReq, opts ...grpc.CallOption) (*BlobInfoRes, error)
-	ListBlobInfo(ctx context.Context, in *ListBlobInfoReq, opts ...grpc.CallOption) (DDRPv1_ListBlobInfoClient, error)
+	ListBlobInfo(ctx context.Context, in *ListBlobInfoReq, opts ...grpc.CallOption) (Footnotev1_ListBlobInfoClient, error)
 	SendUpdate(ctx context.Context, in *SendUpdateReq, opts ...grpc.CallOption) (*SendUpdateRes, error)
 }
 
-type dDRPv1Client struct {
+type footnotev1Client struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDDRPv1Client(cc grpc.ClientConnInterface) DDRPv1Client {
-	return &dDRPv1Client{cc}
+func NewFootnotev1Client(cc grpc.ClientConnInterface) Footnotev1Client {
+	return &footnotev1Client{cc}
 }
 
-func (c *dDRPv1Client) GetStatus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetStatusRes, error) {
+func (c *footnotev1Client) GetStatus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetStatusRes, error) {
 	out := new(GetStatusRes)
-	err := c.cc.Invoke(ctx, "/DDRPv1/GetStatus", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/GetStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) AddPeer(ctx context.Context, in *AddPeerReq, opts ...grpc.CallOption) (*Empty, error) {
+func (c *footnotev1Client) AddPeer(ctx context.Context, in *AddPeerReq, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/DDRPv1/AddPeer", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/AddPeer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) BanPeer(ctx context.Context, in *BanPeerReq, opts ...grpc.CallOption) (*Empty, error) {
+func (c *footnotev1Client) BanPeer(ctx context.Context, in *BanPeerReq, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/DDRPv1/BanPeer", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/BanPeer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) UnbanPeer(ctx context.Context, in *UnbanPeerReq, opts ...grpc.CallOption) (*Empty, error) {
+func (c *footnotev1Client) UnbanPeer(ctx context.Context, in *UnbanPeerReq, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/DDRPv1/UnbanPeer", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/UnbanPeer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) ListPeers(ctx context.Context, in *ListPeersReq, opts ...grpc.CallOption) (DDRPv1_ListPeersClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_DDRPv1_serviceDesc.Streams[0], "/DDRPv1/ListPeers", opts...)
+func (c *footnotev1Client) ListPeers(ctx context.Context, in *ListPeersReq, opts ...grpc.CallOption) (Footnotev1_ListPeersClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Footnotev1_serviceDesc.Streams[0], "/Footnotev1/ListPeers", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &dDRPv1ListPeersClient{stream}
+	x := &footnotev1ListPeersClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -1919,16 +1920,16 @@ func (c *dDRPv1Client) ListPeers(ctx context.Context, in *ListPeersReq, opts ...
 	return x, nil
 }
 
-type DDRPv1_ListPeersClient interface {
+type Footnotev1_ListPeersClient interface {
 	Recv() (*ListPeersRes, error)
 	grpc.ClientStream
 }
 
-type dDRPv1ListPeersClient struct {
+type footnotev1ListPeersClient struct {
 	grpc.ClientStream
 }
 
-func (x *dDRPv1ListPeersClient) Recv() (*ListPeersRes, error) {
+func (x *footnotev1ListPeersClient) Recv() (*ListPeersRes, error) {
 	m := new(ListPeersRes)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -1936,57 +1937,57 @@ func (x *dDRPv1ListPeersClient) Recv() (*ListPeersRes, error) {
 	return m, nil
 }
 
-func (c *dDRPv1Client) Checkout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutRes, error) {
+func (c *footnotev1Client) Checkout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutRes, error) {
 	out := new(CheckoutRes)
-	err := c.cc.Invoke(ctx, "/DDRPv1/Checkout", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/Checkout", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) WriteSector(ctx context.Context, in *WriteSectorReq, opts ...grpc.CallOption) (*WriteSectorRes, error) {
+func (c *footnotev1Client) WriteSector(ctx context.Context, in *WriteSectorReq, opts ...grpc.CallOption) (*WriteSectorRes, error) {
 	out := new(WriteSectorRes)
-	err := c.cc.Invoke(ctx, "/DDRPv1/WriteSector", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/WriteSector", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) Commit(ctx context.Context, in *CommitReq, opts ...grpc.CallOption) (*CommitRes, error) {
+func (c *footnotev1Client) Commit(ctx context.Context, in *CommitReq, opts ...grpc.CallOption) (*CommitRes, error) {
 	out := new(CommitRes)
-	err := c.cc.Invoke(ctx, "/DDRPv1/Commit", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/Commit", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) ReadAt(ctx context.Context, in *ReadAtReq, opts ...grpc.CallOption) (*ReadAtRes, error) {
+func (c *footnotev1Client) ReadAt(ctx context.Context, in *ReadAtReq, opts ...grpc.CallOption) (*ReadAtRes, error) {
 	out := new(ReadAtRes)
-	err := c.cc.Invoke(ctx, "/DDRPv1/ReadAt", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/ReadAt", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) GetBlobInfo(ctx context.Context, in *BlobInfoReq, opts ...grpc.CallOption) (*BlobInfoRes, error) {
+func (c *footnotev1Client) GetBlobInfo(ctx context.Context, in *BlobInfoReq, opts ...grpc.CallOption) (*BlobInfoRes, error) {
 	out := new(BlobInfoRes)
-	err := c.cc.Invoke(ctx, "/DDRPv1/GetBlobInfo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/GetBlobInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dDRPv1Client) ListBlobInfo(ctx context.Context, in *ListBlobInfoReq, opts ...grpc.CallOption) (DDRPv1_ListBlobInfoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_DDRPv1_serviceDesc.Streams[1], "/DDRPv1/ListBlobInfo", opts...)
+func (c *footnotev1Client) ListBlobInfo(ctx context.Context, in *ListBlobInfoReq, opts ...grpc.CallOption) (Footnotev1_ListBlobInfoClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Footnotev1_serviceDesc.Streams[1], "/Footnotev1/ListBlobInfo", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &dDRPv1ListBlobInfoClient{stream}
+	x := &footnotev1ListBlobInfoClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -1996,16 +1997,16 @@ func (c *dDRPv1Client) ListBlobInfo(ctx context.Context, in *ListBlobInfoReq, op
 	return x, nil
 }
 
-type DDRPv1_ListBlobInfoClient interface {
+type Footnotev1_ListBlobInfoClient interface {
 	Recv() (*BlobInfoRes, error)
 	grpc.ClientStream
 }
 
-type dDRPv1ListBlobInfoClient struct {
+type footnotev1ListBlobInfoClient struct {
 	grpc.ClientStream
 }
 
-func (x *dDRPv1ListBlobInfoClient) Recv() (*BlobInfoRes, error) {
+func (x *footnotev1ListBlobInfoClient) Recv() (*BlobInfoRes, error) {
 	m := new(BlobInfoRes)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -2013,352 +2014,352 @@ func (x *dDRPv1ListBlobInfoClient) Recv() (*BlobInfoRes, error) {
 	return m, nil
 }
 
-func (c *dDRPv1Client) SendUpdate(ctx context.Context, in *SendUpdateReq, opts ...grpc.CallOption) (*SendUpdateRes, error) {
+func (c *footnotev1Client) SendUpdate(ctx context.Context, in *SendUpdateReq, opts ...grpc.CallOption) (*SendUpdateRes, error) {
 	out := new(SendUpdateRes)
-	err := c.cc.Invoke(ctx, "/DDRPv1/SendUpdate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Footnotev1/SendUpdate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DDRPv1Server is the server API for DDRPv1 service.
-type DDRPv1Server interface {
+// Footnotev1Server is the server API for Footnotev1 service.
+type Footnotev1Server interface {
 	GetStatus(context.Context, *Empty) (*GetStatusRes, error)
 	AddPeer(context.Context, *AddPeerReq) (*Empty, error)
 	BanPeer(context.Context, *BanPeerReq) (*Empty, error)
 	UnbanPeer(context.Context, *UnbanPeerReq) (*Empty, error)
-	ListPeers(*ListPeersReq, DDRPv1_ListPeersServer) error
+	ListPeers(*ListPeersReq, Footnotev1_ListPeersServer) error
 	Checkout(context.Context, *CheckoutReq) (*CheckoutRes, error)
 	WriteSector(context.Context, *WriteSectorReq) (*WriteSectorRes, error)
 	Commit(context.Context, *CommitReq) (*CommitRes, error)
 	ReadAt(context.Context, *ReadAtReq) (*ReadAtRes, error)
 	GetBlobInfo(context.Context, *BlobInfoReq) (*BlobInfoRes, error)
-	ListBlobInfo(*ListBlobInfoReq, DDRPv1_ListBlobInfoServer) error
+	ListBlobInfo(*ListBlobInfoReq, Footnotev1_ListBlobInfoServer) error
 	SendUpdate(context.Context, *SendUpdateReq) (*SendUpdateRes, error)
 }
 
-// UnimplementedDDRPv1Server can be embedded to have forward compatible implementations.
-type UnimplementedDDRPv1Server struct {
+// UnimplementedFootnotev1Server can be embedded to have forward compatible implementations.
+type UnimplementedFootnotev1Server struct {
 }
 
-func (*UnimplementedDDRPv1Server) GetStatus(context.Context, *Empty) (*GetStatusRes, error) {
+func (*UnimplementedFootnotev1Server) GetStatus(context.Context, *Empty) (*GetStatusRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStatus not implemented")
 }
-func (*UnimplementedDDRPv1Server) AddPeer(context.Context, *AddPeerReq) (*Empty, error) {
+func (*UnimplementedFootnotev1Server) AddPeer(context.Context, *AddPeerReq) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddPeer not implemented")
 }
-func (*UnimplementedDDRPv1Server) BanPeer(context.Context, *BanPeerReq) (*Empty, error) {
+func (*UnimplementedFootnotev1Server) BanPeer(context.Context, *BanPeerReq) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BanPeer not implemented")
 }
-func (*UnimplementedDDRPv1Server) UnbanPeer(context.Context, *UnbanPeerReq) (*Empty, error) {
+func (*UnimplementedFootnotev1Server) UnbanPeer(context.Context, *UnbanPeerReq) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnbanPeer not implemented")
 }
-func (*UnimplementedDDRPv1Server) ListPeers(*ListPeersReq, DDRPv1_ListPeersServer) error {
+func (*UnimplementedFootnotev1Server) ListPeers(*ListPeersReq, Footnotev1_ListPeersServer) error {
 	return status.Errorf(codes.Unimplemented, "method ListPeers not implemented")
 }
-func (*UnimplementedDDRPv1Server) Checkout(context.Context, *CheckoutReq) (*CheckoutRes, error) {
+func (*UnimplementedFootnotev1Server) Checkout(context.Context, *CheckoutReq) (*CheckoutRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Checkout not implemented")
 }
-func (*UnimplementedDDRPv1Server) WriteSector(context.Context, *WriteSectorReq) (*WriteSectorRes, error) {
+func (*UnimplementedFootnotev1Server) WriteSector(context.Context, *WriteSectorReq) (*WriteSectorRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WriteSector not implemented")
 }
-func (*UnimplementedDDRPv1Server) Commit(context.Context, *CommitReq) (*CommitRes, error) {
+func (*UnimplementedFootnotev1Server) Commit(context.Context, *CommitReq) (*CommitRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Commit not implemented")
 }
-func (*UnimplementedDDRPv1Server) ReadAt(context.Context, *ReadAtReq) (*ReadAtRes, error) {
+func (*UnimplementedFootnotev1Server) ReadAt(context.Context, *ReadAtReq) (*ReadAtRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadAt not implemented")
 }
-func (*UnimplementedDDRPv1Server) GetBlobInfo(context.Context, *BlobInfoReq) (*BlobInfoRes, error) {
+func (*UnimplementedFootnotev1Server) GetBlobInfo(context.Context, *BlobInfoReq) (*BlobInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBlobInfo not implemented")
 }
-func (*UnimplementedDDRPv1Server) ListBlobInfo(*ListBlobInfoReq, DDRPv1_ListBlobInfoServer) error {
+func (*UnimplementedFootnotev1Server) ListBlobInfo(*ListBlobInfoReq, Footnotev1_ListBlobInfoServer) error {
 	return status.Errorf(codes.Unimplemented, "method ListBlobInfo not implemented")
 }
-func (*UnimplementedDDRPv1Server) SendUpdate(context.Context, *SendUpdateReq) (*SendUpdateRes, error) {
+func (*UnimplementedFootnotev1Server) SendUpdate(context.Context, *SendUpdateReq) (*SendUpdateRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendUpdate not implemented")
 }
 
-func RegisterDDRPv1Server(s *grpc.Server, srv DDRPv1Server) {
-	s.RegisterService(&_DDRPv1_serviceDesc, srv)
+func RegisterFootnotev1Server(s *grpc.Server, srv Footnotev1Server) {
+	s.RegisterService(&_Footnotev1_serviceDesc, srv)
 }
 
-func _DDRPv1_GetStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_GetStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).GetStatus(ctx, in)
+		return srv.(Footnotev1Server).GetStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/GetStatus",
+		FullMethod: "/Footnotev1/GetStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).GetStatus(ctx, req.(*Empty))
+		return srv.(Footnotev1Server).GetStatus(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_AddPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_AddPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddPeerReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).AddPeer(ctx, in)
+		return srv.(Footnotev1Server).AddPeer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/AddPeer",
+		FullMethod: "/Footnotev1/AddPeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).AddPeer(ctx, req.(*AddPeerReq))
+		return srv.(Footnotev1Server).AddPeer(ctx, req.(*AddPeerReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_BanPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_BanPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BanPeerReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).BanPeer(ctx, in)
+		return srv.(Footnotev1Server).BanPeer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/BanPeer",
+		FullMethod: "/Footnotev1/BanPeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).BanPeer(ctx, req.(*BanPeerReq))
+		return srv.(Footnotev1Server).BanPeer(ctx, req.(*BanPeerReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_UnbanPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_UnbanPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UnbanPeerReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).UnbanPeer(ctx, in)
+		return srv.(Footnotev1Server).UnbanPeer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/UnbanPeer",
+		FullMethod: "/Footnotev1/UnbanPeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).UnbanPeer(ctx, req.(*UnbanPeerReq))
+		return srv.(Footnotev1Server).UnbanPeer(ctx, req.(*UnbanPeerReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_ListPeers_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Footnotev1_ListPeers_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ListPeersReq)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(DDRPv1Server).ListPeers(m, &dDRPv1ListPeersServer{stream})
+	return srv.(Footnotev1Server).ListPeers(m, &footnotev1ListPeersServer{stream})
 }
 
-type DDRPv1_ListPeersServer interface {
+type Footnotev1_ListPeersServer interface {
 	Send(*ListPeersRes) error
 	grpc.ServerStream
 }
 
-type dDRPv1ListPeersServer struct {
+type footnotev1ListPeersServer struct {
 	grpc.ServerStream
 }
 
-func (x *dDRPv1ListPeersServer) Send(m *ListPeersRes) error {
+func (x *footnotev1ListPeersServer) Send(m *ListPeersRes) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _DDRPv1_Checkout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_Checkout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CheckoutReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).Checkout(ctx, in)
+		return srv.(Footnotev1Server).Checkout(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/Checkout",
+		FullMethod: "/Footnotev1/Checkout",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).Checkout(ctx, req.(*CheckoutReq))
+		return srv.(Footnotev1Server).Checkout(ctx, req.(*CheckoutReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_WriteSector_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_WriteSector_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WriteSectorReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).WriteSector(ctx, in)
+		return srv.(Footnotev1Server).WriteSector(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/WriteSector",
+		FullMethod: "/Footnotev1/WriteSector",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).WriteSector(ctx, req.(*WriteSectorReq))
+		return srv.(Footnotev1Server).WriteSector(ctx, req.(*WriteSectorReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_Commit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_Commit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommitReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).Commit(ctx, in)
+		return srv.(Footnotev1Server).Commit(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/Commit",
+		FullMethod: "/Footnotev1/Commit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).Commit(ctx, req.(*CommitReq))
+		return srv.(Footnotev1Server).Commit(ctx, req.(*CommitReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_ReadAt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_ReadAt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadAtReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).ReadAt(ctx, in)
+		return srv.(Footnotev1Server).ReadAt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/ReadAt",
+		FullMethod: "/Footnotev1/ReadAt",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).ReadAt(ctx, req.(*ReadAtReq))
+		return srv.(Footnotev1Server).ReadAt(ctx, req.(*ReadAtReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_GetBlobInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_GetBlobInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BlobInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).GetBlobInfo(ctx, in)
+		return srv.(Footnotev1Server).GetBlobInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/GetBlobInfo",
+		FullMethod: "/Footnotev1/GetBlobInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).GetBlobInfo(ctx, req.(*BlobInfoReq))
+		return srv.(Footnotev1Server).GetBlobInfo(ctx, req.(*BlobInfoReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DDRPv1_ListBlobInfo_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Footnotev1_ListBlobInfo_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ListBlobInfoReq)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(DDRPv1Server).ListBlobInfo(m, &dDRPv1ListBlobInfoServer{stream})
+	return srv.(Footnotev1Server).ListBlobInfo(m, &footnotev1ListBlobInfoServer{stream})
 }
 
-type DDRPv1_ListBlobInfoServer interface {
+type Footnotev1_ListBlobInfoServer interface {
 	Send(*BlobInfoRes) error
 	grpc.ServerStream
 }
 
-type dDRPv1ListBlobInfoServer struct {
+type footnotev1ListBlobInfoServer struct {
 	grpc.ServerStream
 }
 
-func (x *dDRPv1ListBlobInfoServer) Send(m *BlobInfoRes) error {
+func (x *footnotev1ListBlobInfoServer) Send(m *BlobInfoRes) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _DDRPv1_SendUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Footnotev1_SendUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SendUpdateReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DDRPv1Server).SendUpdate(ctx, in)
+		return srv.(Footnotev1Server).SendUpdate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DDRPv1/SendUpdate",
+		FullMethod: "/Footnotev1/SendUpdate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DDRPv1Server).SendUpdate(ctx, req.(*SendUpdateReq))
+		return srv.(Footnotev1Server).SendUpdate(ctx, req.(*SendUpdateReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _DDRPv1_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "DDRPv1",
-	HandlerType: (*DDRPv1Server)(nil),
+var _Footnotev1_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "Footnotev1",
+	HandlerType: (*Footnotev1Server)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GetStatus",
-			Handler:    _DDRPv1_GetStatus_Handler,
+			Handler:    _Footnotev1_GetStatus_Handler,
 		},
 		{
 			MethodName: "AddPeer",
-			Handler:    _DDRPv1_AddPeer_Handler,
+			Handler:    _Footnotev1_AddPeer_Handler,
 		},
 		{
 			MethodName: "BanPeer",
-			Handler:    _DDRPv1_BanPeer_Handler,
+			Handler:    _Footnotev1_BanPeer_Handler,
 		},
 		{
 			MethodName: "UnbanPeer",
-			Handler:    _DDRPv1_UnbanPeer_Handler,
+			Handler:    _Footnotev1_UnbanPeer_Handler,
 		},
 		{
 			MethodName: "Checkout",
-			Handler:    _DDRPv1_Checkout_Handler,
+			Handler:    _Footnotev1_Checkout_Handler,
 		},
 		{
 			MethodName: "WriteSector",
-			Handler:    _DDRPv1_WriteSector_Handler,
+			Handler:    _Footnotev1_WriteSector_Handler,
 		},
 		{
 			MethodName: "Commit",
-			Handler:    _DDRPv1_Commit_Handler,
+			Handler:    _Footnotev1_Commit_Handler,
 		},
 		{
 			MethodName: "ReadAt",
-			Handler:    _DDRPv1_ReadAt_Handler,
+			Handler:    _Footnotev1_ReadAt_Handler,
 		},
 		{
 			MethodName: "GetBlobInfo",
-			Handler:    _DDRPv1_GetBlobInfo_Handler,
+			Handler:    _Footnotev1_GetBlobInfo_Handler,
 		},
 		{
 			MethodName: "SendUpdate",
-			Handler:    _DDRPv1_SendUpdate_Handler,
+			Handler:    _Footnotev1_SendUpdate_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "ListPeers",
-			Handler:       _DDRPv1_ListPeers_Handler,
+			Handler:       _Footnotev1_ListPeers_Handler,
 			ServerStreams: true,
 		},
 		{
 			StreamName:    "ListBlobInfo",
-			Handler:       _DDRPv1_ListBlobInfo_Handler,
+			Handler:       _Footnotev1_ListBlobInfo_Handler,
 			ServerStreams: true,
 		},
 	},

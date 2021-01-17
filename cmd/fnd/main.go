@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fnd/cmd/ddrpd/cmd"
+	"fnd/cmd/fnd/cmd"
 )
 
 func main() {

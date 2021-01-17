@@ -6,7 +6,7 @@ import (
 
 var cmd = &cobra.Command{
 	Use:   "net",
-	Short: "Commands related to DDRP's network connection.",
+	Short: "Commands related to fnd's network connection.",
 }
 
 func AddCmd(parent *cobra.Command) {

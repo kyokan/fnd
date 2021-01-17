@@ -2,7 +2,7 @@ package unsafe
 
 import "github.com/spf13/cobra"
 
-var ddrpdHome string
+var fndHome string
 
 var cmd = &cobra.Command{
 	Use:   "unsafe",

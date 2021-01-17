@@ -35,7 +35,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		grpcClient := apiv1.NewDDRPv1Client(conn)
+		grpcClient := apiv1.NewFootnotev1Client(conn)
 		var count int
 		encoder := json.NewEncoder(os.Stdout)
 		var innerErr error

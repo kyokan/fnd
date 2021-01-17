@@ -19,7 +19,7 @@ var statusCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		grpcClient := apiv1.NewDDRPv1Client(conn)
+		grpcClient := apiv1.NewFootnotev1Client(conn)
 
 		res, err := rpc.GetStatus(grpcClient)
 		if err != nil {

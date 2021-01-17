@@ -19,7 +19,7 @@ import (
 
 var infoCmd = &cobra.Command{
 	Use:   "info <names>",
-	Short: "Returns metadata about DDRP blobs.",
+	Short: "Returns metadata about Footnote blobs.",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		names := strings.Split(args[0], ",")
@@ -33,7 +33,7 @@ var infoCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		grpcClient := apiv1.NewDDRPv1Client(conn)
+		grpcClient := apiv1.NewFootnotev1Client(conn)
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{
 			"Name",

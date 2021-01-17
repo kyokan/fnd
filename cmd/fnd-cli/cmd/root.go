@@ -3,17 +3,17 @@ package cmd
 import (
 	"fmt"
 	"fnd/cli"
-	"fnd/cmd/ddrpcli/cmd/blob"
-	"fnd/cmd/ddrpcli/cmd/net"
-	"fnd/cmd/ddrpcli/cmd/unsafe"
+	"fnd/cmd/fnd-cli/cmd/blob"
+	"fnd/cmd/fnd-cli/cmd/net"
+	"fnd/cmd/fnd-cli/cmd/unsafe"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "ddrpcli",
-	Short: "Command-line RPC interface for DDRP.",
+	Use:   "fnd-cli",
+	Short: "Command-line RPC interface for fnd.",
 }
 
 func Execute() {
@@ -26,7 +26,7 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().Int(cli.FlagRPCPort, 9098, "RPC port to connect to.")
 	rootCmd.PersistentFlags().String(cli.FlagRPCHost, "127.0.0.1", "RPC host to connect to.")
-	rootCmd.PersistentFlags().String(cli.FlagHome, "~/.ddrpcli", "Home directory for the CLI's configuration.")
+	rootCmd.PersistentFlags().String(cli.FlagHome, "~/.fnd-cli", "Home directory for the CLI's configuration.")
 	rootCmd.PersistentFlags().String(cli.FlagFormat, "text", "Output format")
 	net.AddCmd(rootCmd)
 	blob.AddCmd(rootCmd)
