@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"fnd/blob"
+	"fnd/crypto"
+	apiv1 "fnd/rpc/v1"
+
 	"github.com/pkg/errors"
 )
 

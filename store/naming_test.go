@@ -1,10 +1,11 @@
 package store
 
 import (
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
+	"fnd/testutil/testcrypto"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
-	"testing"
 )
 
 func TestNaming_Meta(t *testing.T) {

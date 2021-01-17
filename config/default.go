@@ -7,7 +7,8 @@ import (
 	"path"
 	"text/template"
 
-	"github.com/ddrp-org/ddrp/log"
+	"fnd/log"
+
 	"github.com/pkg/errors"
 )
 

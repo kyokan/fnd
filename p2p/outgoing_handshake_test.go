@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/testutil"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/ddrp-org/ddrp/wire"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"fnd/crypto"
+	"fnd/testutil"
+	"fnd/testutil/testcrypto"
+	"fnd/wire"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type handshakeSetup struct {

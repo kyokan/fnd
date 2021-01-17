@@ -3,8 +3,8 @@ package rpc
 import (
 	"context"
 	"errors"
-	"github.com/ddrp-org/ddrp/blob"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"fnd/blob"
+	apiv1 "fnd/rpc/v1"
 	"io"
 )
 

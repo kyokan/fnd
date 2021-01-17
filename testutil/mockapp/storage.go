@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/testutil/testfs"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/blob"
+	"fnd/crypto"
+	"fnd/store"
+	"fnd/testutil/testfs"
+	"fnd/wire"
+
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 )

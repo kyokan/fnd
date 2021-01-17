@@ -2,13 +2,14 @@ package p2p
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/util"
-	"github.com/ddrp-org/ddrp/wire"
-	"github.com/pkg/errors"
+	"fnd/crypto"
+	"fnd/log"
+	"fnd/util"
+	"fnd/wire"
 	"sync"
 	"sync/atomic"
+
+	"github.com/pkg/errors"
 )
 
 const (

@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
+	"fnd/crypto"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func TestPeers(t *testing.T) {

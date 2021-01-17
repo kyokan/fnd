@@ -4,13 +4,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/p2p"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/testutil"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/blob"
+	"fnd/crypto"
+	"fnd/p2p"
+	"fnd/store"
+	"fnd/testutil"
+	"fnd/testutil/testcrypto"
+	"fnd/wire"
+
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -20,22 +21,22 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 	defer done()
 
 	identicalHeader := signHeader(t, &store.Header{
-		Name:        "identical",
-		EpochHeight: uint16(0),
-		SectorSize:  uint16(1),
-		EpochStartAt:  time.Unix(1, 0),
+		Name:         "identical",
+		EpochHeight:  uint16(0),
+		SectorSize:   uint16(1),
+		EpochStartAt: time.Unix(1, 0),
 	})
 	throttledHeader := signHeader(t, &store.Header{
-		Name:        "throttled",
-		EpochHeight: uint16(0),
-		SectorSize:  uint16(1),
-		EpochStartAt:  time.Now(),
+		Name:         "throttled",
+		EpochHeight:  uint16(0),
+		SectorSize:   uint16(1),
+		EpochStartAt: time.Now(),
 	})
 	staleHeader := signHeader(t, &store.Header{
-		Name:        "stale",
-		EpochHeight: uint16(0),
-		SectorSize:  uint16(100),
-		EpochStartAt:  time.Unix(1, 0),
+		Name:         "stale",
+		EpochHeight:  uint16(0),
+		SectorSize:   uint16(100),
+		EpochStartAt: time.Unix(1, 0),
 	})
 
 	headers := []*store.Header{
@@ -144,10 +145,10 @@ func TestUpdateQueue_Enqueue_InvalidAfterEnqueue(t *testing.T) {
 	defer done()
 
 	header := signHeader(t, &store.Header{
-		Name:        "somename",
-		EpochHeight: uint16(0),
-		SectorSize:  uint16(100),
-		EpochStartAt:  time.Unix(1, 0),
+		Name:         "somename",
+		EpochHeight:  uint16(0),
+		SectorSize:   uint16(100),
+		EpochStartAt: time.Unix(1, 0),
 	})
 
 	_, pub := testcrypto.FixedKey(t)
@@ -188,10 +189,10 @@ func TestUpdateQueue_EnqueueDequeue(t *testing.T) {
 	defer done()
 
 	header := signHeader(t, &store.Header{
-		Name:        "somename",
-		EpochHeight: uint16(0),
-		SectorSize:  uint16(100),
-		EpochStartAt:  time.Unix(1, 0),
+		Name:         "somename",
+		EpochHeight:  uint16(0),
+		SectorSize:   uint16(100),
+		EpochStartAt: time.Unix(1, 0),
 	})
 
 	_, pub := testcrypto.FixedKey(t)

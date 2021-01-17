@@ -1,19 +1,20 @@
 package protocol
 
 import (
-	"github.com/ddrp-org/ddrp/config"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/p2p"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/util"
-	"github.com/ddrp-org/ddrp/wire"
-	"github.com/syndtr/goleveldb/leveldb"
+	"fnd/config"
+	"fnd/crypto"
+	"fnd/log"
+	"fnd/p2p"
+	"fnd/store"
+	"fnd/util"
+	"fnd/wire"
 	"math"
 	"math/rand"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (

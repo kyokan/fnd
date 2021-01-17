@@ -5,10 +5,11 @@ import (
 	"io"
 	"time"
 
+	"fnd/crypto"
+	apiv1 "fnd/rpc/v1"
+	"fnd/store"
+
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/ddrp-org/ddrp/crypto"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
-	"github.com/ddrp-org/ddrp/store"
 	"github.com/pkg/errors"
 )
 

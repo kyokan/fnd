@@ -2,11 +2,12 @@ package p2p
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/service"
-	"github.com/pkg/errors"
+	"fnd/log"
+	"fnd/service"
 	"net"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 type Listener struct {

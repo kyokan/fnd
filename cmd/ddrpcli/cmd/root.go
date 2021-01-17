@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/cli"
-	"github.com/ddrp-org/ddrp/cmd/ddrpcli/cmd/blob"
-	"github.com/ddrp-org/ddrp/cmd/ddrpcli/cmd/net"
-	"github.com/ddrp-org/ddrp/cmd/ddrpcli/cmd/unsafe"
-	"github.com/spf13/cobra"
+	"fnd/cli"
+	"fnd/cmd/ddrpcli/cmd/blob"
+	"fnd/cmd/ddrpcli/cmd/net"
+	"fnd/cmd/ddrpcli/cmd/unsafe"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

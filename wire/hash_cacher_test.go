@@ -6,8 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/dwire"
+	"fnd/crypto"
+	"fnd/dwire"
+
 	"github.com/stretchr/testify/require"
 )
 

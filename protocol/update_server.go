@@ -1,12 +1,13 @@
 package protocol
 
 import (
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/p2p"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/util"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/crypto"
+	"fnd/log"
+	"fnd/p2p"
+	"fnd/store"
+	"fnd/util"
+	"fnd/wire"
+
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 )

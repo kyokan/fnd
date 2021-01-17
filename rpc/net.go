@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 	"encoding/hex"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	apiv1 "fnd/rpc/v1"
 	"io"
 )
 

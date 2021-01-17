@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"fnd/config"
+	"fnd/log"
+	"fnd/store"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/ddrp-org/ddrp/config"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/store"
 	"github.com/mslipper/handshake/client"
 	"github.com/mslipper/handshake/dns"
 	"github.com/mslipper/handshake/primitives"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
-	"strings"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 type NameImporter struct {

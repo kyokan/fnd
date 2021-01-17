@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/ddrp-org/ddrp/wire"
-	"github.com/stretchr/testify/require"
+	"fnd/testutil/testcrypto"
+	"fnd/wire"
 	"io"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 type blockingReadWriter struct {

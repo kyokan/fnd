@@ -5,8 +5,8 @@ import (
 	"io"
 	"net"
 
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/dwire"
+	"fnd/crypto"
+	"fnd/dwire"
 )
 
 type Peer struct {

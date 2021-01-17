@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/ddrp-org/ddrp/config"
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/config"
+	"fnd/crypto"
 )
 
 func GetSigner(homeDir string) (crypto.Signer, error) {

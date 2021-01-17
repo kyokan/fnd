@@ -3,12 +3,13 @@ package net
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ddrp-org/ddrp/cli"
-	"github.com/ddrp-org/ddrp/rpc"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"fnd/cli"
+	"fnd/rpc"
+	apiv1 "fnd/rpc/v1"
+	"os"
+
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 type peerJSON struct {

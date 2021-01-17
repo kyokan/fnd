@@ -1,4 +1,4 @@
-module github.com/ddrp-org/ddrp
+module fnd
 
 go 1.12
 

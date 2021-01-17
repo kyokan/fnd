@@ -1,7 +1,7 @@
 fpm = @docker run --rm -i -v "$(CURDIR):$(CURDIR)" -w "$(CURDIR)" -u $(shell id -u) digitalocean/fpm:latest
 git_commit := $(shell git log -1 --format='%H')
 git_tag := $(shell git describe --tags --abbrev=0)
-ldflags = -X github.com/ddrp-org/ddrp/version.GitCommit=$(git_commit) -X github.com/ddrp-org/ddrp/version.GitTag=$(git_tag)
+ldflags = -X fnd/version.GitCommit=$(git_commit) -X fnd/version.GitTag=$(git_tag)
 build_flags := -ldflags '$(ldflags)'
 
 all: ddrpd ddrpcli

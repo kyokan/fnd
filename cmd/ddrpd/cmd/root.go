@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/cli"
-	"github.com/ddrp-org/ddrp/config"
+	"fnd/cli"
+	"fnd/config"
+	"os"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var configuredHomeDir string

@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"context"
 	"errors"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/wire"
-	"golang.org/x/time/rate"
+	"fnd/log"
+	"fnd/wire"
 	"io"
 	"math"
 	"net"
 	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 var (

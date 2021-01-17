@@ -1,12 +1,13 @@
 package testutil
 
 import (
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/ddrp-org/ddrp/wire"
-	"github.com/stretchr/testify/require"
+	"fnd/testutil/testcrypto"
+	"fnd/wire"
 	"io"
 	"net"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const (

@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/crypto"
+	"fnd/wire"
+
 	"github.com/stretchr/testify/require"
 )
 

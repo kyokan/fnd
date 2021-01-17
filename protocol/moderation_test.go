@@ -1,11 +1,12 @@
 package protocol
 
 import (
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/testutil/testfs"
-	"github.com/stretchr/testify/require"
+	"fnd/blob"
+	"fnd/store"
+	"fnd/testutil/testfs"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // TODO: refactor to use the httptest server

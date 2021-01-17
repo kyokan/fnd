@@ -2,9 +2,10 @@ package protocol
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/stretchr/testify/require"
+	"fnd/testutil/testcrypto"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseDDRPKeyRecord(t *testing.T) {

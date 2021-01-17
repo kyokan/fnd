@@ -2,11 +2,12 @@ package p2p
 
 import (
 	"context"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/version"
-	"github.com/ddrp-org/ddrp/wire"
-	"github.com/pkg/errors"
+	"fnd/crypto"
+	"fnd/version"
+	"fnd/wire"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 var (

@@ -7,7 +7,8 @@ import (
 	"math/bits"
 	"strings"
 
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/crypto"
+
 	"github.com/pkg/errors"
 )
 

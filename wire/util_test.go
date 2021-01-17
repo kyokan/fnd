@@ -6,8 +6,9 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/blob"
+	"fnd/crypto"
+
 	"github.com/stretchr/testify/require"
 )
 

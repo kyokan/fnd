@@ -3,9 +3,9 @@ package wire
 import (
 	"io"
 
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/dwire"
+	"fnd/blob"
+	"fnd/crypto"
+	"fnd/dwire"
 )
 
 type BlobRes struct {

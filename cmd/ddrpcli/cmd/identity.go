@@ -3,8 +3,9 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/ddrp-org/ddrp/cli"
-	"github.com/ddrp-org/ddrp/config"
+	"fnd/cli"
+	"fnd/config"
+
 	"github.com/spf13/cobra"
 )
 

@@ -2,11 +2,12 @@ package unsafe
 
 import (
 	"fmt"
-	"github.com/ddrp-org/ddrp/config"
-	"github.com/ddrp-org/ddrp/store"
+	"fnd/config"
+	"fnd/store"
+	"os"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var resetBlobsCmd = &cobra.Command{

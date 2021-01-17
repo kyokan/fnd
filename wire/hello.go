@@ -3,9 +3,10 @@ package wire
 import (
 	"io"
 
+	"fnd/crypto"
+	"fnd/dwire"
+
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/dwire"
 )
 
 type Hello struct {

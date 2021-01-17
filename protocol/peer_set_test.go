@@ -1,9 +1,10 @@
 package protocol
 
 import (
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/stretchr/testify/require"
+	"fnd/crypto"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPeerSet(t *testing.T) {

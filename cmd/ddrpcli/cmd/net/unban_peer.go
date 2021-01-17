@@ -1,9 +1,10 @@
 package net
 
 import (
-	"github.com/ddrp-org/ddrp/cli"
-	"github.com/ddrp-org/ddrp/rpc"
-	apiv1 "github.com/ddrp-org/ddrp/rpc/v1"
+	"fnd/cli"
+	"fnd/rpc"
+	apiv1 "fnd/rpc/v1"
+
 	"github.com/spf13/cobra"
 )
 

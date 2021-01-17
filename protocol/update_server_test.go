@@ -4,14 +4,15 @@ import (
 	"io"
 	"testing"
 
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/p2p"
-	"github.com/ddrp-org/ddrp/store"
-	"github.com/ddrp-org/ddrp/testutil"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/ddrp-org/ddrp/util"
-	"github.com/ddrp-org/ddrp/wire"
+	"fnd/blob"
+	"fnd/crypto"
+	"fnd/p2p"
+	"fnd/store"
+	"fnd/testutil"
+	"fnd/testutil/testcrypto"
+	"fnd/util"
+	"fnd/wire"
+
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -118,11 +119,11 @@ func TestUpdateServer(t *testing.T) {
 				require.NoError(t, err)
 				require.NoError(t, store.WithTx(db, func(tx *leveldb.Transaction) error {
 					return store.SetHeaderTx(tx, &store.Header{
-						Name:        "valid",
-						EpochHeight: epochHeight,
-						SectorSize:  sectorSize,
-						SectorTipHash:  tree.Root(),
-						Signature:   sig,
+						Name:          "valid",
+						EpochHeight:   epochHeight,
+						SectorSize:    sectorSize,
+						SectorTipHash: tree.Root(),
+						Signature:     sig,
 					}, blob.ZeroSectorHashes)
 				}))
 			},

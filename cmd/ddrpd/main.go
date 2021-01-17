@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ddrp-org/ddrp/cmd/ddrpd/cmd"
+	"fnd/cmd/ddrpd/cmd"
 )
 
 func main() {

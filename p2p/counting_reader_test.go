@@ -2,10 +2,11 @@ package p2p
 
 import (
 	"bytes"
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/crypto"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestCountingReader(t *testing.T) {

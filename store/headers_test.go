@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ddrp-org/ddrp/blob"
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/blob"
+	"fnd/crypto"
+
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -23,13 +24,13 @@ func TestHeaders_GetSet(t *testing.T) {
 	require.NoError(t, err)
 
 	expHeader := &Header{
-		Name:         "foo",
-		EpochHeight:  uint16(0),
-		SectorSize:   uint16(0),
-		SectorTipHash:   crypto.Rand32(),
-		Signature:    sig,
-		ReservedRoot: crypto.Rand32(),
-		EpochStartAt:   time.Unix(11, 0),
+		Name:          "foo",
+		EpochHeight:   uint16(0),
+		SectorSize:    uint16(0),
+		SectorTipHash: crypto.Rand32(),
+		Signature:     sig,
+		ReservedRoot:  crypto.Rand32(),
+		EpochStartAt:  time.Unix(11, 0),
 	}
 	_, err = GetHeader(db, "foo")
 	require.Error(t, err)

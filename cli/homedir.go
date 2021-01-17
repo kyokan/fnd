@@ -2,7 +2,8 @@ package cli
 
 import (
 	"errors"
-	"github.com/ddrp-org/ddrp/config"
+	"fnd/config"
+
 	"github.com/spf13/cobra"
 )
 

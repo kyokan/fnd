@@ -3,14 +3,15 @@ package protocol
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/log"
-	"github.com/ddrp-org/ddrp/service"
-	"github.com/ddrp-org/ddrp/version"
-	"github.com/pkg/errors"
+	"fnd/crypto"
+	"fnd/log"
+	"fnd/service"
+	"fnd/version"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 const (

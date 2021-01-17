@@ -1,10 +1,11 @@
 package p2p
 
 import (
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/pkg/errors"
+	"fnd/crypto"
 	"net"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type SeedPeer struct {

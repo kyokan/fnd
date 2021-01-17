@@ -2,15 +2,16 @@ package protocol
 
 import (
 	"encoding/json"
-	"github.com/ddrp-org/ddrp/crypto"
-	"github.com/ddrp-org/ddrp/testutil/testcrypto"
-	"github.com/stretchr/testify/require"
+	"fnd/crypto"
+	"fnd/testutil/testcrypto"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestHeartbeater_SendHeartbeats(t *testing.T) {

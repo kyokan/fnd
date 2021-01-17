@@ -3,7 +3,8 @@ package blob
 import (
 	"io"
 
-	"github.com/ddrp-org/ddrp/crypto"
+	"fnd/crypto"
+
 	"golang.org/x/crypto/blake2b"
 )
 
