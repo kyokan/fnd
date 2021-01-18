@@ -3,18 +3,16 @@ package blob
 import (
 	"encoding/hex"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
-
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-
-	"github.com/mslipper/handshake/primitives"
+	"fnd.localhost/handshake/primitives"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"os"
+	"strconv"
+	"strings"
 )
 
 var infoCmd = &cobra.Command{

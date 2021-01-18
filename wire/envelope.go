@@ -3,11 +3,10 @@ package wire
 import (
 	"bytes"
 	"fmt"
+	"fnd/crypto"
+	"fnd.localhost/dwire"
 	"io"
 	"time"
-
-	"fnd/crypto"
-	"fnd/dwire"
 )
 
 type Envelope struct {

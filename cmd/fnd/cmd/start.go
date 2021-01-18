@@ -2,14 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
-	"time"
-
 	"fnd/blob"
 	"fnd/cli"
 	"fnd/config"
@@ -22,11 +14,17 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/version"
-
-	"github.com/mslipper/handshake/client"
+	"fnd.localhost/handshake/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/syndtr/goleveldb/leveldb"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"runtime"
+	"syscall"
+	"time"
 )
 
 var startCmd = &cobra.Command{
@@ -47,7 +45,7 @@ var startCmd = &cobra.Command{
 		log.SetLevel(logLevel)
 		lgr := log.WithModule("main")
 
-		lgr.Info("starting ddrp", "git_commit", version.GitCommit, "git_tag", version.GitTag)
+		lgr.Info("starting fnd", "git_commit", version.GitCommit, "git_tag", version.GitTag)
 		lgr.Info("opening home directory", "path", configuredHomeDir)
 		signer, err := cli.GetSigner(configuredHomeDir)
 		if err != nil {

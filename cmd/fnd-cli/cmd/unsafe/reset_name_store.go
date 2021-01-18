@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"fnd/config"
 	"fnd/store"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +29,6 @@ var resetNameStore = &cobra.Command{
 }
 
 func init() {
-	resetNameStore.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to fnd's home directory.")
+	resetNameStore.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to FootnoteD's home directory.")
 	cmd.AddCommand(resetNameStore)
 }

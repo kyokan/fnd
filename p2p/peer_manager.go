@@ -8,13 +8,12 @@ import (
 	"fnd/service"
 	"fnd/store"
 	"fnd/util"
-	"net"
-	"sync"
-	"time"
-
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/sync/semaphore"
+	"net"
+	"sync"
+	"time"
 )
 
 const (

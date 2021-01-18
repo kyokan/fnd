@@ -6,11 +6,10 @@ import (
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
 	"fnd/store"
+	"github.com/spf13/cobra"
 	"math"
 	"os"
 	"strconv"
-
-	"github.com/spf13/cobra"
 )
 
 var listCmd = &cobra.Command{

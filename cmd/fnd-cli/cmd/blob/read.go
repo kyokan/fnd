@@ -4,10 +4,9 @@ import (
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
+	"github.com/spf13/cobra"
 	"io"
 	"os"
-
-	"github.com/spf13/cobra"
 )
 
 var readCmd = &cobra.Command{

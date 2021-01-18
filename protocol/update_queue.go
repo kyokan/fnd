@@ -1,10 +1,7 @@
 package protocol
 
 import (
-	"sync"
-	"sync/atomic"
-	"time"
-
+	"github.com/btcsuite/btcd/btcec"
 	"fnd/blob"
 	"fnd/config"
 	"fnd/crypto"
@@ -12,11 +9,12 @@ import (
 	"fnd/p2p"
 	"fnd/store"
 	"fnd/wire"
-
-	"github.com/btcsuite/btcd/btcec"
-	"github.com/mslipper/handshake/primitives"
+	"fnd.localhost/handshake/primitives"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 var (

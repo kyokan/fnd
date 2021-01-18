@@ -4,7 +4,6 @@ import (
 	"context"
 	"fnd/crypto"
 	"fnd/wire"
-
 	"github.com/pkg/errors"
 )
 

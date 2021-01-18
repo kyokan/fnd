@@ -4,16 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io"
-	"os"
-
 	"fnd/blob"
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
+	"io"
+	"os"
 )
 
 const (

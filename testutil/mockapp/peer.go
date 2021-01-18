@@ -5,9 +5,8 @@ import (
 	"fnd/p2p"
 	"fnd/testutil"
 	"fnd/testutil/testcrypto"
-	"testing"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 type TestPeers struct {

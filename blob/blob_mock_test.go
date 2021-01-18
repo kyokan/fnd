@@ -26,6 +26,13 @@ func (b BlobMock) Name() string {
 	return args.String(0)
 }
 
+func (b BlobMock) Seek(sectorSize uint16) {
+}
+
+func (b BlobMock) At() uint16 {
+	return 0
+}
+
 func (b BlobMock) Transaction() (Transaction, error) {
 	args := b.Called()
 	return args.Get(0).(Transaction), args.Error(1)

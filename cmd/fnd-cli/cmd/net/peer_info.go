@@ -6,10 +6,9 @@ import (
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-	"os"
-
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 type peerJSON struct {

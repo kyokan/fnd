@@ -2,14 +2,12 @@ package wire
 
 import (
 	"encoding/hex"
+	"fnd/crypto"
+	"fnd.localhost/dwire"
+	"github.com/stretchr/testify/require"
 	"io"
 	"sync"
 	"testing"
-
-	"fnd/crypto"
-	"fnd/dwire"
-
-	"github.com/stretchr/testify/require"
 )
 
 type input struct {

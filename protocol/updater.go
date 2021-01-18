@@ -1,9 +1,6 @@
 package protocol
 
 import (
-	"sync"
-	"time"
-
 	"fnd/blob"
 	"fnd/config"
 	"fnd/crypto"
@@ -12,9 +9,10 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
-
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
+	"sync"
+	"time"
 )
 
 var (

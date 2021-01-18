@@ -1,12 +1,11 @@
 package blob
 
 import (
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 type SectorReader interface {

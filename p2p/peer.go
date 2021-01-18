@@ -6,13 +6,12 @@ import (
 	"errors"
 	"fnd/log"
 	"fnd/wire"
+	"golang.org/x/time/rate"
 	"io"
 	"math"
 	"net"
 	"sync"
 	"time"
-
-	"golang.org/x/time/rate"
 )
 
 var (

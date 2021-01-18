@@ -3,11 +3,10 @@ package testutil
 import (
 	"fnd/testutil/testcrypto"
 	"fnd/wire"
+	"github.com/stretchr/testify/require"
 	"io"
 	"net"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 const (

@@ -7,11 +7,10 @@ import (
 	"fnd/log"
 	"fnd/service"
 	"fnd/version"
+	"github.com/pkg/errors"
 	"net/http"
 	"sync"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 const (

@@ -1,9 +1,6 @@
 package protocol
 
 import (
-	"testing"
-	"time"
-
 	"fnd/blob"
 	"fnd/crypto"
 	"fnd/p2p"
@@ -11,9 +8,10 @@ import (
 	"fnd/testutil"
 	"fnd/testutil/testcrypto"
 	"fnd/wire"
-
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
+	"testing"
+	"time"
 )
 
 func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {

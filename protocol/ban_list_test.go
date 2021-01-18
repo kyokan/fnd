@@ -13,11 +13,11 @@ func TestParseBanListVersion(t *testing.T) {
 	}{
 		{"", "colon-separated components"},
 		{"whatever", "colon-separated components"},
-		{":", "start with DDRPBAN"},
-		{"DDRPBAN", "colon-separated components"},
-		{"DDRPBAN:", "end with v followed by a digit"},
-		{"DDRPBAN:beep", "end with v followed by a digit"},
-		{"DDRPBAN:1", "end with v followed by a digit"},
+		{":", "start with FNBAN"},
+		{"FNBAN", "colon-separated components"},
+		{"FNBAN:", "end with v followed by a digit"},
+		{"FNBAN:beep", "end with v followed by a digit"},
+		{"FNBAN:1", "end with v followed by a digit"},
 	}
 
 	for _, test := range invalidTests {
@@ -31,9 +31,9 @@ func TestParseBanListVersion(t *testing.T) {
 		in  string
 		ver int
 	}{
-		{"DDRPBAN:v0", 0},
-		{"DDRPBAN:v1", 1},
-		{"DDRPBAN:v10", 10},
+		{"FNBAN:v0", 0},
+		{"FNBAN:v1", 1},
+		{"FNBAN:v10", 10},
 	}
 
 	for _, test := range validTests {
@@ -53,15 +53,15 @@ func TestReadBanList(t *testing.T) {
 			"must start with version line",
 		},
 		{
-			"DDRPBAN:",
+			"FNBAN:",
 			"v followed by a digit",
 		},
 		{
-			"DDRPBAN:v1\n-------.",
+			"FNBAN:v1\n-------.",
 			"start with a hyphen",
 		},
 		{
-			"DDRPBAN:v0\nhonk",
+			"FNBAN:v0\nhonk",
 			"unsupported ban list version",
 		},
 	}
@@ -78,7 +78,7 @@ func TestReadBanList(t *testing.T) {
 		out []string
 	}{
 		{
-			"DDRPBAN:v1\nwar\nis\npeace",
+			"FNBAN:v1\nwar\nis\npeace",
 			[]string{
 				"war",
 				"is",
@@ -86,27 +86,27 @@ func TestReadBanList(t *testing.T) {
 			},
 		},
 		{
-			"DDRPBAN:v1",
+			"FNBAN:v1",
 			[]string{},
 		},
 		{
-			"DDRPBAN:v1\n",
+			"FNBAN:v1\n",
 			[]string{},
 		},
 		{
-			"DDRPBAN:v1\n    test2   \n",
+			"FNBAN:v1\n    test2   \n",
 			[]string{
 				"test2",
 			},
 		},
 		{
-			"DDRPBAN:v1\ntest2   \n",
+			"FNBAN:v1\ntest2   \n",
 			[]string{
 				"test2",
 			},
 		},
 		{
-			"DDRPBAN:v1\n\ttest2   \nhello",
+			"FNBAN:v1\n\ttest2   \nhello",
 			[]string{
 				"test2",
 				"hello",
@@ -125,7 +125,7 @@ func TestReadBanList(t *testing.T) {
 }
 
 func TestFetchListFile(t *testing.T) {
-	names, err := FetchListFile("https://gist.githubusercontent.com/mslipper/fd68d2eea1fbb0c435924d71c3152f19/raw/ccfa9fff79ce805c149ebdfff0dfa938f408fa52/banlist")
+	names, err := FetchListFile("<path-to-your-banlist>")
 	require.NoError(t, err)
 	require.Equal(t, 3, len(names))
 	require.Equal(t, names[0], "testname")

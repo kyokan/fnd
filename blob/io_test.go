@@ -1,10 +1,9 @@
 package blob
 
 import (
+	"github.com/stretchr/testify/require"
 	"io"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 type zeroReader struct{}
@@ -111,7 +110,7 @@ func TestReadSector(t *testing.T) {
 		},
 		{
 			255,
-			65280,
+			16711680,
 		},
 	}
 	r := &readerWrapper{
@@ -181,7 +180,7 @@ func TestWriteBlobAt(t *testing.T) {
 
 func TestWriteSector(t *testing.T) {
 	tests := []struct {
-		id     uint8
+		id     uint16
 		offset int64
 	}{
 		{
@@ -190,7 +189,7 @@ func TestWriteSector(t *testing.T) {
 		},
 		{
 			255,
-			65280,
+			16711680,
 		},
 	}
 	w := &writerWrapper{

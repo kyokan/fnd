@@ -1,10 +1,6 @@
 package protocol
 
 import (
-	"sync"
-	"sync/atomic"
-	"time"
-
 	"fnd/config"
 	"fnd/crypto"
 	"fnd/log"
@@ -12,9 +8,11 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
-
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 var (
@@ -174,7 +172,7 @@ func (ns *NameSyncer) OnSyncError(cb func(name string, err error)) util.Unsubscr
 
 func (ns *NameSyncer) syncName(info *store.NameInfo) {
 	name := info.Name
-	ownEpoch := uint16(0)
+	var epochHeight, sectorSize uint16
 	header, err := store.GetHeader(ns.db, info.Name)
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		ns.lgr.Error(
@@ -184,7 +182,8 @@ func (ns *NameSyncer) syncName(info *store.NameInfo) {
 		return
 	}
 	if err == nil {
-		ownEpoch = header.EpochHeight
+		epochHeight = header.EpochHeight
+		sectorSize = header.SectorSize
 	}
 
 	isEnvelopeCh := make(chan bool)
@@ -198,9 +197,9 @@ func (ns *NameSyncer) syncName(info *store.NameInfo) {
 	})
 
 	recips, _ := p2p.BroadcastRandom(ns.mux, ns.SampleSize, &wire.UpdateReq{
-		Name:        name,
-		EpochHeight: ownEpoch,
-		SectorSize:  uint16(0), // FIXME
+		Name:      name,
+		EpochHeight: epochHeight,
+		SectorSize: sectorSize,
 	})
 	sampleSize := len(recips)
 

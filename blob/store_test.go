@@ -3,13 +3,12 @@ package blob
 import (
 	"crypto/rand"
 	"fnd/testutil/testfs"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/blake2b"
 	"io"
 	"os"
 	"path"
 	"testing"
-
-	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/blake2b"
 )
 
 func TestBlobStore(t *testing.T) {

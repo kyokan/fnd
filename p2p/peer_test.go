@@ -6,12 +6,11 @@ import (
 	"errors"
 	"fnd/testutil/testcrypto"
 	"fnd/wire"
+	"github.com/stretchr/testify/require"
 	"io"
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/require"
 )
 
 type blockingReadWriter struct {

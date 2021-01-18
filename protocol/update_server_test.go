@@ -1,9 +1,6 @@
 package protocol
 
 import (
-	"io"
-	"testing"
-
 	"fnd/blob"
 	"fnd/crypto"
 	"fnd/p2p"
@@ -12,9 +9,10 @@ import (
 	"fnd/testutil/testcrypto"
 	"fnd/util"
 	"fnd/wire"
-
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
+	"io"
+	"testing"
 )
 
 func TestUpdateServer(t *testing.T) {
@@ -114,15 +112,15 @@ func TestUpdateServer(t *testing.T) {
 			func(t *testing.T) {
 				epochHeight := uint16(0)
 				sectorSize := uint16(10)
-				tree := blob.MakeTreeFromBase(blob.ZeroMerkleBase)
-				sig, err := blob.SignSeal(signer, "valid", epochHeight, sectorSize, tree.Root(), crypto.ZeroHash)
+				sectorHashTip := blob.ZeroHash
+				sig, err := blob.SignSeal(signer, "valid", epochHeight, sectorSize, sectorHashTip, crypto.ZeroHash)
 				require.NoError(t, err)
 				require.NoError(t, store.WithTx(db, func(tx *leveldb.Transaction) error {
 					return store.SetHeaderTx(tx, &store.Header{
 						Name:          "valid",
 						EpochHeight:   epochHeight,
 						SectorSize:    sectorSize,
-						SectorTipHash: tree.Root(),
+						SectorTipHash: sectorHashTip,
 						Signature:     sig,
 					}, blob.ZeroSectorHashes)
 				}))

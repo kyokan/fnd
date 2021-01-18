@@ -2,10 +2,9 @@ package p2p
 
 import (
 	"fnd/crypto"
+	"github.com/pkg/errors"
 	"net"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type SeedPeer struct {

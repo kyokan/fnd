@@ -3,7 +3,6 @@ package cli
 import (
 	"errors"
 	"fnd/config"
-
 	"github.com/spf13/cobra"
 )
 

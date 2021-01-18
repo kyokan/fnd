@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"fnd/blob"
-
 	"github.com/stretchr/testify/mock"
 )
 

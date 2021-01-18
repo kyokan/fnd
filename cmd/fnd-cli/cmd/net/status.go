@@ -4,11 +4,10 @@ import (
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-	"os"
-	"strconv"
-
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"os"
+	"strconv"
 )
 
 var statusCmd = &cobra.Command{

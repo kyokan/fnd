@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"fnd/crypto"
-	"fnd/dwire"
+	"fnd.localhost/dwire"
 )
 
 type BlobReq struct {

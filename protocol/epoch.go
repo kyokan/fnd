@@ -3,7 +3,7 @@ package protocol
 import (
 	"time"
 
-	"github.com/mslipper/handshake/primitives"
+	"fnd.localhost/handshake/primitives"
 )
 
 // 2020 Jan 1 00:00 UTC

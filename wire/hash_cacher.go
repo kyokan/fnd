@@ -2,10 +2,9 @@ package wire
 
 import (
 	"bytes"
-	"sync"
-
 	"fnd/crypto"
-	"fnd/dwire"
+	"fnd.localhost/dwire"
+	"sync"
 )
 
 var hashCacherBufPool = sync.Pool{

@@ -3,12 +3,11 @@ package protocol
 import (
 	"fmt"
 	"fnd/store"
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 	"io/ioutil"
 	"os"
 	"testing"
-
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func setupDB(t *testing.T) (*leveldb.DB, func()) {

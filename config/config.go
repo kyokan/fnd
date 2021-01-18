@@ -1,11 +1,10 @@
 package config
 
 import (
-	"io"
-	"time"
-
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
+	"io"
+	"time"
 )
 
 type Config struct {

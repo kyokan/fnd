@@ -7,12 +7,11 @@ import (
 	"fnd/testutil"
 	"fnd/testutil/testcrypto"
 	"fnd/wire"
+	"github.com/stretchr/testify/require"
 	"io"
 	"io/ioutil"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestPinger_SendsPingsOnInterval(t *testing.T) {

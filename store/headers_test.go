@@ -2,14 +2,12 @@ package store
 
 import (
 	"crypto/rand"
-	"testing"
-	"time"
-
 	"fnd/blob"
 	"fnd/crypto"
-
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
+	"testing"
+	"time"
 )
 
 func TestHeaders_GetSet(t *testing.T) {

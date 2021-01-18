@@ -3,11 +3,10 @@ package testcrypto
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fnd/crypto"
-	"testing"
-
 	"github.com/btcsuite/btcd/btcec"
+	"fnd/crypto"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func RandKey() (*btcec.PrivateKey, *btcec.PublicKey) {

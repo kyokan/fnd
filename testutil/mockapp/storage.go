@@ -2,18 +2,16 @@ package mockapp
 
 import (
 	"crypto/rand"
-	"io"
-	"testing"
-	"time"
-
 	"fnd/blob"
 	"fnd/crypto"
 	"fnd/store"
 	"fnd/testutil/testfs"
 	"fnd/wire"
-
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
+	"io"
+	"testing"
+	"time"
 )
 
 type TestStorage struct {

@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"fnd/log"
 	"fnd/service"
+	"github.com/pkg/errors"
 	"net"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 type Listener struct {

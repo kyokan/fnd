@@ -2,15 +2,13 @@ package rpc
 
 import (
 	"context"
-	"io"
-	"time"
-
+	"github.com/btcsuite/btcd/btcec"
 	"fnd/crypto"
 	apiv1 "fnd/rpc/v1"
 	"fnd/store"
-
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
+	"io"
+	"time"
 )
 
 func GetBlobInfo(client apiv1.Footnotev1Client, name string) (*store.BlobInfo, error) {

@@ -8,13 +8,12 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
+	"github.com/syndtr/goleveldb/leveldb"
 	"math"
 	"math/rand"
 	"net"
 	"sync"
 	"time"
-
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (

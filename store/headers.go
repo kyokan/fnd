@@ -4,17 +4,15 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"sync"
-	"time"
-
+	"github.com/btcsuite/btcd/btcec"
 	"fnd/blob"
 	"fnd/crypto"
-
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"sync"
+	"time"
 )
 
 type Header struct {

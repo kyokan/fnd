@@ -2,13 +2,11 @@ package rpc
 
 import (
 	"context"
-	"time"
-
 	"fnd/blob"
 	"fnd/crypto"
 	apiv1 "fnd/rpc/v1"
-
 	"github.com/pkg/errors"
+	"time"
 )
 
 type BlobWriter struct {

@@ -2,9 +2,8 @@ package protocol
 
 import (
 	"fnd/crypto"
-	"testing"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestPeerSet(t *testing.T) {

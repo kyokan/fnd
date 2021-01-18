@@ -3,9 +3,6 @@ package protocol
 import (
 	"crypto/rand"
 	"errors"
-	"testing"
-	"time"
-
 	"fnd/blob"
 	"fnd/crypto"
 	"fnd/p2p"
@@ -13,9 +10,10 @@ import (
 	"fnd/testutil/mockapp"
 	"fnd/util"
 	"fnd/wire"
-
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
+	"testing"
+	"time"
 )
 
 type updaterTestSetup struct {

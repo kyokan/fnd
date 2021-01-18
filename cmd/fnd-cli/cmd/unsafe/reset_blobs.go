@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"fnd/config"
 	"fnd/store"
-	"os"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var resetBlobsCmd = &cobra.Command{
@@ -38,6 +37,6 @@ var resetBlobsCmd = &cobra.Command{
 }
 
 func init() {
-	resetBlobsCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to fnd's home directory.")
+	resetBlobsCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to FootnoteD's home directory.")
 	cmd.AddCommand(resetBlobsCmd)
 }

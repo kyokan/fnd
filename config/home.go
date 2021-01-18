@@ -1,9 +1,8 @@
 package config
 
 import (
-	"os"
-
 	"github.com/pkg/errors"
+	"os"
 )
 
 func HomeDirExists(path string) (bool, error) {

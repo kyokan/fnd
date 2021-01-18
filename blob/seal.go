@@ -2,8 +2,7 @@ package blob
 
 import (
 	"fnd/crypto"
-	"fnd/dwire"
-
+	"fnd.localhost/dwire"
 	"golang.org/x/crypto/blake2b"
 )
 

@@ -8,12 +8,11 @@ import (
 	"fnd/testutil"
 	"fnd/testutil/testcrypto"
 	"fnd/wire"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"net"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 type handshakeSetup struct {

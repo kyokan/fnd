@@ -2,13 +2,11 @@ package blob
 
 import (
 	"encoding/hex"
-	"testing"
-
 	"fnd/crypto"
 	"fnd/testutil/testcrypto"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestSealHash(t *testing.T) {

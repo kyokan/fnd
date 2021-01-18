@@ -4,9 +4,8 @@ import (
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-	"strconv"
-
 	"github.com/spf13/cobra"
+	"strconv"
 )
 
 var banPeerCmd = &cobra.Command{

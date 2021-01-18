@@ -1,15 +1,13 @@
 package protocol
 
 import (
-	"time"
-
 	"fnd/blob"
 	"fnd/crypto"
 	"fnd/log"
 	"fnd/p2p"
 	"fnd/wire"
-
 	"github.com/pkg/errors"
+	"time"
 )
 
 const (
@@ -40,7 +38,6 @@ type payloadRes struct {
 
 func SyncSectors(opts *SyncSectorsOpts) error {
 	lgr := log.WithModule("payload-syncer").Sub("name", opts.Name)
-	// Implement payload hash based sync
 	payloadResCh := make(chan *payloadRes)
 	payloadProcessedCh := make(chan struct{}, 1)
 	doneCh := make(chan struct{})

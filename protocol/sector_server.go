@@ -2,8 +2,6 @@ package protocol
 
 import (
 	"fmt"
-	"time"
-
 	"fnd/blob"
 	"fnd/config"
 	"fnd/crypto"
@@ -12,8 +10,8 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
-
 	"github.com/syndtr/goleveldb/leveldb"
+	"time"
 )
 
 type SectorServer struct {

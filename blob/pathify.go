@@ -3,7 +3,7 @@ package blob
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/mslipper/handshake/primitives"
+	"fnd.localhost/handshake/primitives"
 	"path"
 )
 

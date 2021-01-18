@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fnd/crypto"
 	"fnd/testutil/testcrypto"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestHeartbeater_SendHeartbeats(t *testing.T) {

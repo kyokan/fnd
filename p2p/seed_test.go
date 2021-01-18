@@ -1,15 +1,15 @@
 package p2p
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestLookupDNSSeeds(t *testing.T) {
-	seeds, err := ResolveDNSSeeds("seeds-test.merkleblock.com")
+	seeds, err := ResolveDNSSeeds("seeds-test.fnd.network")
 	require.NoError(t, err)
 
-	require.Equal(t, 1, len(seeds))
-	require.Contains(t, seeds, "78.46.17.17")
+	require.Equal(t, 2, len(seeds))
+	require.Contains(t, seeds, "10.1.0.1")
+	require.Contains(t, seeds, "10.1.0.2")
 }

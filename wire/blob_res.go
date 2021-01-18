@@ -5,7 +5,7 @@ import (
 
 	"fnd/blob"
 	"fnd/crypto"
-	"fnd/dwire"
+	"fnd.localhost/dwire"
 )
 
 type BlobRes struct {

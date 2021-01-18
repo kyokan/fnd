@@ -5,9 +5,8 @@ import (
 	"fnd/crypto"
 	"fnd/version"
 	"fnd/wire"
-	"time"
-
 	"github.com/pkg/errors"
+	"time"
 )
 
 var (

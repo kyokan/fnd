@@ -6,14 +6,13 @@ import (
 	"fnd/cmd/fnd-cli/cmd/blob"
 	"fnd/cmd/fnd-cli/cmd/net"
 	"fnd/cmd/fnd-cli/cmd/unsafe"
-	"os"
-
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "fnd-cli",
-	Short: "Command-line RPC interface for fnd.",
+	Short: "Command-line RPC interface for Footnote.",
 }
 
 func Execute() {

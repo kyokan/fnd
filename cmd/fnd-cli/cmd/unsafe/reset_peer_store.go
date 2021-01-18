@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"fnd/config"
 	"fnd/store"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +29,6 @@ var resetPeerStoreCmd = &cobra.Command{
 }
 
 func init() {
-	resetPeerStoreCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to fnd's home directory.")
+	resetPeerStoreCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to FootnoteD's home directory.")
 	cmd.AddCommand(resetPeerStoreCmd)
 }

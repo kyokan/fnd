@@ -2,11 +2,10 @@ package wire
 
 import (
 	"bytes"
+	"fnd/crypto"
+	"fnd.localhost/dwire"
 	"io"
 	"net"
-
-	"fnd/crypto"
-	"fnd/dwire"
 )
 
 type Peer struct {

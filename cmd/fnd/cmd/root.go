@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"fnd/cli"
 	"fnd/config"
-	"os"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var configuredHomeDir string
 
 var rootCmd = &cobra.Command{
 	Use:   "fnd",
-	Short: "fnd Daemon",
+	Short: "Footnote Daemon",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if cmd.CalledAs() == "init" {
 			return nil

@@ -2,11 +2,10 @@ package store
 
 import (
 	"fnd/crypto"
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
+	"testing"
+	"time"
 )
 
 func TestPeers(t *testing.T) {

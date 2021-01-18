@@ -5,9 +5,8 @@ import (
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-	"strings"
-
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 var (
