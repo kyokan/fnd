@@ -110,7 +110,7 @@ func TestReadSector(t *testing.T) {
 		},
 		{
 			255,
-			16711680,
+			1044480,
 		},
 	}
 	r := &readerWrapper{
@@ -189,7 +189,7 @@ func TestWriteSector(t *testing.T) {
 		},
 		{
 			255,
-			16711680,
+			1044480,
 		},
 	}
 	w := &writerWrapper{

@@ -13,7 +13,7 @@ func TestSealHash(t *testing.T) {
 	epochZero := uint16(0)
 	sectorSize := uint16(0)
 	h := SealHash("testname", epochZero, sectorSize, crypto.ZeroHash, crypto.ZeroHash)
-	assert.Equal(t, "694802db0f9b9b72725cf9c108b7a496bf20e1bdcc4d7feb9c42b8df1a08823b", hex.EncodeToString(h[:]))
+	assert.Equal(t, "ec3f68febf79bfe9439b37c9ae707a7e16abf02e67d1ee29fd530598571e16de", hex.EncodeToString(h[:]))
 }
 
 func TestSignSeal(t *testing.T) {
@@ -22,5 +22,5 @@ func TestSignSeal(t *testing.T) {
 	priv, _ := testcrypto.FixedKey(t)
 	sig, err := SignSeal(crypto.NewSECP256k1Signer(priv), "testname", epochZero, sectorSize, crypto.ZeroHash, crypto.ZeroHash)
 	require.NoError(t, err)
-	assert.Equal(t, "1cdb0e3aa14a5489cc1bfcf25843d6747cb9412d6200c35b69dd5fb9cb133ebc7c339ea9d5bb0cce8a9b20e84642757d9a2bc82e9e0a777a9641dd05fb9e5e4836", sig.String())
+	assert.Equal(t, "1c3f284e48f72666b5631c707f53c81cc6ba79f3b92d0ae7785189f1ebf43a8174572d16e6ef38de65eb918f6468d7c0bcc04a269fc7346b9da2f29c4b3a08a695", sig.String())
 }
