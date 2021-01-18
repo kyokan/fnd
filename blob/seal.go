@@ -8,7 +8,7 @@ import (
 
 func SealHash(name string, epochHeight, sectorSize uint16, sectorTipHash crypto.Hash, reservedRoot crypto.Hash) crypto.Hash {
 	h, _ := blake2b.New256(nil)
-	if _, err := h.Write([]byte("DDRPBLOB")); err != nil {
+	if _, err := h.Write([]byte("FNBLOB")); err != nil {
 		panic(err)
 	}
 	if err := dwire.EncodeField(h, name); err != nil {
