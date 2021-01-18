@@ -125,7 +125,7 @@ func TestReadBanList(t *testing.T) {
 }
 
 func TestFetchListFile(t *testing.T) {
-	names, err := FetchListFile("<path-to-your-banlist>")
+	names, err := FetchListFile("http://sprunge.us/GgRLMw")
 	require.NoError(t, err)
 	require.Equal(t, 3, len(names))
 	require.Equal(t, names[0], "testname")
