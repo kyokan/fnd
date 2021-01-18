@@ -4,7 +4,7 @@ import "io"
 
 const (
 	DefaultMaxVariableArrayLen = 1024
-	DefaultMaxByteFieldLen     = 256 * 1024
+	DefaultMaxByteFieldLen     = 8 * 256 * 1024
 )
 
 // Encoder is an interface that allows arbitrary types to be
@@ -33,7 +33,7 @@ type ConfiguredEncoder struct {
 
 	// MaxByteFieldLen is the maximum length of a variable-length byte array field
 	// dwire will decode before stopping early.
-	MaxByteFieldLen     uint64
+	MaxByteFieldLen uint64
 }
 
 var defaultEncoder = &ConfiguredEncoder{
