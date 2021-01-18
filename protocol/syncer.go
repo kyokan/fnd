@@ -124,6 +124,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 		}
 	}()
 
+	timeout := time.NewTimer(opts.Timeout)
 payloadLoop:
 	for {
 		lgr.Debug("requesting payload")
@@ -131,7 +132,7 @@ payloadLoop:
 		case <-payloadProcessedCh:
 			lgr.Debug("payload processed")
 			break payloadLoop
-		case <-time.NewTimer(opts.Timeout).C:
+		case <-timeout.C:
 			lgr.Warn("payload request timed out")
 			break payloadLoop
 		}
