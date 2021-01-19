@@ -55,7 +55,7 @@ var infoCmd = &cobra.Command{
 				hex.EncodeToString(res.PublicKey.SerializeCompressed()),
 				strconv.Itoa(int(res.EpochHeight)),
 				strconv.Itoa(int(res.SectorSize)),
-				res.MerkleRoot.String(),
+				res.SectorTipHash.String(),
 				res.ReservedRoot.String(),
 				res.ReceivedAt.String(),
 				res.Signature.String(),

@@ -61,7 +61,7 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing public key")
 	}
-	merkleRoot, err := crypto.NewHashFromBytes(res.MerkleRoot)
+	merkleRoot, err := crypto.NewHashFromBytes(res.SectorTipHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing merkle root")
 	}
@@ -80,7 +80,7 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 		ImportHeight: int(res.ImportHeight),
 		EpochHeight:  uint16(res.EpochHeight),
 		SectorSize:   uint16(res.SectorSize),
-		MerkleRoot:   merkleRoot,
+		SectorTipHash:   merkleRoot,
 		ReservedRoot: reservedRoot,
 		ReceivedAt:   time.Unix(int64(res.ReceivedAt), 0),
 		Signature:    sig,

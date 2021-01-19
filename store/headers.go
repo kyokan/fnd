@@ -32,7 +32,7 @@ func (h *Header) MarshalJSON() ([]byte, error) {
 		Name         string    `json:"name"`
 		EpochHeight  uint16    `json:"epoch_height"`
 		SectorSize   uint16    `json:"sector_size"`
-		MerkleRoot   string    `json:"merkle_root"`
+		SectorTipHash   string    `json:"sector_tip_hash"`
 		Signature    string    `json:"signature"`
 		ReservedRoot string    `json:"reserved_root"`
 		EpochStartAt time.Time `json:"epoch_start_at"`
@@ -58,7 +58,7 @@ func (h *Header) UnmarshalJSON(b []byte) error {
 		Name         string    `json:"name"`
 		EpochHeight  uint16    `json:"epoch_height"`
 		SectorSize   uint16    `json:"sector_size"`
-		MerkleRoot   string    `json:"merkle_root"`
+		SectorTipHash   string    `json:"sector_tip_hash"`
 		Signature    string    `json:"signature"`
 		ReservedRoot string    `json:"reserved_root"`
 		EpochStartAt time.Time `json:"epoch_start_at"`
@@ -68,7 +68,7 @@ func (h *Header) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, in); err != nil {
 		return err
 	}
-	mrB, err := hex.DecodeString(in.MerkleRoot)
+	mrB, err := hex.DecodeString(in.SectorTipHash)
 	if err != nil {
 		return err
 	}
@@ -200,7 +200,7 @@ type BlobInfo struct {
 	ImportHeight int              `json:"import_height"`
 	EpochHeight  uint16           `json:"epoch_height"`
 	SectorSize   uint16           `json:"sector_size"`
-	MerkleRoot   crypto.Hash      `json:"merkle_root"`
+	SectorTipHash   crypto.Hash      `json:"sector_tip_hash"`
 	Signature    crypto.Signature `json:"signature"`
 	ReservedRoot crypto.Hash      `json:"reserved_root"`
 	ReceivedAt   time.Time        `json:"received_at"`
@@ -213,7 +213,7 @@ func (b *BlobInfo) MarshalJSON() ([]byte, error) {
 		ImportHeight int       `json:"import_height"`
 		EpochHeight  uint16    `json:"epoch_height"`
 		SectorSize   uint16    `json:"sector_size"`
-		MerkleRoot   string    `json:"merkle_root"`
+		SectorTipHash   string    `json:"sector_tip_hash"`
 		Signature    string    `json:"signature"`
 		ReservedRoot string    `json:"reserved_root"`
 		ReceivedAt   time.Time `json:"received_at"`
@@ -223,7 +223,7 @@ func (b *BlobInfo) MarshalJSON() ([]byte, error) {
 		b.ImportHeight,
 		b.EpochHeight,
 		b.SectorSize,
-		hex.EncodeToString(b.MerkleRoot[:]),
+		hex.EncodeToString(b.SectorTipHash[:]),
 		hex.EncodeToString(b.Signature[:]),
 		hex.EncodeToString(b.ReservedRoot[:]),
 		b.ReceivedAt,
@@ -254,7 +254,7 @@ func (bis *BlobInfoStream) Next() (*BlobInfo, error) {
 		ImportHeight: nameInfo.ImportHeight,
 		EpochHeight:  header.EpochHeight,
 		SectorSize:   header.SectorSize,
-		MerkleRoot:   header.SectorTipHash,
+		SectorTipHash:   header.SectorTipHash,
 		Signature:    header.Signature,
 		ReservedRoot: header.ReservedRoot,
 		ReceivedAt:   header.EpochStartAt,
