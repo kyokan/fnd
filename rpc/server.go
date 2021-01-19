@@ -11,13 +11,15 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
-	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
-	"google.golang.org/grpc"
+	"io"
 	"net"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -233,9 +235,12 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 		sectorTipHash = header.SectorTipHash
 	}
 
-	bl.Seek(sectorSize)
-
 	tx, err := bl.Transaction()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = tx.Seek(int64(sectorSize*blob.SectorLen), io.SeekStart)
 	if err != nil {
 		return nil, err
 	}

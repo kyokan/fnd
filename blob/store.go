@@ -92,14 +92,6 @@ func (w *wrappedBlob) Name() string {
 	return w.blob.Name()
 }
 
-func (w *wrappedBlob) Seek(sectorSize uint16) {
-	w.blob.Seek(sectorSize)
-}
-
-func (w *wrappedBlob) At() uint16 {
-	return w.blob.At()
-}
-
 func (w *wrappedBlob) ReadAt(p []byte, off int64) (n int, err error) {
 	return w.blob.ReadAt(p, off)
 }

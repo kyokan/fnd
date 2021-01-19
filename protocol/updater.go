@@ -9,10 +9,12 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
-	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
+	"io"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
@@ -181,11 +183,14 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		}
 	}()
 
-	bl.Seek(sectorSize)
-
 	tx, err := bl.Transaction()
 	if err != nil {
 		return errors.Wrap(err, "error starting transaction")
+	}
+
+	_, err = tx.Seek(int64(sectorSize*blob.SectorLen), io.SeekStart)
+	if err != nil {
+		return errors.Wrap(err, "error seeking transaction")
 	}
 
 	err = SyncSectors(&SyncSectorsOpts{

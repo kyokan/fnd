@@ -1,11 +1,12 @@
 package blob
 
 import (
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -15,6 +16,7 @@ var (
 
 type Transaction interface {
 	Readable
+	io.Seeker
 	io.WriterAt
 	WriteSector(sector Sector) error
 	Truncate() error
@@ -40,8 +42,22 @@ func (t *txImpl) Name() string {
 	return t.name
 }
 
-func (t *txImpl) SectorSize() uint16 {
-	return t.sectorSize
+func (t *txImpl) Seek(off int64, whence int) (int64, error) {
+	if off%SectorLen != 0 {
+		return 0, errors.New("seek not a multiple of sector len")
+	}
+	switch whence {
+	case io.SeekStart:
+		if off > Size {
+			return 0, errors.New("seek beyond blob bounds")
+		}
+		t.sectorSize = uint16(off) / SectorLen
+	case io.SeekCurrent:
+	case io.SeekEnd:
+	default:
+		panic("invalid whence")
+	}
+	return off, nil
 }
 
 func (t *txImpl) ReadSector(id uint8) (Sector, error) {
