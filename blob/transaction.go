@@ -46,6 +46,9 @@ func (t *txImpl) Seek(off int64, whence int) (int64, error) {
 	if off%SectorLen != 0 {
 		return 0, errors.New("seek not a multiple of sector len")
 	}
+	if off < int64(t.sectorSize)*int64(SectorLen) {
+		return 0, errors.New("seek before already written sector")
+	}
 	switch whence {
 	case io.SeekStart:
 		if off > Size {
