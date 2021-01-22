@@ -8,5 +8,5 @@ import (
 
 func TestCurrentEpoch(t *testing.T) {
 	epoch := CurrentEpoch("bazinga")
-	assert.Equal(t, uint16(54), epoch)
+	assert.Equal(t, uint16(55), epoch)
 }
