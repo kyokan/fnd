@@ -54,7 +54,7 @@ func (t *txImpl) Seek(off int64, whence int) (int64, error) {
 		if off > Size {
 			return 0, errors.New("seek beyond blob bounds")
 		}
-		t.sectorSize = uint16(off) / SectorLen
+		t.sectorSize = uint16(off / SectorLen)
 	case io.SeekCurrent:
 	case io.SeekEnd:
 	default:
