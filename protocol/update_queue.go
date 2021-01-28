@@ -167,6 +167,7 @@ func (u *UpdateQueue) Dequeue() *UpdateQueueItem {
 	ret := u.entries[name]
 	u.queue = u.queue[1:]
 	atomic.AddInt32(&u.queueLen, -1)
+	delete(u.entries, name)
 	return ret
 }
 
