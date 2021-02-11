@@ -9,6 +9,8 @@ import (
 // 2020 Jan 1 00:00 UTC
 var epochDate = time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
 
+var now = time.Now
+
 const (
 	secondsPerHour = 60 * 60
 	hoursPerWeek   = 7 * 24
@@ -30,5 +32,5 @@ func CurrentEpoch(name string) uint16 {
 	mod := modBuffer(hash, hoursPerWeek)
 	offset := mod * secondsPerHour
 	startDate := epochDate.Add(time.Duration(offset) * time.Second)
-	return uint16(int(time.Now().Sub(startDate).Seconds()) / int(weekDuration.Seconds()))
+	return uint16(int(now().Sub(startDate).Seconds()) / int(weekDuration.Seconds()))
 }
