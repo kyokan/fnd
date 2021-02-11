@@ -10,10 +10,11 @@ import (
 	"fnd/testutil/mockapp"
 	"fnd/util"
 	"fnd/wire"
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type updaterTestSetup struct {
@@ -488,15 +489,16 @@ func TestEpoch(t *testing.T) {
 			"aborts sync if the epoch is throttled",
 			func(t *testing.T, setup *updaterTestSetup) {
 				cfg := &UpdateConfig{
-					Mux:       setup.tp.LocalMux,
-					DB:        setup.ls.DB,
-					BlobStore: setup.ls.BlobStore,
+					Mux:        setup.tp.LocalMux,
+					DB:         setup.ls.DB,
+					NameLocker: util.NewMultiLocker(),
+					BlobStore:  setup.ls.BlobStore,
 					Item: &UpdateQueueItem{
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
 						Name:        name,
-						EpochHeight: CurrentEpoch(name) + 1,
+						EpochHeight: CurrentEpoch(name) - 1,
 					},
 				}
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
@@ -553,9 +555,16 @@ func TestEpoch(t *testing.T) {
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
 						Name:        name,
-						EpochHeight: CurrentEpoch(name) + 1,
+						EpochHeight: CurrentEpoch(name) + 2,
 					},
 				}
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					return store.SetHeaderTx(tx, &store.Header{
+						Name:        name,
+						EpochHeight: CurrentEpoch(name),
+						SectorSize:  10,
+					}, blob.ZeroSectorHashes)
+				}))
 				err := UpdateBlob(cfg)
 				require.NotNil(t, err)
 				require.True(t, errors.Is(err, ErrInvalidEpochFuturedated))

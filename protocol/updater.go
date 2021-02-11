@@ -126,7 +126,10 @@ func UpdateBlob(cfg *UpdateConfig) error {
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		return errors.Wrap(err, "error getting header")
 	}
-	if header != nil && header.EpochHeight == item.EpochHeight && header.SectorSize == item.SectorSize {
+
+	// If the new update and is the same size or fewer reject if it is in the
+	// same epoch. In the future, this may be an equivocation condition
+	if header != nil && header.EpochHeight == item.EpochHeight && header.SectorSize >= item.SectorSize {
 		return ErrUpdaterAlreadySynchronized
 	}
 
@@ -139,27 +142,45 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		prevHash = header.SectorTipHash
 	}
 
+	// header is the existing header/data in the db
+	// item is the new incoming update
+
+	// The new header should have a higher or equal epoch
 	if item.EpochHeight < epochHeight {
 		return ErrInvalidEpochBackdated
 	}
 
-	if item.EpochHeight > epochHeight {
-		if header != nil && header.Banned {
+	// If it is higher (skip if it's appending data to the same epoch)
+	if header != nil && item.EpochHeight > epochHeight {
+		// Recovery from banning must increment the epoch by at least 2 and one
+		// real week since the local node banned
+		if header.Banned {
+			// Banned for at least a week
 			if header.BannedAt.Add(7 * 24 * time.Duration(time.Hour)).After(time.Now()) {
 				return ErrNameBanned
 			}
 
-			if item.EpochHeight >= CurrentEpoch(item.Name) {
+			// Publisher is banned for the equivocating epoch and the next epoch
+			// The faulty epoch may be old or backdated, so the penalty may not be
+			// as large as it seems
+			if item.EpochHeight <= epochHeight+1 {
 				return ErrInvalidEpochCurrent
 			}
 		}
 
-		if header != nil && time.Now().Before(header.EpochStartAt.Add(7*24*time.Duration(time.Hour))) {
-			if item.EpochHeight != CurrentEpoch(item.Name) {
+		// If the epoch is updated less than a week ago BUT NOT the current
+		// epoch or the next one. The node can bank up one extra epoch just in
+		// case (or periodically burst and do two epochs in a week). This
+		// conditions is only valid if the last local epoch increment is less
+		// than a week old.
+		if time.Now().Before(header.EpochStartAt.Add(7 * 24 * time.Duration(time.Hour))) {
+			if item.EpochHeight < CurrentEpoch(item.Name)+1 {
 				return ErrInvalidEpochThrottled
 			}
 		}
-		if item.EpochHeight > CurrentEpoch(item.Name) {
+
+		// Reject any epochs more than one in the future
+		if item.EpochHeight > CurrentEpoch(item.Name)+1 {
 			return ErrInvalidEpochFuturedated
 		}
 
