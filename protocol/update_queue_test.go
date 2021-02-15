@@ -113,7 +113,7 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 				Signature:     identicalHeader.Signature,
 			},
 			func(t *testing.T, err error) {
-				require.Equal(t, ErrUpdateQueueIdenticalTimestamp, err)
+				require.Equal(t, ErrUpdateQueueSectorUpdated, err)
 			},
 		},
 		{
@@ -126,7 +126,7 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 				ReservedRoot:  identicalHeader.ReservedRoot,
 			}),
 			func(t *testing.T, err error) {
-				require.Equal(t, ErrUpdateQueueStaleTimestamp, err)
+				require.Equal(t, ErrUpdateQueueStaleSector, err)
 			},
 		},
 	}
@@ -169,7 +169,7 @@ func TestUpdateQueue_Enqueue_InvalidAfterEnqueue(t *testing.T) {
 		EpochHeight: header.EpochHeight,
 		SectorSize:  header.SectorSize + 1,
 	})))
-	require.Equal(t, ErrUpdateQueueStaleTimestamp, queue.Enqueue(crypto.Rand32(), signUpdate(t, &wire.Update{
+	require.Equal(t, ErrUpdateQueueStaleSector, queue.Enqueue(crypto.Rand32(), signUpdate(t, &wire.Update{
 		Name:        header.Name,
 		EpochHeight: header.EpochHeight,
 		SectorSize:  header.SectorSize - 10,

@@ -1,7 +1,6 @@
 package protocol
 
 import (
-	"github.com/btcsuite/btcd/btcec"
 	"fnd/blob"
 	"fnd/config"
 	"fnd/crypto"
@@ -9,21 +8,23 @@ import (
 	"fnd/p2p"
 	"fnd/store"
 	"fnd/wire"
-	"fnd.localhost/handshake/primitives"
-	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"fnd.localhost/handshake/primitives"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
-	ErrUpdateQueueMaxLen             = errors.New("update queue is at max length")
-	ErrUpdateQueueIdenticalTimestamp = errors.New("timestamp is identical to stored")
-	ErrUpdateQueueThrottled          = errors.New("update is throttled")
-	ErrUpdateQueueStaleTimestamp     = errors.New("update is stale")
-	ErrUpdateQueueSpltBrain          = errors.New("split brain")
-	ErrInitialImportIncomplete       = errors.New("initial import incomplete")
+	ErrUpdateQueueMaxLen        = errors.New("update queue is at max length")
+	ErrUpdateQueueSectorUpdated = errors.New("sector already updated")
+	ErrUpdateQueueThrottled     = errors.New("update is throttled")
+	ErrUpdateQueueStaleSector   = errors.New("sector is stale")
+	ErrUpdateQueueSpltBrain     = errors.New("split brain")
+	ErrInitialImportIncomplete  = errors.New("initial import incomplete")
 )
 
 type UpdateQueue struct {
@@ -115,10 +116,10 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 	}
 
 	if storedSectorSize > update.SectorSize {
-		return ErrUpdateQueueStaleTimestamp
+		return ErrUpdateQueueStaleSector
 	}
 	if storedSectorSize == update.SectorSize {
-		return ErrUpdateQueueIdenticalTimestamp
+		return ErrUpdateQueueSectorUpdated
 	}
 	u.mu.Lock()
 	defer u.mu.Unlock()
@@ -145,7 +146,7 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 	}
 
 	if entry.SectorSize > update.SectorSize {
-		return ErrUpdateQueueStaleTimestamp
+		return ErrUpdateQueueStaleSector
 	}
 	if entry.Signature != update.Signature {
 		return ErrUpdateQueueSpltBrain
