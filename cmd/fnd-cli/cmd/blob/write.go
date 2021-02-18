@@ -6,20 +6,29 @@ import (
 	"fmt"
 	"fnd/blob"
 	"fnd/cli"
+	"fnd/config"
+	"fnd/protocol"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-	"github.com/mattn/go-isatty"
-	"github.com/spf13/cobra"
+	"fnd/store"
 	"io"
 	"os"
+	"path"
+
+	"github.com/mattn/go-isatty"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 const (
-	BroadcastFlag = "broadcast"
+	BroadcastFlag  = "broadcast"
+	ResetEpochFlag = "reset-epoch"
 )
 
 var (
-	broadcast bool
+	fndHome    string
+	broadcast  bool
+	resetEpoch bool
 )
 
 var writeCmd = &cobra.Command{
@@ -27,17 +36,49 @@ var writeCmd = &cobra.Command{
 	Short: "Write data to the specified blob.",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		name := args[0]
+
 		conn, err := cli.DialRPC(cmd)
 		if err != nil {
 			return err
 		}
+
+		if resetEpoch {
+			res, err := rpc.GetBlobInfo(apiv1.NewFootnotev1Client(conn), name)
+			if err != nil {
+				return err
+			}
+
+			if res.EpochHeight >= protocol.CurrentEpoch(name) {
+				return errors.New("cannot reset epoch ahead of schedule")
+			}
+
+			homePath := config.ExpandHomePath(fndHome)
+			db, err := store.Open(config.ExpandDBPath(homePath))
+			if err != nil {
+				return errors.Wrap(err, "error opening store")
+			}
+
+			blobsPath := config.ExpandBlobsPath(homePath)
+			blobSubpath := blob.PathifyName(name)
+			blobFile := path.Join(blobsPath, blobSubpath)
+			if err := os.RemoveAll(blobFile); err != nil {
+				return errors.Wrap(err, "error erasing blob data")
+			}
+			if err := store.TruncateHeaderName(db, name); err != nil {
+				return errors.Wrap(err, "error truncating header store")
+			}
+			if err := db.Close(); err != nil {
+				return errors.Wrap(err, "error closing DB")
+			}
+		}
+
 		homeDir := cli.GetHomeDir(cmd)
 		signer, err := cli.GetSigner(homeDir)
 		if err != nil {
 			return err
 		}
 
-		name := args[0]
 		wr := rpc.NewBlobWriter(apiv1.NewFootnotev1Client(conn), signer, name)
 
 		if err := wr.Open(); err != nil {
@@ -90,5 +131,7 @@ func readDataTTY() []byte {
 
 func init() {
 	writeCmd.Flags().BoolVar(&broadcast, BroadcastFlag, true, "Broadcast data to the network upon completion")
+	writeCmd.Flags().BoolVar(&resetEpoch, ResetEpochFlag, false, "Increment the epoch and reset the blob before write.")
+	writeCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to FootnoteD's home directory.")
 	cmd.AddCommand(writeCmd)
 }
