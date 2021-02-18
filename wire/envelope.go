@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"fnd/crypto"
-	"fnd.localhost/dwire"
 	"io"
 	"time"
+
+	"fnd.localhost/dwire"
 )
 
 type Envelope struct {
@@ -92,6 +93,8 @@ func (e *Envelope) Decode(r io.Reader) error {
 		msg = &PeerRes{}
 	case MessageTypeUpdateReq:
 		msg = &UpdateReq{}
+	case MessageTypeEquivocationProof:
+		msg = &EquivocationProof{}
 	default:
 		return fmt.Errorf("invalid message type: %d", e.MessageType)
 	}

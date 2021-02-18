@@ -2,8 +2,9 @@ package wire
 
 import (
 	"fnd/crypto"
-	"fnd.localhost/dwire"
 	"io"
+
+	"fnd.localhost/dwire"
 )
 
 type Message interface {
@@ -27,6 +28,7 @@ const (
 	MessageTypePeerRes
 	MessageTypeUpdateReq
 	MessageTypeNameRes
+	MessageTypeEquivocationProof
 )
 
 func (t MessageType) String() string {
@@ -53,6 +55,8 @@ func (t MessageType) String() string {
 		return "UpdateReq"
 	case MessageTypeNameRes:
 		return "NameRes"
+	case MessageTypeEquivocationProof:
+		return "EquivocationProof"
 	default:
 		return "unknown"
 	}

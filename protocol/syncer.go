@@ -5,9 +5,12 @@ import (
 	"fnd/crypto"
 	"fnd/log"
 	"fnd/p2p"
+	"fnd/store"
 	"fnd/wire"
-	"github.com/pkg/errors"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (
@@ -29,6 +32,7 @@ type SyncSectorsOpts struct {
 	PrevHash      crypto.Hash
 	SectorTipHash crypto.Hash
 	Name          string
+	DB            *leveldb.DB
 }
 
 type payloadRes struct {
@@ -99,16 +103,13 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				}
 				if sectorTipHash != opts.SectorTipHash {
 					lgr.Trace("payload tip hash mismatch", "payload_tip_hash", sectorTipHash, "expected_payload_tip_hash", opts.SectorTipHash)
-					peer, err := opts.Mux.PeerByID(peerID)
+					err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
+						return store.SetEquivocationProofTx(tx, msg.Name, &wire.EquivocationProof{})
+					})
 					if err != nil {
-						lgr.Trace("error fetching peer", "peer_id", peerID)
+						lgr.Error("failed to write equivocation proof", "err", err)
 					}
-					// TODO: set header.bannedat = time.now for this name
-					if err := peer.Close(); err != nil {
-						lgr.Trace("error banning peer", "peer_id", peerID)
-					}
-					// TODO: generate equivocation proof
-					continue
+					return
 				}
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					if err := opts.Tx.WriteSector(msg.Payload[i]); err != nil {

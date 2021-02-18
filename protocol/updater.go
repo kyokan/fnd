@@ -224,6 +224,7 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		SectorTipHash: item.SectorTipHash,
 		PrevHash:      prevHash,
 		Name:          item.Name,
+		DB:            cfg.DB,
 	})
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
