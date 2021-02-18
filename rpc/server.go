@@ -355,6 +355,11 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 	return &apiv1.CommitRes{}, nil
 }
 
+func (s *Server) ResetEpoch(ctx context.Context, req *apiv1.ResetEpochReq) (*apiv1.ResetEpochRes, error) {
+	// TODO: implement epoch reset
+	return &apiv1.ResetEpochRes{}, nil
+}
+
 func (s *Server) ReadAt(_ context.Context, req *apiv1.ReadAtReq) (*apiv1.ReadAtRes, error) {
 	if req.Offset > blob.Size {
 		return nil, errors.New("offset is beyond blob bounds")
@@ -400,15 +405,15 @@ func (s *Server) GetBlobInfo(_ context.Context, req *apiv1.BlobInfoReq) (*apiv1.
 	}
 
 	return &apiv1.BlobInfoRes{
-		Name:         name,
-		PublicKey:    info.PublicKey.SerializeCompressed(),
-		ImportHeight: uint32(info.ImportHeight),
-		EpochHeight:  uint32(header.EpochHeight),
-		SectorSize:   uint32(header.SectorSize),
-		SectorTipHash:   header.SectorTipHash[:],
-		ReservedRoot: header.ReservedRoot[:],
-		ReceivedAt:   uint64(header.EpochStartAt.Unix()),
-		Signature:    header.Signature[:],
+		Name:          name,
+		PublicKey:     info.PublicKey.SerializeCompressed(),
+		ImportHeight:  uint32(info.ImportHeight),
+		EpochHeight:   uint32(header.EpochHeight),
+		SectorSize:    uint32(header.SectorSize),
+		SectorTipHash: header.SectorTipHash[:],
+		ReservedRoot:  header.ReservedRoot[:],
+		ReceivedAt:    uint64(header.EpochStartAt.Unix()),
+		Signature:     header.Signature[:],
 	}, nil
 }
 
@@ -428,15 +433,15 @@ func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.Footnotev1_L
 			return nil
 		}
 		res := &apiv1.BlobInfoRes{
-			Name:         info.Name,
-			PublicKey:    info.PublicKey.SerializeCompressed(),
-			ImportHeight: uint32(info.ImportHeight),
-			EpochHeight:  uint32(info.EpochHeight),
-			SectorSize:   uint32(info.SectorSize),
-			SectorTipHash:   info.SectorTipHash[:],
-			ReservedRoot: info.ReservedRoot[:],
-			ReceivedAt:   uint64(info.ReceivedAt.Unix()),
-			Signature:    info.Signature[:],
+			Name:          info.Name,
+			PublicKey:     info.PublicKey.SerializeCompressed(),
+			ImportHeight:  uint32(info.ImportHeight),
+			EpochHeight:   uint32(info.EpochHeight),
+			SectorSize:    uint32(info.SectorSize),
+			SectorTipHash: info.SectorTipHash[:],
+			ReservedRoot:  info.ReservedRoot[:],
+			ReceivedAt:    uint64(info.ReceivedAt.Unix()),
+			Signature:     info.Signature[:],
 		}
 		if err = srv.Send(res); err != nil {
 			return errors.Wrap(err, "error sending info")

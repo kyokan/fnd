@@ -5,8 +5,9 @@ import (
 	"fnd/blob"
 	"fnd/crypto"
 	apiv1 "fnd/rpc/v1"
-	"github.com/pkg/errors"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type BlobWriter struct {
@@ -79,6 +80,10 @@ func (b *BlobWriter) WriteSector(p []byte) (crypto.Hash, error) {
 	b.sectorTipHash = blob.SerialHashSector(sector, b.sectorTipHash)
 
 	return b.sectorTipHash, nil
+}
+
+func (b *BlobWriter) Reset() error {
+	return nil
 }
 
 func (b *BlobWriter) Commit(broadcast bool) (crypto.Hash, error) {

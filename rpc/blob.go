@@ -2,13 +2,14 @@ package rpc
 
 import (
 	"context"
-	"github.com/btcsuite/btcd/btcec"
 	"fnd/crypto"
 	apiv1 "fnd/rpc/v1"
 	"fnd/store"
-	"github.com/pkg/errors"
 	"io"
 	"time"
+
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/pkg/errors"
 )
 
 func GetBlobInfo(client apiv1.Footnotev1Client, name string) (*store.BlobInfo, error) {
@@ -75,14 +76,14 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 	}
 
 	return &store.BlobInfo{
-		Name:         res.Name,
-		PublicKey:    pub,
-		ImportHeight: int(res.ImportHeight),
-		EpochHeight:  uint16(res.EpochHeight),
-		SectorSize:   uint16(res.SectorSize),
-		SectorTipHash:   merkleRoot,
-		ReservedRoot: reservedRoot,
-		ReceivedAt:   time.Unix(int64(res.ReceivedAt), 0),
-		Signature:    sig,
+		Name:          res.Name,
+		PublicKey:     pub,
+		ImportHeight:  int(res.ImportHeight),
+		EpochHeight:   uint16(res.EpochHeight),
+		SectorSize:    uint16(res.SectorSize),
+		SectorTipHash: merkleRoot,
+		ReservedRoot:  reservedRoot,
+		ReceivedAt:    time.Unix(int64(res.ReceivedAt), 0),
+		Signature:     sig,
 	}, nil
 }

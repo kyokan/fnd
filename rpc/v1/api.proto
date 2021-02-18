@@ -12,8 +12,10 @@ service Footnotev1 {
     rpc Checkout (CheckoutReq) returns (CheckoutRes);
     rpc WriteSector (WriteSectorReq) returns (WriteSectorRes);
     rpc Commit (CommitReq) returns (CommitRes);
+    rpc ResetEpoch(ResetEpochReq) returns (ResetEpochRes);
 
     rpc ReadAt (ReadAtReq) returns (ReadAtRes);
+
 
     rpc GetBlobInfo (BlobInfoReq) returns (BlobInfoRes);
     rpc ListBlobInfo (ListBlobInfoReq) returns (stream BlobInfoRes);
@@ -112,6 +114,13 @@ message ReadAtReq {
 message ReadAtRes {
     uint32 offset = 1;
     bytes data = 2;
+}
+
+message ResetEpochReq {
+    string name = 1;
+}
+
+message ResetEpochRes {
 }
 
 message BlobInfoReq {
