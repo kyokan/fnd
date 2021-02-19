@@ -46,14 +46,14 @@ var writeCmd = &cobra.Command{
 
 		wr := rpc.NewBlobWriter(apiv1.NewFootnotev1Client(conn), signer, name)
 
-		if err := wr.Open(); err != nil {
-			return err
-		}
-
 		if resetEpoch {
 			if err := wr.Reset(); err != nil {
 				return err
 			}
+		}
+
+		if err := wr.Open(); err != nil {
+			return err
 		}
 
 		var rd io.Reader

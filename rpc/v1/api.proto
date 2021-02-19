@@ -117,7 +117,7 @@ message ReadAtRes {
 }
 
 message ResetEpochReq {
-    string name = 1;
+    uint32 txID = 1;
 }
 
 message ResetEpochRes {

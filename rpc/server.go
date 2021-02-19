@@ -357,6 +357,31 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 
 func (s *Server) ResetEpoch(ctx context.Context, req *apiv1.ResetEpochReq) (*apiv1.ResetEpochRes, error) {
 	// TODO: implement epoch reset
+	id := strconv.FormatUint(uint64(req.TxID), 32)
+	awaiting := s.txStore.Get(id).(*awaitingTx)
+	if awaiting == nil {
+		return nil, errors.New("transaction ID not found")
+	}
+
+	tx := awaiting.tx
+	name := tx.Name()
+	header, err := store.GetHeader(s.db, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if header.EpochHeight >= protocol.CurrentEpoch(name) {
+		return nil, errors.New("cannot reset epoch ahead of schedule")
+	}
+
+	if err := s.bs.Reset(name); err != nil {
+		return nil, err
+	}
+
+	if err := store.TruncateHeaderName(s.db, name); err != nil {
+		return nil, err
+	}
+
 	return &apiv1.ResetEpochRes{}, nil
 }
 
