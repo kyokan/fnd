@@ -343,11 +343,9 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 	var recips []crypto.Hash
 	if req.Broadcast {
 		recips, _ = p2p.GossipAll(s.mux, &wire.Update{
-			Name:          name,
-			EpochHeight:   epochHeight,
-			SectorSize:    sectorSize,
-			SectorTipHash: sectorTipHash,
-			Signature:     sig,
+			Name:        name,
+			EpochHeight: epochHeight,
+			SectorSize:  sectorSize,
 		})
 	}
 	s.lgr.Info("committed blob", "name", name, "recipient_count", len(recips))
@@ -480,11 +478,9 @@ func (s *Server) SendUpdate(_ context.Context, req *apiv1.SendUpdateReq) (*apiv1
 	}
 
 	recips, _ := p2p.GossipAll(s.mux, &wire.Update{
-		Name:          req.Name,
-		EpochHeight:   header.EpochHeight,
-		SectorSize:    header.SectorSize,
-		SectorTipHash: header.SectorTipHash,
-		Signature:     header.Signature,
+		Name:        req.Name,
+		EpochHeight: header.EpochHeight,
+		SectorSize:  header.SectorSize,
 	})
 
 	return &apiv1.SendUpdateRes{

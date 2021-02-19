@@ -9,6 +9,7 @@ import (
 	"fnd/wire"
 	"time"
 
+	"fnd.localhost/handshake/primitives"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -38,6 +39,28 @@ type SyncSectorsOpts struct {
 type payloadRes struct {
 	peerID crypto.Hash
 	msg    *wire.BlobRes
+}
+
+func validateBlobRes(opts *SyncSectorsOpts, name string, epochHeight, sectorSize uint16, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) (*store.NameInfo, error) {
+	if err := primitives.ValidateName(name); err != nil {
+		return nil, errors.Wrap(err, "update name is invalid")
+	}
+	banned, err := store.NameIsBanned(opts.DB, name)
+	if err != nil {
+		return nil, errors.Wrap(err, "error reading name ban state")
+	}
+	if banned {
+		return nil, errors.New("name is banned")
+	}
+	info, err := store.GetNameInfo(opts.DB, name)
+	if err != nil {
+		return nil, errors.Wrap(err, "error reading name info")
+	}
+	h := blob.SealHash(name, epochHeight, sectorSize, mr, rr)
+	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
+		return nil, errors.New("update signature is invalid")
+	}
+	return info, nil
 }
 
 func SyncSectors(opts *SyncSectorsOpts) error {
@@ -101,6 +124,11 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					sectorTipHash = blob.SerialHashSector(msg.Payload[i], sectorTipHash)
 				}
+				if err := validateBlobRes(opts, msg.Name, opts.EpochHeight, opts.SectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
+					lgr.Trace("blob res validation failed", err)
+					continue
+				}
+				// FIXME: opts.SectorTipHash was being set from update.SectorTipHash, now that it's removed, the condition on the next line always fails
 				if sectorTipHash != opts.SectorTipHash {
 					lgr.Trace("payload tip hash mismatch", "payload_tip_hash", sectorTipHash, "expected_payload_tip_hash", opts.SectorTipHash)
 					err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {

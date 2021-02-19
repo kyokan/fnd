@@ -80,11 +80,9 @@ func (u *UpdateServer) UpdateReqHandler(peerID crypto.Hash, envelope *wire.Envel
 	}
 
 	err = u.mux.Send(peerID, &wire.Update{
-		Name:          msg.Name,
-		EpochHeight:   header.EpochHeight,
-		SectorSize:    header.SectorSize,
-		SectorTipHash: header.SectorTipHash,
-		Signature:     header.Signature,
+		Name:        msg.Name,
+		EpochHeight: header.EpochHeight,
+		SectorSize:  header.SectorSize,
 	})
 	if err != nil {
 		u.lgr.Error("error serving update", "name", msg.Name, "err", err)

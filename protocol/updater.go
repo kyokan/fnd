@@ -305,10 +305,9 @@ func UpdateBlob(cfg *UpdateConfig) error {
 	}
 
 	update := &wire.Update{
-		Name:          item.Name,
-		EpochHeight:   item.EpochHeight,
-		SectorSize:    item.SectorSize,
-		SectorTipHash: item.SectorTipHash,
+		Name:        item.Name,
+		EpochHeight: item.EpochHeight,
+		SectorSize:  item.SectorSize,
 	}
 	p2p.GossipAll(cfg.Mux, update)
 	return nil

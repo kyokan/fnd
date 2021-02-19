@@ -5,6 +5,7 @@ import (
 
 	"fnd/blob"
 	"fnd/crypto"
+
 	"fnd.localhost/dwire"
 )
 
@@ -17,6 +18,7 @@ type BlobRes struct {
 	PrevHash        crypto.Hash
 	ReservedRoot    crypto.Hash
 	Payload         []blob.Sector
+	Signature       crypto.Signature
 }
 
 var _ Message = (*BlobRes)(nil)
@@ -35,7 +37,8 @@ func (s *BlobRes) Equals(other Message) bool {
 		s.EpochHeight == cast.EpochHeight &&
 		s.PayloadPosition == cast.PayloadPosition &&
 		s.PrevHash == cast.PrevHash &&
-		s.ReservedRoot == cast.ReservedRoot
+		s.ReservedRoot == cast.ReservedRoot &&
+		s.Signature == cast.Signature
 }
 
 func (s *BlobRes) Encode(w io.Writer) error {
@@ -47,6 +50,7 @@ func (s *BlobRes) Encode(w io.Writer) error {
 		s.PrevHash,
 		s.ReservedRoot,
 		s.Payload,
+		s.Signature,
 	)
 }
 
@@ -59,6 +63,7 @@ func (s *BlobRes) Decode(r io.Reader) error {
 		&s.PrevHash,
 		&s.ReservedRoot,
 		&s.Payload,
+		&s.Signature,
 	)
 }
 

@@ -1,7 +1,6 @@
 package protocol
 
 import (
-	"fnd/blob"
 	"fnd/config"
 	"fnd/crypto"
 	"fnd/log"
@@ -12,7 +11,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"fnd.localhost/handshake/primitives"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -101,9 +99,9 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 		return ErrInitialImportIncomplete
 	}
 
-	nameInfo, err := u.validateUpdate(update.Name, update.EpochHeight, update.SectorSize, update.SectorTipHash, update.ReservedRoot, update.Signature)
+	nameInfo, err := store.GetNameInfo(u.db, update.Name)
 	if err != nil {
-		return errors.Wrap(err, "name failed validation")
+		return errors.Wrap(err, "error getting name info")
 	}
 
 	// FIXME: epochHeight?
@@ -126,15 +124,12 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 	entry := u.entries[update.Name]
 	if entry == nil || entry.SectorSize < update.SectorSize {
 		u.entries[update.Name] = &UpdateQueueItem{
-			PeerIDs:       NewPeerSet([]crypto.Hash{peerID}),
-			Name:          update.Name,
-			EpochHeight:   update.EpochHeight,
-			SectorSize:    update.SectorSize,
-			SectorTipHash: update.SectorTipHash,
-			ReservedRoot:  update.ReservedRoot,
-			Signature:     update.Signature,
-			Pub:           nameInfo.PublicKey,
-			Height:        nameInfo.ImportHeight,
+			PeerIDs:     NewPeerSet([]crypto.Hash{peerID}),
+			Name:        update.Name,
+			EpochHeight: update.EpochHeight,
+			SectorSize:  update.SectorSize,
+			Pub:         nameInfo.PublicKey,
+			Height:      nameInfo.ImportHeight,
 		}
 
 		if entry == nil {
@@ -147,9 +142,6 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 
 	if entry.SectorSize > update.SectorSize {
 		return ErrUpdateQueueStaleSector
-	}
-	if entry.Signature != update.Signature {
-		return ErrUpdateQueueSpltBrain
 	}
 
 	u.lgr.Info("enqueued update", "name", update.Name, "epoch", update.EpochHeight, "sector", update.SectorSize)
@@ -170,28 +162,6 @@ func (u *UpdateQueue) Dequeue() *UpdateQueueItem {
 	atomic.AddInt32(&u.queueLen, -1)
 	delete(u.entries, name)
 	return ret
-}
-
-func (u *UpdateQueue) validateUpdate(name string, epochHeight, sectorSize uint16, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) (*store.NameInfo, error) {
-	if err := primitives.ValidateName(name); err != nil {
-		return nil, errors.Wrap(err, "update name is invalid")
-	}
-	banned, err := store.NameIsBanned(u.db, name)
-	if err != nil {
-		return nil, errors.Wrap(err, "error reading name ban state")
-	}
-	if banned {
-		return nil, errors.New("name is banned")
-	}
-	info, err := store.GetNameInfo(u.db, name)
-	if err != nil {
-		return nil, errors.Wrap(err, "error reading name info")
-	}
-	h := blob.SealHash(name, epochHeight, sectorSize, mr, rr)
-	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
-		return nil, errors.New("update signature is invalid")
-	}
-	return info, nil
 }
 
 func (u *UpdateQueue) onUpdate(peerID crypto.Hash, envelope *wire.Envelope) {
