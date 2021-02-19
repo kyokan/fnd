@@ -83,7 +83,10 @@ func (b *BlobWriter) WriteSector(p []byte) (crypto.Hash, error) {
 }
 
 func (b *BlobWriter) Reset() error {
-	return nil
+	_, err := b.client.ResetEpoch(context.Background(), &apiv1.ResetEpochReq{
+		TxID: b.txID,
+	})
+	return err
 }
 
 func (b *BlobWriter) Commit(broadcast bool) (crypto.Hash, error) {

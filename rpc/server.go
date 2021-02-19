@@ -356,7 +356,6 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 }
 
 func (s *Server) ResetEpoch(ctx context.Context, req *apiv1.ResetEpochReq) (*apiv1.ResetEpochRes, error) {
-	// TODO: implement epoch reset
 	id := strconv.FormatUint(uint64(req.TxID), 32)
 	awaiting := s.txStore.Get(id).(*awaitingTx)
 	if awaiting == nil {
