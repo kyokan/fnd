@@ -9,10 +9,11 @@ import (
 	"fnd/testutil/testcrypto"
 	"fnd/util"
 	"fnd/wire"
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
 	"io"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func TestUpdateServer(t *testing.T) {
@@ -130,11 +131,9 @@ func TestUpdateServer(t *testing.T) {
 				require.NoError(t, err)
 				envelope := testutil.ReceiveEnvelope(t, clientConn)
 				require.EqualValues(t, &wire.Update{
-					Name:          header.Name,
-					EpochHeight:   header.EpochHeight,
-					SectorSize:    header.SectorSize,
-					SectorTipHash: header.SectorTipHash,
-					Signature:     header.Signature,
+					Name:        header.Name,
+					EpochHeight: header.EpochHeight,
+					SectorSize:  header.SectorSize,
 				}, envelope.Message)
 			},
 		},

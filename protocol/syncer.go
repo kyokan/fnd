@@ -24,16 +24,15 @@ var (
 )
 
 type SyncSectorsOpts struct {
-	Timeout       time.Duration
-	Mux           *p2p.PeerMuxer
-	Tx            blob.Transaction
-	Peers         *PeerSet
-	EpochHeight   uint16
-	SectorSize    uint16
-	PrevHash      crypto.Hash
-	SectorTipHash crypto.Hash
-	Name          string
-	DB            *leveldb.DB
+	Timeout     time.Duration
+	Mux         *p2p.PeerMuxer
+	Tx          blob.Transaction
+	Peers       *PeerSet
+	EpochHeight uint16
+	SectorSize  uint16
+	PrevHash    crypto.Hash
+	Name        string
+	DB          *leveldb.DB
 }
 
 type payloadRes struct {
@@ -41,26 +40,26 @@ type payloadRes struct {
 	msg    *wire.BlobRes
 }
 
-func validateBlobRes(opts *SyncSectorsOpts, name string, epochHeight, sectorSize uint16, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) (*store.NameInfo, error) {
+func validateBlobRes(opts *SyncSectorsOpts, name string, epochHeight, sectorSize uint16, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) error {
 	if err := primitives.ValidateName(name); err != nil {
-		return nil, errors.Wrap(err, "update name is invalid")
+		return errors.Wrap(err, "update name is invalid")
 	}
 	banned, err := store.NameIsBanned(opts.DB, name)
 	if err != nil {
-		return nil, errors.Wrap(err, "error reading name ban state")
+		return errors.Wrap(err, "error reading name ban state")
 	}
 	if banned {
-		return nil, errors.New("name is banned")
+		return errors.New("name is banned")
 	}
 	info, err := store.GetNameInfo(opts.DB, name)
 	if err != nil {
-		return nil, errors.Wrap(err, "error reading name info")
+		return errors.Wrap(err, "error reading name info")
 	}
 	h := blob.SealHash(name, epochHeight, sectorSize, mr, rr)
 	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
-		return nil, errors.New("update signature is invalid")
+		return errors.New("update signature is invalid")
 	}
-	return info, nil
+	return nil
 }
 
 func SyncSectors(opts *SyncSectorsOpts) error {
@@ -115,29 +114,23 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 					lgr.Trace("already processed this payload", "payload_position", msg.PayloadPosition, "peer_id", peerID)
 					continue
 				}
-				// TODO: if payloadposition = 0xff, handle equivocation proof
 				if opts.SectorSize != msg.PayloadPosition {
-					lgr.Trace("received unexpected payload position", "payload_size", opts.SectorSize, "payload_position", msg.PayloadPosition)
+					lgr.Trace("received unexpected payload position", "sector_size", opts.SectorSize, "payload_position", msg.PayloadPosition)
+					continue
+				}
+				sectorSize := msg.PayloadPosition + uint16(len(msg.Payload))
+				if int(sectorSize) > blob.Size {
+					lgr.Trace("received unexpected payload size", "sector_size", sectorSize)
 					continue
 				}
 				var sectorTipHash crypto.Hash = opts.PrevHash
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					sectorTipHash = blob.SerialHashSector(msg.Payload[i], sectorTipHash)
 				}
-				if err := validateBlobRes(opts, msg.Name, opts.EpochHeight, opts.SectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
-					lgr.Trace("blob res validation failed", err)
+				if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
+					lgr.Trace("blob res validation failed", "err", err)
+					// TODO: probably drop this peer, it's sending clearly invalid data
 					continue
-				}
-				// FIXME: opts.SectorTipHash was being set from update.SectorTipHash, now that it's removed, the condition on the next line always fails
-				if sectorTipHash != opts.SectorTipHash {
-					lgr.Trace("payload tip hash mismatch", "payload_tip_hash", sectorTipHash, "expected_payload_tip_hash", opts.SectorTipHash)
-					err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
-						return store.SetEquivocationProofTx(tx, msg.Name, &wire.EquivocationProof{})
-					})
-					if err != nil {
-						lgr.Error("failed to write equivocation proof", "err", err)
-					}
-					return
 				}
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					if err := opts.Tx.WriteSector(msg.Payload[i]); err != nil {

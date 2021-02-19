@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"fnd.localhost/handshake/primitives"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -99,6 +100,10 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 		return ErrInitialImportIncomplete
 	}
 
+	if err := u.validateUpdate(update.Name); err != nil {
+		return err
+	}
+
 	nameInfo, err := store.GetNameInfo(u.db, update.Name)
 	if err != nil {
 		return errors.Wrap(err, "error getting name info")
@@ -169,6 +174,20 @@ func (u *UpdateQueue) onUpdate(peerID crypto.Hash, envelope *wire.Envelope) {
 	if err := u.Enqueue(peerID, update); err != nil {
 		u.lgr.Info("update rejected", "name", update.Name, "reason", err)
 	}
+}
+
+func (u *UpdateQueue) validateUpdate(name string) error {
+	if err := primitives.ValidateName(name); err != nil {
+		return errors.Wrap(err, "update name is invalid")
+	}
+	banned, err := store.NameIsBanned(u.db, name)
+	if err != nil {
+		return errors.Wrap(err, "error reading name ban state")
+	}
+	if banned {
+		return errors.New("name is banned")
+	}
+	return nil
 }
 
 func (u *UpdateQueue) reapDequeuedUpdates() {

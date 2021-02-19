@@ -129,6 +129,7 @@ func UpdateBlob(cfg *UpdateConfig) error {
 
 	// If the new update and is the same size or fewer reject if it is in the
 	// same epoch. In the future, this may be an equivocation condition
+	// may not be eq
 	if header != nil && header.EpochHeight == item.EpochHeight && header.SectorSize >= item.SectorSize {
 		return ErrUpdaterAlreadySynchronized
 	}
@@ -189,6 +190,8 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		sectorSize = 0
 	}
 
+	// check blob res prev hash and equivocate
+
 	if !cfg.NameLocker.TryLock(item.Name) {
 		return ErrNameLocked
 	}
@@ -215,16 +218,15 @@ func UpdateBlob(cfg *UpdateConfig) error {
 	}
 
 	err = SyncSectors(&SyncSectorsOpts{
-		Timeout:       DefaultSyncerBlobResTimeout,
-		Mux:           cfg.Mux,
-		Tx:            tx,
-		Peers:         item.PeerIDs,
-		EpochHeight:   epochHeight,
-		SectorSize:    sectorSize,
-		SectorTipHash: item.SectorTipHash,
-		PrevHash:      prevHash,
-		Name:          item.Name,
-		DB:            cfg.DB,
+		Timeout:     DefaultSyncerBlobResTimeout,
+		Mux:         cfg.Mux,
+		Tx:          tx,
+		Peers:       item.PeerIDs,
+		EpochHeight: epochHeight,
+		SectorSize:  sectorSize,
+		PrevHash:    prevHash,
+		Name:        item.Name,
+		DB:          cfg.DB,
 	})
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -238,24 +240,6 @@ func UpdateBlob(cfg *UpdateConfig) error {
 			updaterLogger.Error("error rolling back blob transaction", "err", err)
 		}
 		return errors.Wrap(err, "error calculating new blob sector tip hash")
-	}
-	if tree.Tip() != item.SectorTipHash {
-		if err := tx.Rollback(); err != nil {
-			updaterLogger.Error("error rolling back blob transaction", "err", err)
-		}
-		err = store.WithTx(cfg.DB, func(tx *leveldb.Transaction) error {
-			return store.SetHeaderTx(tx, &store.Header{
-				Name:          item.Name,
-				EpochHeight:   item.EpochHeight,
-				SectorSize:    item.SectorSize,
-				SectorTipHash: item.SectorTipHash,
-				Signature:     item.Signature,
-				ReservedRoot:  item.ReservedRoot,
-				Banned:        true,
-				BannedAt:      time.Now(),
-			}, blob.ZeroSectorHashes)
-		})
-		return ErrUpdaterSectorTipHashMismatch
 	}
 
 	var sectorsNeeded uint16

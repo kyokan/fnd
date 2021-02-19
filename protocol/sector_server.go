@@ -10,8 +10,9 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
-	"github.com/syndtr/goleveldb/leveldb"
 	"time"
+
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type SectorServer struct {
@@ -81,7 +82,7 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 	cached := s.cache.Get(cacheKey)
 	if cached != nil {
 		s.nameLocker.RUnlock(reqMsg.Name)
-		s.sendResponse(peerID, reqMsg.Name, prevHash, cached.([]blob.Sector), reqMsg.EpochHeight, reqMsg.SectorSize)
+		s.sendResponse(peerID, reqMsg.Name, prevHash, cached.([]blob.Sector), header.EpochHeight, reqMsg.SectorSize, header.Signature)
 		return
 	}
 
@@ -115,16 +116,17 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 	}
 	s.cache.Set(cacheKey, sectors, int64(s.CacheExpiry/time.Millisecond))
 	s.nameLocker.RUnlock(reqMsg.Name)
-	s.sendResponse(peerID, reqMsg.Name, prevHash, sectors, reqMsg.EpochHeight, reqMsg.SectorSize)
+	s.sendResponse(peerID, reqMsg.Name, prevHash, sectors, header.EpochHeight, reqMsg.SectorSize, header.Signature)
 }
 
-func (s *SectorServer) sendResponse(peerID crypto.Hash, name string, prevHash crypto.Hash, sectors []blob.Sector, epochHeight, sectorSize uint16) {
+func (s *SectorServer) sendResponse(peerID crypto.Hash, name string, prevHash crypto.Hash, sectors []blob.Sector, epochHeight, sectorSize uint16, signature crypto.Signature) {
 	resMsg := &wire.BlobRes{
 		Name:            name,
 		EpochHeight:     epochHeight,
 		PayloadPosition: sectorSize,
 		PrevHash:        prevHash,
 		Payload:         sectors,
+		Signature:       signature,
 	}
 	if err := s.mux.Send(peerID, resMsg); err != nil {
 		s.lgr.Error("error serving sector response", "err", err)

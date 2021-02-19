@@ -32,6 +32,15 @@ func TestUpdater(t *testing.T) {
 		{
 			"syncs sectors when the local node has never seen the blob",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
@@ -52,13 +61,10 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -103,13 +109,10 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -154,13 +157,10 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				err := UpdateBlob(cfg)
@@ -195,13 +195,10 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
@@ -272,14 +269,11 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
-						Height:        101,
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
+						Height:      101,
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -325,14 +319,11 @@ func TestUpdater(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
-						Height:        80,
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
+						Height:      80,
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -398,13 +389,10 @@ func TestEpoch(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, UpdateBlob(cfg))
@@ -463,13 +451,10 @@ func TestEpoch(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
@@ -593,13 +578,10 @@ func TestEpoch(t *testing.T) {
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
-						Name:          name,
-						EpochHeight:   update.EpochHeight,
-						SectorSize:    update.SectorSize,
-						SectorTipHash: update.SectorTipHash,
-						ReservedRoot:  update.ReservedRoot,
-						Signature:     update.Signature,
-						Pub:           setup.tp.RemoteSigner.Pub(),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
 					},
 				}
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {

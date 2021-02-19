@@ -7,11 +7,12 @@ import (
 	"fnd/store"
 	"fnd/testutil/testfs"
 	"fnd/wire"
-	"github.com/stretchr/testify/require"
-	"github.com/syndtr/goleveldb/leveldb"
 	"io"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type TestStorage struct {
@@ -69,12 +70,9 @@ func FillBlobReader(t *testing.T, db *leveldb.DB, bs blob.Store, signer crypto.S
 	}))
 	require.NoError(t, tx.Commit())
 	return &wire.Update{
-		Name:          name,
-		EpochHeight:   epochHeight,
-		SectorSize:    sectorSize,
-		SectorTipHash: tree.Tip(),
-		ReservedRoot:  crypto.ZeroHash,
-		Signature:     sig,
+		Name:        name,
+		EpochHeight: epochHeight,
+		SectorSize:  sectorSize,
 	}
 }
 

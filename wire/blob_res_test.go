@@ -12,6 +12,7 @@ func TestBlobRes_Encoding(t *testing.T) {
 		PrevHash:        fixedHash,
 		ReservedRoot:    fixedHash,
 		Payload:         nil,
+		Signature:       fixedSig,
 	}
 
 	testMessageEncoding(t, "blob_res", blobRes, &BlobRes{})
