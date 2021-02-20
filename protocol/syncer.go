@@ -19,8 +19,9 @@ const (
 )
 
 var (
-	ErrSyncerNoProgress  = errors.New("sync not progressing")
-	ErrSyncerMaxAttempts = errors.New("reached max sync attempts")
+	ErrInvalidPayloadSignature = errors.New("update signature is invalid")
+	ErrSyncerNoProgress        = errors.New("sync not progressing")
+	ErrSyncerMaxAttempts       = errors.New("reached max sync attempts")
 )
 
 type SyncSectorsOpts struct {
@@ -57,13 +58,14 @@ func validateBlobRes(opts *SyncSectorsOpts, name string, epochHeight, sectorSize
 	}
 	h := blob.SealHash(name, epochHeight, sectorSize, mr, rr)
 	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
-		return errors.New("update signature is invalid")
+		return ErrInvalidPayloadSignature
 	}
 	return nil
 }
 
 func SyncSectors(opts *SyncSectorsOpts) error {
 	lgr := log.WithModule("payload-syncer").Sub("name", opts.Name)
+	errs := make(chan error)
 	payloadResCh := make(chan *payloadRes)
 	payloadProcessedCh := make(chan struct{}, 1)
 	doneCh := make(chan struct{})
@@ -129,8 +131,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				}
 				if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
 					lgr.Trace("blob res validation failed", "err", err)
-					// TODO: probably drop this peer, it's sending clearly invalid data
-					continue
+					errs <- err
 				}
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					if err := opts.Tx.WriteSector(msg.Payload[i]); err != nil {
@@ -146,6 +147,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 		}
 	}()
 
+	var err error
 	timeout := time.NewTimer(opts.Timeout)
 payloadLoop:
 	for {
@@ -157,10 +159,13 @@ payloadLoop:
 		case <-timeout.C:
 			lgr.Warn("payload request timed out")
 			break payloadLoop
+		case err = <-errs:
+			lgr.Warn("payload syncing failed")
+			break payloadLoop
 		}
 	}
 
 	unsubRes()
 	close(doneCh)
-	return nil
+	return err
 }

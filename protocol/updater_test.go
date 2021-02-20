@@ -5,11 +5,9 @@ import (
 	"errors"
 	"fnd/blob"
 	"fnd/crypto"
-	"fnd/p2p"
 	"fnd/store"
 	"fnd/testutil/mockapp"
 	"fnd/util"
-	"fnd/wire"
 	"testing"
 	"time"
 
@@ -74,6 +72,15 @@ func TestUpdater(t *testing.T) {
 		{
 			"syncs sectors when the local node has an older blob",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(10)
@@ -120,8 +127,17 @@ func TestUpdater(t *testing.T) {
 			},
 		},
 		{
-			"aborts sync when there is a sector tip hash mismatch",
+			"aborts sync when there is a invalid payload signature",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(10)
@@ -165,14 +181,21 @@ func TestUpdater(t *testing.T) {
 				}
 				err := UpdateBlob(cfg)
 				require.NotNil(t, err)
-				require.True(t, errors.Is(err, ErrUpdaterSectorTipHashMismatch))
-				header, err := store.GetHeader(setup.ls.DB, name)
-				require.True(t, header.Banned)
+				require.True(t, errors.Is(err, ErrInvalidPayloadSignature))
 			},
 		},
 		{
 			"aborts sync if the new sector size is equal to the stored sector size",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(0)
@@ -216,6 +239,15 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync if the name is locked",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				locker := util.NewMultiLocker()
 				require.True(t, locker.TryLock(name))
 				cfg := &UpdateConfig{
@@ -237,23 +269,24 @@ func TestUpdater(t *testing.T) {
 			},
 		},
 		{
-			"does not gossip if the name has fewer than 10 confirmations",
+			"aborts sync if the new sector size is equal to the stored sector size",
 			func(t *testing.T, setup *updaterTestSetup) {
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					return store.SetLastNameImportHeightTx(tx, 100)
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
 				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(0)
-				updateCh := make(chan struct{})
-				unsub := setup.tp.RemoteMux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeUpdate, func(id crypto.Hash, envelope *wire.Envelope) {
-					updateCh <- struct{}{}
-				}))
-				defer unsub()
 				update := mockapp.FillBlobRandom(
 					t,
-					setup.rs.DB,
-					setup.rs.BlobStore,
+					setup.ls.DB,
+					setup.ls.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
 					epochHeight,
@@ -273,69 +306,50 @@ func TestUpdater(t *testing.T) {
 						EpochHeight: update.EpochHeight,
 						SectorSize:  update.SectorSize,
 						Pub:         setup.tp.RemoteSigner.Pub(),
-						Height:      101,
 					},
 				}
-				require.NoError(t, UpdateBlob(cfg))
-
-				timeout := time.NewTimer(100 * time.Millisecond)
-				select {
-				case <-updateCh:
-					t.FailNow()
-				case <-timeout.C:
-				}
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					return store.SetHeaderTx(tx, &store.Header{
+						Name:        name,
+						EpochHeight: epochHeight,
+						SectorSize:  sectorSize,
+					}, blob.ZeroSectorHashes)
+				}))
+				err := UpdateBlob(cfg)
+				require.NotNil(t, err)
+				require.True(t, errors.Is(err, ErrUpdaterAlreadySynchronized))
 			},
 		},
 		{
-			"gossips if the name has more than 10 confirmations",
+			"aborts sync if the name is locked",
 			func(t *testing.T, setup *updaterTestSetup) {
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					return store.SetLastNameImportHeightTx(tx, 100)
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
 				}))
-				ts := time.Now()
-				epochHeight := CurrentEpoch(name)
-				sectorSize := uint16(0)
-				updateCh := make(chan *wire.Envelope, 1)
-				unsub := setup.tp.RemoteMux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeUpdate, func(id crypto.Hash, envelope *wire.Envelope) {
-					updateCh <- envelope
-				}))
-				defer unsub()
-				update := mockapp.FillBlobRandom(
-					t,
-					setup.rs.DB,
-					setup.rs.BlobStore,
-					setup.tp.RemoteSigner,
-					name,
-					epochHeight,
-					sectorSize,
-					ts,
-				)
+				locker := util.NewMultiLocker()
+				require.True(t, locker.TryLock(name))
 				cfg := &UpdateConfig{
 					Mux:        setup.tp.LocalMux,
 					DB:         setup.ls.DB,
-					NameLocker: util.NewMultiLocker(),
+					NameLocker: locker,
 					BlobStore:  setup.ls.BlobStore,
 					Item: &UpdateQueueItem{
 						PeerIDs: NewPeerSet([]crypto.Hash{
 							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
 						}),
 						Name:        name,
-						EpochHeight: update.EpochHeight,
-						SectorSize:  update.SectorSize,
-						Pub:         setup.tp.RemoteSigner.Pub(),
-						Height:      80,
+						EpochHeight: CurrentEpoch(name),
 					},
 				}
-				require.NoError(t, UpdateBlob(cfg))
-
-				timeout := time.NewTimer(250 * time.Millisecond)
-				select {
-				case envelope := <-updateCh:
-					msg := envelope.Message.(*wire.Update)
-					require.Equal(t, name, msg.Name)
-				case <-timeout.C:
-					t.Fail()
-				}
+				err := UpdateBlob(cfg)
+				require.NotNil(t, err)
+				require.True(t, errors.Is(err, ErrNameLocked))
 			},
 		},
 	}
@@ -369,6 +383,15 @@ func TestEpoch(t *testing.T) {
 		{
 			"syncs sectors when the local node has never seen the name before",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
@@ -431,6 +454,15 @@ func TestEpoch(t *testing.T) {
 		{
 			"syncs sectors when the name ban has passed",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
@@ -558,6 +590,15 @@ func TestEpoch(t *testing.T) {
 		{
 			"rewrites partial blob with new blob on epoch rollover",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
