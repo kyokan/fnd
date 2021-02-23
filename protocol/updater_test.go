@@ -194,6 +194,7 @@ func TestUpdater(t *testing.T) {
 					if err := store.SetInitialImportCompleteTx(tx); err != nil {
 						return err
 					}
+					// TODO: ideally setup a fake signer
 					if err := store.SetNameInfoTx(tx, name, setup.tp.LocalSigner.Pub(), 10); err != nil {
 						return err
 					}
@@ -213,10 +214,10 @@ func TestUpdater(t *testing.T) {
 					ts.Add(-48*time.Hour),
 					mockapp.NullReader,
 				)
-				// create the new blob remotely
-				// this forces an equivocation because local has 10 random sectors
-				// and remote as 20 _different_ random sectors. Prev Hash at 10 will
-				// mismatch, leading to ErrInvalidPrevHash
+				// The sectors are generated from null reader, so there won't
+				// be an equivocation, however we used local signer on the
+				// remote (instead of remote signer like other test cases
+				// above), so it generates an invalid signature.
 				update := mockapp.FillBlobReader(
 					t,
 					setup.rs.DB,
