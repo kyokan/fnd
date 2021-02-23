@@ -20,6 +20,7 @@ const (
 
 var (
 	ErrInvalidPayloadSignature = errors.New("update signature is invalid")
+	ErrInvalidPrevHash         = errors.New("update prev hash is invalid")
 	ErrSyncerNoProgress        = errors.New("sync not progressing")
 	ErrSyncerMaxAttempts       = errors.New("reached max sync attempts")
 )
@@ -125,13 +126,21 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 					lgr.Trace("received unexpected payload size", "sector_size", sectorSize)
 					continue
 				}
+				if opts.PrevHash != msg.PrevHash {
+					lgr.Trace("received unexpected prev hash", "sector_size", sectorSize)
+					errs <- ErrInvalidPrevHash
+					break
+				}
 				var sectorTipHash crypto.Hash = opts.PrevHash
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					sectorTipHash = blob.SerialHashSector(msg.Payload[i], sectorTipHash)
 				}
+				// prev hash - store it in struct
 				if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
+					// faulty message
 					lgr.Trace("blob res validation failed", "err", err)
 					errs <- err
+					break
 				}
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					if err := opts.Tx.WriteSector(msg.Payload[i]); err != nil {
