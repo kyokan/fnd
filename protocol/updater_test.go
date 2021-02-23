@@ -188,6 +188,67 @@ func TestUpdater(t *testing.T) {
 			},
 		},
 		{
+			"aborts sync when there is a invalid payload signature",
+			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.LocalSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
+				ts := time.Now()
+				epochHeight := CurrentEpoch(name)
+				sectorSize := uint16(10)
+				mockapp.FillBlobReader(
+					t,
+					setup.ls.DB,
+					setup.ls.BlobStore,
+					setup.tp.RemoteSigner,
+					name,
+					epochHeight,
+					sectorSize,
+					ts.Add(-48*time.Hour),
+					mockapp.NullReader,
+				)
+				// create the new blob remotely
+				// this forces an equivocation because local has 10 random sectors
+				// and remote as 20 _different_ random sectors. Prev Hash at 10 will
+				// mismatch, leading to ErrInvalidPrevHash
+				update := mockapp.FillBlobReader(
+					t,
+					setup.rs.DB,
+					setup.rs.BlobStore,
+					setup.tp.RemoteSigner,
+					name,
+					epochHeight,
+					sectorSize+10,
+					ts,
+					mockapp.NullReader,
+				)
+				cfg := &UpdateConfig{
+					Mux:        setup.tp.LocalMux,
+					DB:         setup.ls.DB,
+					NameLocker: util.NewMultiLocker(),
+					BlobStore:  setup.ls.BlobStore,
+					Item: &UpdateQueueItem{
+						PeerIDs: NewPeerSet([]crypto.Hash{
+							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
+						}),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
+					},
+				}
+				err := UpdateBlob(cfg)
+				require.NotNil(t, err)
+				require.True(t, errors.Is(err, ErrInvalidPayloadSignature))
+			},
+		},
+		{
 			"aborts sync if the new sector size is equal to the stored sector size",
 			func(t *testing.T, setup *updaterTestSetup) {
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
