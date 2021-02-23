@@ -240,7 +240,7 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 		return nil, err
 	}
 
-	_, err = tx.Seek(int64(sectorSize)*int64(blob.SectorLen), io.SeekStart)
+	_, err = tx.Seek(int64(sectorSize)*int64(blob.SectorBytes), io.SeekStart)
 	if err != nil {
 		return nil, err
 	}

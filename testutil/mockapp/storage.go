@@ -95,7 +95,7 @@ func RequireBlobsEqual(t *testing.T, localBS blob.Store, remoteBS blob.Store, na
 	require.NoError(t, err)
 	remoteBl, err := remoteBS.Open(name)
 	require.NoError(t, err)
-	for i := 0; i < blob.SectorCount; i++ {
+	for i := 0; i < blob.MaxSectors; i++ {
 		localSector, err := localBl.ReadSector(uint8(i))
 		require.NoError(t, err)
 		remoteSector, err := remoteBl.ReadSector(uint8(i))

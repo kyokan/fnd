@@ -2,8 +2,8 @@ package blob
 
 const (
 	HeaderLen      = 1 + 1 + 63 + 8 + 32 + 65
-	SectorLen      = 256
-	SectorCount    = 4096
-	Size           = SectorLen * SectorCount
+	SectorBytes      = 256
+	MaxSectors    = 4096
+	Size           = SectorBytes * MaxSectors
 	CurrentVersion = 1
 )

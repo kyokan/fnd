@@ -13,7 +13,7 @@ var (
 	ZeroSectorHashes SectorHashes
 )
 
-type SectorHashes [SectorCount]crypto.Hash
+type SectorHashes [MaxSectors]crypto.Hash
 
 func (s SectorHashes) Encode(w io.Writer) error {
 	for _, h := range s {
@@ -54,7 +54,7 @@ func (s SectorHashes) DiffWith(other SectorHashes) int {
 
 func (s SectorHashes) Tip() crypto.Hash {
 	var i int
-	for i = 0; i < SectorCount; i++ {
+	for i = 0; i < MaxSectors; i++ {
 		if s[i] == ZeroHash {
 			break
 		}

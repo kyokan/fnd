@@ -27,7 +27,7 @@ func ReadBlobAt(r io.ReaderAt, b []byte, off int64) (int, error) {
 
 func ReadSector(r io.ReaderAt, id uint8) (Sector, error) {
 	var sector Sector
-	_, err := r.ReadAt(sector[:], int64(id)*int64(SectorLen))
+	_, err := r.ReadAt(sector[:], int64(id)*int64(SectorBytes))
 	return sector, err
 }
 
@@ -48,7 +48,7 @@ func WriteBlobAt(w io.WriterAt, b []byte, off int64) (int, error) {
 }
 
 func WriteSector(w io.WriterAt, id uint16, sector Sector) error {
-	_, err := w.WriteAt(sector[:], int64(id)*int64(SectorLen))
+	_, err := w.WriteAt(sector[:], int64(id)*int64(SectorBytes))
 	return err
 }
 

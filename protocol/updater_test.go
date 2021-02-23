@@ -47,7 +47,7 @@ func TestUpdater(t *testing.T) {
 					setup.tp.RemoteSigner,
 					name,
 					CurrentEpoch(name),
-					blob.SectorLen,
+					blob.SectorBytes,
 					ts,
 				)
 				cfg := &UpdateConfig{
@@ -464,7 +464,7 @@ func TestEpoch(t *testing.T) {
 					setup.tp.RemoteSigner,
 					name,
 					0,
-					blob.SectorLen,
+					blob.SectorBytes,
 					ts,
 				)
 				cfg := &UpdateConfig{
@@ -535,7 +535,7 @@ func TestEpoch(t *testing.T) {
 					setup.tp.RemoteSigner,
 					name,
 					0,
-					blob.SectorLen,
+					blob.SectorBytes,
 					ts,
 				)
 				cfg := &UpdateConfig{
@@ -671,7 +671,7 @@ func TestEpoch(t *testing.T) {
 					setup.tp.RemoteSigner,
 					name,
 					CurrentEpoch(name),
-					blob.SectorLen,
+					blob.SectorBytes,
 					ts,
 				)
 				cfg := &UpdateConfig{

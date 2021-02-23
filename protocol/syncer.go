@@ -130,8 +130,8 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				}
 				sectorSize := msg.PayloadPosition + uint16(len(msg.Payload))
 				// Additional sanity check: make sure that update does not overflow max sectors.
-				if int(sectorSize) > blob.SectorCount {
-					lgr.Trace("received unexpected sector size", "sector_size", sectorSize, "max", blob.SectorCount)
+				if int(sectorSize) > blob.MaxSectors {
+					lgr.Trace("received unexpected sector size", "sector_size", sectorSize, "max", blob.MaxSectors)
 					continue
 				}
 				// Verify that the prev hash from the remote matches our

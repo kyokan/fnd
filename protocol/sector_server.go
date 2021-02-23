@@ -103,7 +103,7 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 	var sectors []blob.Sector
 	for i := reqMsg.SectorSize; i < header.SectorSize; i++ {
 		sector := &blob.Sector{}
-		_, err = bl.ReadAt(sector[:], int64(i)*blob.SectorLen)
+		_, err = bl.ReadAt(sector[:], int64(i)*blob.SectorBytes)
 		if err != nil {
 			s.nameLocker.RUnlock(reqMsg.Name)
 			lgr.Error(

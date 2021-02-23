@@ -212,7 +212,7 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		return errors.Wrap(err, "error starting transaction")
 	}
 
-	_, err = tx.Seek(int64(sectorSize)*int64(blob.SectorLen), io.SeekStart)
+	_, err = tx.Seek(int64(sectorSize)*int64(blob.SectorBytes), io.SeekStart)
 	if err != nil {
 		return errors.Wrap(err, "error seeking transaction")
 	}

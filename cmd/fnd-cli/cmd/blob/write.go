@@ -67,7 +67,7 @@ var writeCmd = &cobra.Command{
 			rd = bufio.NewReader(bytes.NewReader([]byte(args[1])))
 		}
 		var sector blob.Sector
-		for i := 0; i < blob.SectorCount; i++ {
+		for i := 0; i < blob.MaxSectors; i++ {
 			if _, err := rd.Read(sector[:]); err != nil {
 				if err == io.EOF {
 					break
