@@ -117,27 +117,41 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 					lgr.Trace("already processed this payload", "payload_position", msg.PayloadPosition, "peer_id", peerID)
 					continue
 				}
+				// Verify that we received the payload starting from the sector
+				// we requested in blob request.  opts.SectorSize contains our
+				// current known sector size, which is what we send in blob
+				// request.
 				if opts.SectorSize != msg.PayloadPosition {
+					// TODO: Check for race condition when sector is
+					// being updated and is written _after_ our request...  because
+					// then this check will fail.
 					lgr.Trace("received unexpected payload position", "sector_size", opts.SectorSize, "payload_position", msg.PayloadPosition)
 					continue
 				}
 				sectorSize := msg.PayloadPosition + uint16(len(msg.Payload))
-				if int(sectorSize) > blob.Size {
-					lgr.Trace("received unexpected payload size", "sector_size", sectorSize)
+				// Additional sanity check: make sure that update does not overflow max sectors.
+				if int(sectorSize) > blob.SectorCount {
+					lgr.Trace("received unexpected sector size", "sector_size", sectorSize, "max", blob.SectorCount)
 					continue
 				}
+				// Verify that the prev hash from the remote matches our
+				// current tip hash i.e.  the update starts _after_ our latest
+				// sector and both the sector hashes match.
 				if opts.PrevHash != msg.PrevHash {
-					lgr.Trace("received unexpected prev hash", "sector_size", sectorSize)
+					lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
 					errs <- ErrInvalidPrevHash
 					break
 				}
+				// Generate the current tip hash from prev hash and the payload sectors
 				var sectorTipHash crypto.Hash = opts.PrevHash
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					sectorTipHash = blob.SerialHashSector(msg.Payload[i], sectorTipHash)
 				}
-				// prev hash - store it in struct
+				// Verify that the update is valid by using the recomputed
+				// sector size, sector tip hash etc and validate the signature
+				// over the hash of the metadata.
+				// TODO: store the latest tip hash
 				if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
-					// faulty message
 					lgr.Trace("blob res validation failed", "err", err)
 					errs <- err
 					break

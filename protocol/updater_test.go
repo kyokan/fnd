@@ -127,7 +127,7 @@ func TestUpdater(t *testing.T) {
 			},
 		},
 		{
-			"aborts sync when there is a invalid payload signature",
+			"aborts sync when there is a prev hash mismatch",
 			func(t *testing.T, setup *updaterTestSetup) {
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
 					if err := store.SetInitialImportCompleteTx(tx); err != nil {
@@ -153,6 +153,9 @@ func TestUpdater(t *testing.T) {
 					rand.Reader,
 				)
 				// create the new blob remotely
+				// this forces an equivocation because local has 10 random sectors
+				// and remote as 20 _different_ random sectors. Prev Hash at 10 will
+				// mismatch, leading to ErrInvalidPrevHash
 				update := mockapp.FillBlobReader(
 					t,
 					setup.rs.DB,
@@ -181,7 +184,7 @@ func TestUpdater(t *testing.T) {
 				}
 				err := UpdateBlob(cfg)
 				require.NotNil(t, err)
-				require.True(t, errors.Is(err, ErrInvalidPayloadSignature))
+				require.True(t, errors.Is(err, ErrInvalidPrevHash))
 			},
 		},
 		{
