@@ -157,6 +157,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 						lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
 						if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, msg.PrevHash, msg.ReservedRoot, msg.Signature); err != nil {
 							errs <- ErrPayloadEquivocation
+							break
 						}
 						// TODO: generate eq proof if epoch height eq msg
 						// broadcast update msg sector size zero
