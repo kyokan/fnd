@@ -138,7 +138,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				}
 				// Generate the current tip hash from prev hash and the payload
 				// sectors.
-				var sectorTipHash crypto.Hash = opts.PrevHash
+				var sectorTipHash crypto.Hash = msg.PrevHash
 				for i := 0; int(i) < len(msg.Payload); i++ {
 					sectorTipHash = blob.SerialHashSector(msg.Payload[i], sectorTipHash)
 				}
@@ -149,44 +149,43 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				// TODO: store the latest tip hash
 				if err := validateBlobRes(opts.DB, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
 					lgr.Trace("blob res validation failed", "err", err)
-					// Verify that the prev hash from the remote matches our
-					// current tip hash i.e.  the update starts _after_ our
-					// latest sector and both the sector hashes match.  A
-					// mismatch indicates a proof of equivocation.
-					if opts.PrevHash != msg.PrevHash {
-						lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
-						if err := validateBlobRes(opts.DB, msg.Name, msg.EpochHeight, sectorSize, msg.PrevHash, msg.ReservedRoot, msg.Signature); err != nil {
-							if opts.EpochHeight == msg.EpochHeight {
-								if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
-									msg.PayloadPosition = blob.MaxSectors
-									return store.SetEquivocationProofTx(tx, msg.Name, msg)
-								}); err != nil {
-									lgr.Trace("error writing equivocation proof", "err", err)
-								}
-								// TODO: handle equivocation proof
-								// local
-								// -> update { sectorSize: 0 }
-								// <- BlobReq { sectorSize: 0xff }
-								// -> BlobRes { payloadPosition: 0xff }
-								// remote
-								// <- update { sectorSize: 0 }
-								// -> BlobReq { sectorSize: 0xff }
-								// <- BlobRes { payloadPosition: 0xff }
-								update := &wire.Update{
-									Name:        msg.Name,
-									EpochHeight: msg.EpochHeight,
-									SectorSize:  0,
-								}
-								p2p.GossipAll(opts.Mux, update)
-							}
-							errs <- ErrPayloadEquivocation
-							break
-						}
-					}
 					// If prev hash matches, we have an invalid signature,
 					// which cannot be used as a proof of equivocation.
 					// TODO: ban the peer as it is clearly sending invalid data
 					errs <- errors.Wrap(ErrInvalidPayloadSignature, "signature validation failed")
+					break
+				}
+				// Verify that the prev hash from the remote matches our
+				// current tip hash i.e.  the update starts _after_ our
+				// latest sector and both the sector hashes match.  A
+				// mismatch indicates a proof of equivocation.
+				if opts.PrevHash != msg.PrevHash {
+					lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
+					if opts.EpochHeight == msg.EpochHeight {
+						// TODO: check if eq exists
+						if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
+							msg.PayloadPosition = blob.MaxSectors
+							return store.SetEquivocationProofTx(tx, msg.Name, msg)
+						}); err != nil {
+							lgr.Trace("error writing equivocation proof", "err", err)
+						}
+						// TODO: handle equivocation proof
+						// local
+						// -> update { sectorSize: 0 }
+						// <- BlobReq { sectorSize: 0xff }
+						// -> BlobRes { payloadPosition: 0xff }
+						// remote
+						// <- update { sectorSize: 0 }
+						// -> BlobReq { sectorSize: 0xff }
+						// <- BlobRes { payloadPosition: 0xff }
+						update := &wire.Update{
+							Name:        msg.Name,
+							EpochHeight: msg.EpochHeight,
+							SectorSize:  0,
+						}
+						p2p.GossipAll(opts.Mux, update)
+					}
+					errs <- ErrPayloadEquivocation
 					break
 				}
 				for i := 0; int(i) < len(msg.Payload); i++ {
