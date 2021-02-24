@@ -127,7 +127,7 @@ func TestUpdater(t *testing.T) {
 			},
 		},
 		{
-			"aborts sync when there is a prev hash mismatch",
+			"aborts sync when there is an equivocation",
 			func(t *testing.T, setup *updaterTestSetup) {
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
 					if err := store.SetInitialImportCompleteTx(tx); err != nil {
@@ -184,7 +184,7 @@ func TestUpdater(t *testing.T) {
 				}
 				err := UpdateBlob(cfg)
 				require.NotNil(t, err)
-				require.True(t, errors.Is(err, ErrInvalidPrevHash))
+				require.True(t, errors.Is(err, ErrPayloadEquivocation))
 			},
 		},
 		{

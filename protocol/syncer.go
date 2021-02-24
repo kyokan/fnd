@@ -20,7 +20,7 @@ const (
 
 var (
 	ErrInvalidPayloadSignature = errors.New("update signature is invalid")
-	ErrInvalidPrevHash         = errors.New("update prev hash is invalid")
+	ErrPayloadEquivocation     = errors.New("update payload is equivocated")
 	ErrSyncerNoProgress        = errors.New("sync not progressing")
 	ErrSyncerMaxAttempts       = errors.New("reached max sync attempts")
 )
@@ -155,8 +155,9 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 					// mismatch indicates a proof of equivocation.
 					if opts.PrevHash != msg.PrevHash {
 						lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
-						errs <- ErrInvalidPrevHash
-						break
+						if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, msg.PrevHash, msg.ReservedRoot, msg.Signature); err != nil {
+							errs <- ErrPayloadEquivocation
+						}
 						// TODO: generate eq proof if epoch height eq msg
 						// broadcast update msg sector size zero
 						// payload size 0xff
