@@ -74,7 +74,9 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 		{
 			"invalid name",
 			&wire.Update{
-				Name: "--not-a-good-name--",
+				Name:        "--not-a-good-name--",
+				EpochHeight: 52,
+				SectorSize:  10,
 			},
 			func(t *testing.T, err error) {
 				require.Contains(t, err.Error(), "name is invalid")
@@ -83,7 +85,9 @@ func TestUpdateQueue_Enqueue_InvalidBeforeEnqueue(t *testing.T) {
 		{
 			"banned name",
 			&wire.Update{
-				Name: "banned",
+				Name:        "banned",
+				EpochHeight: 52,
+				SectorSize:  10,
 			},
 			func(t *testing.T, err error) {
 				require.Contains(t, err.Error(), "name is banned")
