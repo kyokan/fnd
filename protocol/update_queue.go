@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"fnd/blob"
 	"fnd/config"
 	"fnd/crypto"
 	"fnd/log"
@@ -98,6 +99,15 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 	}
 	if !initialImportComplete {
 		return ErrInitialImportIncomplete
+	}
+
+	if update.SectorSize == 0 {
+		err := u.mux.Send(peerID, &wire.BlobReq{
+			Name:        update.Name,
+			EpochHeight: update.EpochHeight,
+			SectorSize:  blob.MaxSectors,
+		})
+		return err
 	}
 
 	if err := u.validateUpdate(update.Name); err != nil {
