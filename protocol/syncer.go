@@ -42,18 +42,18 @@ type payloadRes struct {
 	msg    *wire.BlobRes
 }
 
-func validateBlobRes(opts *SyncSectorsOpts, name string, epochHeight, sectorSize uint16, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) error {
+func validateBlobRes(db *leveldb.DB, name string, epochHeight, sectorSize uint16, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) error {
 	if err := primitives.ValidateName(name); err != nil {
 		return errors.Wrap(err, "update name is invalid")
 	}
-	banned, err := store.NameIsBanned(opts.DB, name)
+	banned, err := store.NameIsBanned(db, name)
 	if err != nil {
 		return errors.Wrap(err, "error reading name ban state")
 	}
 	if banned {
 		return errors.New("name is banned")
 	}
-	info, err := store.GetNameInfo(opts.DB, name)
+	info, err := store.GetNameInfo(db, name)
 	if err != nil {
 		return errors.Wrap(err, "error reading name info")
 	}
@@ -147,7 +147,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				// is first hashed and the signature is validated against the
 				// name's pubkey. See validateBlobRes.
 				// TODO: store the latest tip hash
-				if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
+				if err := validateBlobRes(opts.DB, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
 					lgr.Trace("blob res validation failed", "err", err)
 					// Verify that the prev hash from the remote matches our
 					// current tip hash i.e.  the update starts _after_ our
@@ -155,7 +155,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 					// mismatch indicates a proof of equivocation.
 					if opts.PrevHash != msg.PrevHash {
 						lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
-						if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, msg.PrevHash, msg.ReservedRoot, msg.Signature); err != nil {
+						if err := validateBlobRes(opts.DB, msg.Name, msg.EpochHeight, sectorSize, msg.PrevHash, msg.ReservedRoot, msg.Signature); err != nil {
 							if opts.EpochHeight == msg.EpochHeight {
 								if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
 									msg.PayloadPosition = blob.MaxSectors
@@ -166,12 +166,12 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 								// TODO: handle equivocation proof
 								// local
 								// -> update { sectorSize: 0 }
-								// <- BlobReq { sectorSize 0xff }
-								// -> BlobRes { equivocation proof }
+								// <- BlobReq { sectorSize: 0xff }
+								// -> BlobRes { payloadPosition: 0xff }
 								// remote
 								// <- update { sectorSize: 0 }
-								// -> BlobReq { sectorSize 0xff }
-								// <- BlobRes { equivocation proof }
+								// -> BlobReq { sectorSize: 0xff }
+								// <- BlobRes { payloadPosition: 0xff }
 								update := &wire.Update{
 									Name:        msg.Name,
 									EpochHeight: msg.EpochHeight,
