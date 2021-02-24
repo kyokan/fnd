@@ -85,6 +85,7 @@ func (u *UpdateQueue) Stop() error {
 	return nil
 }
 
+// TODO: prioritize higher epochs, sector sizes
 func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 	// use atomic below to prevent having to lock mu
 	// during expensive name validation calls when
