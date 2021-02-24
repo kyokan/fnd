@@ -12,13 +12,20 @@ import (
 type EquivocationProof struct {
 	HashCacher
 
-	Name            string
-	EpochHeight     uint16
-	PayloadPosition uint16
-	PrevHash        crypto.Hash
-	ReservedRoot    crypto.Hash
-	Payload         []blob.Sector
-	Signature       crypto.Signature
+	Name string
+
+	OurEpochHeight     uint16
+	OurPayloadPosition uint16
+	OurPrevHash        crypto.Hash
+	OurReservedRoot    crypto.Hash
+	OurPayload         []blob.Sector
+	OurSignature       crypto.Signature
+
+	TheirEpochHeight   uint16
+	TheirSectorSize    uint16
+	TheirSectorTipHash crypto.Hash
+	TheirReservedRoot  crypto.Hash
+	TheirSignature     crypto.Signature
 }
 
 var _ Message = (*EquivocationProof)(nil)
@@ -34,23 +41,33 @@ func (s *EquivocationProof) Equals(other Message) bool {
 	}
 
 	return s.Name == cast.Name &&
-		s.EpochHeight == cast.EpochHeight &&
-		s.PayloadPosition == cast.PayloadPosition &&
-		s.PrevHash == cast.PrevHash &&
-		s.ReservedRoot == cast.ReservedRoot &&
-		s.Signature == cast.Signature
+		s.OurEpochHeight == cast.OurEpochHeight &&
+		s.OurPayloadPosition == cast.OurPayloadPosition &&
+		s.OurPrevHash == cast.OurPrevHash &&
+		s.OurReservedRoot == cast.OurReservedRoot &&
+		s.OurSignature == cast.OurSignature &&
+		s.TheirEpochHeight == cast.TheirEpochHeight &&
+		s.TheirSectorSize == cast.TheirSectorSize &&
+		s.TheirSectorTipHash == cast.TheirSectorTipHash &&
+		s.TheirReservedRoot == cast.TheirReservedRoot &&
+		s.TheirSignature == cast.TheirSignature
 }
 
 func (s *EquivocationProof) Encode(w io.Writer) error {
 	return dwire.EncodeFields(
 		w,
 		s.Name,
-		s.EpochHeight,
-		s.PayloadPosition,
-		s.PrevHash,
-		s.ReservedRoot,
-		s.Payload,
-		s.Signature,
+		s.OurEpochHeight,
+		s.OurPayloadPosition,
+		s.OurPrevHash,
+		s.OurReservedRoot,
+		s.OurPayload,
+		s.OurSignature,
+		s.TheirEpochHeight,
+		s.TheirSectorSize,
+		s.TheirSectorTipHash,
+		s.TheirReservedRoot,
+		s.TheirSignature,
 	)
 }
 
@@ -58,12 +75,17 @@ func (s *EquivocationProof) Decode(r io.Reader) error {
 	return dwire.DecodeFields(
 		r,
 		&s.Name,
-		&s.EpochHeight,
-		&s.PayloadPosition,
-		&s.PrevHash,
-		&s.ReservedRoot,
-		&s.Payload,
-		&s.Signature,
+		&s.OurEpochHeight,
+		&s.OurPayloadPosition,
+		&s.OurPrevHash,
+		&s.OurReservedRoot,
+		&s.OurPayload,
+		&s.OurSignature,
+		&s.TheirEpochHeight,
+		&s.TheirSectorSize,
+		&s.TheirSectorTipHash,
+		&s.TheirReservedRoot,
+		&s.TheirSignature,
 	)
 }
 

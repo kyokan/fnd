@@ -167,9 +167,26 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 						// version A -> [header, sig] version B -> [payload pos, prev hash, payload, sign]
 						// remote reconstructs tip hash, sector size and matches versions A and B
 						// and if both are valid, handles equivocation condition
+						header, err := store.GetHeader(opts.DB, msg.Name)
+						if err != nil {
+							lgr.Trace("error getting headers", "err", err)
+							break
+						}
 						if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
-							msg.PayloadPosition = blob.MaxSectors
-							return store.SetEquivocationProofTx(tx, msg.Name, msg)
+							proof := &wire.EquivocationProof{
+								OurEpochHeight:     msg.EpochHeight,
+								OurPayloadPosition: msg.PayloadPosition,
+								OurPrevHash:        msg.PrevHash,
+								OurReservedRoot:    msg.ReservedRoot,
+								OurPayload:         msg.Payload,
+								OurSignature:       msg.Signature,
+								TheirEpochHeight:   header.EpochHeight,
+								TheirSectorSize:    header.SectorSize,
+								TheirSectorTipHash: header.SectorTipHash,
+								TheirReservedRoot:  header.ReservedRoot,
+								TheirSignature:     header.Signature,
+							}
+							return store.SetEquivocationProofTx(tx, msg.Name, proof)
 						}); err != nil {
 							lgr.Trace("error writing equivocation proof", "err", err)
 						}
