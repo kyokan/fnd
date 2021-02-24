@@ -13,22 +13,23 @@ var (
 	equivocationProofsPrefix = Prefixer("equivocationproofs")
 )
 
-func GeEquivocationProof(db *leveldb.DB, name string) (*wire.EquivocationProof, error) {
-	proof := new(wire.EquivocationProof)
+func GeEquivocationProof(db *leveldb.DB, name string) (*wire.BlobRes, error) {
+	proof := new(wire.BlobRes)
 	equivocationProofData, err := db.Get(equivocationProofsPrefix(name), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting equivocation proof data")
 	}
-	mustUnmarshalJSON(equivocationProofData, proof)
+	wr := bytes.NewReader(equivocationProofData)
+	proof.Decode(wr)
 	return proof, nil
 }
 
-func SetEquivocationProofTx(tx *leveldb.Transaction, name string, proof *wire.EquivocationProof) error {
+func SetEquivocationProofTx(tx *leveldb.Transaction, name string, proof *wire.BlobRes) error {
 	var buf bytes.Buffer
 	wr := bufio.NewWriter(&buf)
 	proof.Encode(wr)
 	if err := tx.Put(equivocationProofsPrefix(proof.Name), buf.Bytes(), nil); err != nil {
-		return errors.Wrap(err, "error writing header tree")
+		return errors.Wrap(err, "error writing equivocation proof")
 	}
 	return nil
 }

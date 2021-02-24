@@ -156,18 +156,26 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 					if opts.PrevHash != msg.PrevHash {
 						lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
 						if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, msg.PrevHash, msg.ReservedRoot, msg.Signature); err != nil {
+							if opts.EpochHeight == msg.EpochHeight {
+								if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
+									return store.SetEquivocationProofTx(tx, msg.Name, msg)
+								}); err != nil {
+									lgr.Trace("error writing equivocation proof", "err", err)
+								}
+								// TODO: handle equivocation proof
+								// -> update { sectorSize: 0 }
+								// <- BlobReq { sectorSize 0xff }
+								// -> BlobRes { equivocation proof }
+								update := &wire.Update{
+									Name:        msg.Name,
+									EpochHeight: msg.EpochHeight,
+									SectorSize:  0,
+								}
+								p2p.GossipAll(opts.Mux, update)
+							}
 							errs <- ErrPayloadEquivocation
 							break
 						}
-						// TODO: generate eq proof if epoch height eq msg
-						// broadcast update msg sector size zero
-						// payload size 0xff
-						// blob req sector size 0xff
-						// -> eq proof
-						// <- handle eq
-						// eq epoch height must be same, same reserved root
-						// -> log time, ban name
-						// if already has eq proof dont write to disk
 					}
 					// If prev hash matches, we have an invalid signature,
 					// which cannot be used as a proof of equivocation.
