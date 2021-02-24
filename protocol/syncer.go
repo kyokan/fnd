@@ -163,9 +163,14 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 									lgr.Trace("error writing equivocation proof", "err", err)
 								}
 								// TODO: handle equivocation proof
+								// local
 								// -> update { sectorSize: 0 }
 								// <- BlobReq { sectorSize 0xff }
 								// -> BlobRes { equivocation proof }
+								// remote
+								// <- update { sectorSize: 0 }
+								// -> BlobReq { sectorSize 0xff }
+								// <- BlobRes { equivocation proof }
 								update := &wire.Update{
 									Name:        msg.Name,
 									EpochHeight: msg.EpochHeight,

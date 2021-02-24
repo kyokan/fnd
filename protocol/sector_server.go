@@ -53,6 +53,22 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 		"peer_id", peerID,
 	)
 
+	if reqMsg.SectorSize == blob.MaxSectors {
+		// handle equivocation proof
+		blobRes, err := store.GeEquivocationProof(s.db, reqMsg.Name)
+		if err != nil {
+			lgr.Error(
+				"failed to fetch equivocation proof",
+				"err", err)
+			return
+		}
+		if err := s.mux.Send(peerID, blobRes); err != nil {
+			s.lgr.Error("error serving equivocation proof", "err", err)
+			return
+		}
+		return
+	}
+
 	if !s.nameLocker.TryRLock(reqMsg.Name) {
 		lgr.Info("dropping sector req for busy name")
 		return
