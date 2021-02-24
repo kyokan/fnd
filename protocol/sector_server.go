@@ -39,6 +39,7 @@ func NewSectorServer(mux *p2p.PeerMuxer, db *leveldb.DB, bs blob.Store, nameLock
 
 func (s *SectorServer) Start() error {
 	s.mux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeBlobReq, s.onBlobReq))
+	s.mux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeBlobRes, s.onBlobRes))
 	return nil
 }
 
@@ -153,4 +154,16 @@ func (s *SectorServer) sendResponse(peerID crypto.Hash, name string, prevHash cr
 		"peer_id", peerID,
 		"sector_size", sectorSize,
 	)
+}
+
+func (s *SectorServer) onBlobRes(peerID crypto.Hash, envelope *wire.Envelope) {
+	reqMsg := envelope.Message.(*wire.BlobRes)
+	lgr := s.lgr.Sub(
+		"name", reqMsg.Name,
+		"peer_id", peerID,
+	)
+	if reqMsg.PayloadPosition == blob.MaxSectors {
+		lgr.Trace("handling equivocation response")
+	}
+	return
 }

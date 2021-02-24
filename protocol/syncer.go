@@ -158,6 +158,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 						if err := validateBlobRes(opts, msg.Name, msg.EpochHeight, sectorSize, msg.PrevHash, msg.ReservedRoot, msg.Signature); err != nil {
 							if opts.EpochHeight == msg.EpochHeight {
 								if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
+									msg.PayloadPosition = blob.MaxSectors
 									return store.SetEquivocationProofTx(tx, msg.Name, msg)
 								}); err != nil {
 									lgr.Trace("error writing equivocation proof", "err", err)
