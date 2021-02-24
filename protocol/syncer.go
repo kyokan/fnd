@@ -162,11 +162,11 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				if opts.PrevHash != msg.PrevHash {
 					lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
 					if opts.EpochHeight == msg.EpochHeight {
-						// TODO: check and skip if equivocation already exists
-						// TODO: rewrite to use EquivocationProof wire message:
-						// version A -> [header, sig] version B -> [payload pos, prev hash, payload, sign]
-						// remote reconstructs tip hash, sector size and matches versions A and B
-						// and if both are valid, handles equivocation condition
+						// skip if equivocation already exists
+						if _, err := store.GeEquivocationProof(opts.DB, msg.Name); err == nil {
+							lgr.Trace("skipping update, equivocation exists")
+							break
+						}
 						header, err := store.GetHeader(opts.DB, msg.Name)
 						if err != nil {
 							lgr.Trace("error getting headers", "err", err)
