@@ -174,17 +174,17 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 						}
 						if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
 							proof := &wire.EquivocationProof{
-								OurEpochHeight:     msg.EpochHeight,
-								OurPayloadPosition: msg.PayloadPosition,
-								OurPrevHash:        msg.PrevHash,
-								OurReservedRoot:    msg.ReservedRoot,
-								OurPayload:         msg.Payload,
-								OurSignature:       msg.Signature,
-								TheirEpochHeight:   header.EpochHeight,
-								TheirSectorSize:    header.SectorSize,
-								TheirSectorTipHash: header.SectorTipHash,
-								TheirReservedRoot:  header.ReservedRoot,
-								TheirSignature:     header.Signature,
+								RemoteEpochHeight:     msg.EpochHeight,
+								RemotePayloadPosition: msg.PayloadPosition,
+								RemotePrevHash:        msg.PrevHash,
+								RemoteReservedRoot:    msg.ReservedRoot,
+								RemotePayload:         msg.Payload,
+								RemoteSignature:       msg.Signature,
+								LocalEpochHeight:   header.EpochHeight,
+								LocalSectorSize:    header.SectorSize,
+								LocalSectorTipHash: header.SectorTipHash,
+								LocalReservedRoot:  header.ReservedRoot,
+								LocalSignature:     header.Signature,
 							}
 							return store.SetEquivocationProofTx(tx, msg.Name, proof)
 						}); err != nil {

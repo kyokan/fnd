@@ -14,18 +14,18 @@ type EquivocationProof struct {
 
 	Name string
 
-	OurEpochHeight     uint16
-	OurPayloadPosition uint16
-	OurPrevHash        crypto.Hash
-	OurReservedRoot    crypto.Hash
-	OurPayload         []blob.Sector
-	OurSignature       crypto.Signature
+	RemoteEpochHeight     uint16
+	RemotePayloadPosition uint16
+	RemotePrevHash        crypto.Hash
+	RemoteReservedRoot    crypto.Hash
+	RemotePayload         []blob.Sector
+	RemoteSignature       crypto.Signature
 
-	TheirEpochHeight   uint16
-	TheirSectorSize    uint16
-	TheirSectorTipHash crypto.Hash
-	TheirReservedRoot  crypto.Hash
-	TheirSignature     crypto.Signature
+	LocalEpochHeight   uint16
+	LocalSectorSize    uint16
+	LocalSectorTipHash crypto.Hash
+	LocalReservedRoot  crypto.Hash
+	LocalSignature     crypto.Signature
 }
 
 var _ Message = (*EquivocationProof)(nil)
@@ -41,33 +41,33 @@ func (s *EquivocationProof) Equals(other Message) bool {
 	}
 
 	return s.Name == cast.Name &&
-		s.OurEpochHeight == cast.OurEpochHeight &&
-		s.OurPayloadPosition == cast.OurPayloadPosition &&
-		s.OurPrevHash == cast.OurPrevHash &&
-		s.OurReservedRoot == cast.OurReservedRoot &&
-		s.OurSignature == cast.OurSignature &&
-		s.TheirEpochHeight == cast.TheirEpochHeight &&
-		s.TheirSectorSize == cast.TheirSectorSize &&
-		s.TheirSectorTipHash == cast.TheirSectorTipHash &&
-		s.TheirReservedRoot == cast.TheirReservedRoot &&
-		s.TheirSignature == cast.TheirSignature
+		s.RemoteEpochHeight == cast.RemoteEpochHeight &&
+		s.RemotePayloadPosition == cast.RemotePayloadPosition &&
+		s.RemotePrevHash == cast.RemotePrevHash &&
+		s.RemoteReservedRoot == cast.RemoteReservedRoot &&
+		s.RemoteSignature == cast.RemoteSignature &&
+		s.LocalEpochHeight == cast.LocalEpochHeight &&
+		s.LocalSectorSize == cast.LocalSectorSize &&
+		s.LocalSectorTipHash == cast.LocalSectorTipHash &&
+		s.LocalReservedRoot == cast.LocalReservedRoot &&
+		s.LocalSignature == cast.LocalSignature
 }
 
 func (s *EquivocationProof) Encode(w io.Writer) error {
 	return dwire.EncodeFields(
 		w,
 		s.Name,
-		s.OurEpochHeight,
-		s.OurPayloadPosition,
-		s.OurPrevHash,
-		s.OurReservedRoot,
-		s.OurPayload,
-		s.OurSignature,
-		s.TheirEpochHeight,
-		s.TheirSectorSize,
-		s.TheirSectorTipHash,
-		s.TheirReservedRoot,
-		s.TheirSignature,
+		s.RemoteEpochHeight,
+		s.RemotePayloadPosition,
+		s.RemotePrevHash,
+		s.RemoteReservedRoot,
+		s.RemotePayload,
+		s.RemoteSignature,
+		s.LocalEpochHeight,
+		s.LocalSectorSize,
+		s.LocalSectorTipHash,
+		s.LocalReservedRoot,
+		s.LocalSignature,
 	)
 }
 
@@ -75,17 +75,17 @@ func (s *EquivocationProof) Decode(r io.Reader) error {
 	return dwire.DecodeFields(
 		r,
 		&s.Name,
-		&s.OurEpochHeight,
-		&s.OurPayloadPosition,
-		&s.OurPrevHash,
-		&s.OurReservedRoot,
-		&s.OurPayload,
-		&s.OurSignature,
-		&s.TheirEpochHeight,
-		&s.TheirSectorSize,
-		&s.TheirSectorTipHash,
-		&s.TheirReservedRoot,
-		&s.TheirSignature,
+		&s.RemoteEpochHeight,
+		&s.RemotePayloadPosition,
+		&s.RemotePrevHash,
+		&s.RemoteReservedRoot,
+		&s.RemotePayload,
+		&s.RemoteSignature,
+		&s.LocalEpochHeight,
+		&s.LocalSectorSize,
+		&s.LocalSectorTipHash,
+		&s.LocalReservedRoot,
+		&s.LocalSignature,
 	)
 }
 
