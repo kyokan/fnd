@@ -166,11 +166,45 @@ func (s *SectorServer) sendResponse(peerID crypto.Hash, name string, prevHash cr
 }
 
 func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.Envelope) {
-	reqMsg := envelope.Message.(*wire.EquivocationProof)
+	msg := envelope.Message.(*wire.EquivocationProof)
 	lgr := s.lgr.Sub(
-		"name", reqMsg.Name,
+		"name", msg.Name,
 		"peer_id", peerID,
 	)
-	lgr.Trace("handling equivocation response")
+	lgr.Trace("handling equivocation response", "name", msg.Name)
+	if msg.LocalEpochHeight != msg.RemoteEpochHeight {
+		s.lgr.Warn("unexpected epoch height", "local_epoch_height", msg.LocalEpochHeight, "remote_epoch_height", msg.RemoteEpochHeight)
+		return
+	}
+	if msg.LocalSectorSize != msg.RemotePayloadPosition {
+		s.lgr.Warn("unexpected sector size", "local_sector_size", msg.LocalSectorSize, "remote_payload_position", msg.RemotePayloadPosition)
+		return
+	}
+	if err := validateBlobRes(s.db, msg.Name, msg.LocalEpochHeight, msg.LocalSectorSize, msg.LocalSectorTipHash, msg.LocalReservedRoot, msg.LocalSignature); err != nil {
+		lgr.Warn("local signaure validation failed", "err", err)
+		return
+	}
+	sectorSize := msg.RemotePayloadPosition + uint16(len(msg.RemotePayload))
+	// Additional sanity check: make sure that update does not overflow max sectors.
+	if int(sectorSize) > blob.MaxSectors {
+		lgr.Warn("received unexpected sector size", "sector_size", sectorSize, "max", blob.MaxSectors)
+		return
+	}
+	// Generate the current tip hash from prev hash and the payload
+	// sectors.
+	var sectorTipHash crypto.Hash = msg.RemotePrevHash
+	for i := 0; int(i) < len(msg.RemotePayload); i++ {
+		sectorTipHash = blob.SerialHashSector(msg.RemotePayload[i], sectorTipHash)
+	}
+	// Verify that the update is valid by using the recomputed
+	// sector size, sector tip hash and other metadata. This data
+	// is first hashed and the signature is validated against the
+	// name's pubkey. See validateBlobRes.
+	// TODO: store the latest tip hash
+	if err := validateBlobRes(s.db, msg.Name, msg.RemoteEpochHeight, sectorSize, sectorTipHash, msg.RemoteReservedRoot, msg.RemoteSignature); err != nil {
+		lgr.Warn("remote signaure validation failed", "err", err)
+		return
+	}
+	// TODO: log timestamp and ban name
 	return
 }

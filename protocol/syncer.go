@@ -175,6 +175,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 						}
 						if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
 							proof := &wire.EquivocationProof{
+								Name:                  msg.Name,
 								RemoteEpochHeight:     msg.EpochHeight,
 								RemotePayloadPosition: msg.PayloadPosition,
 								RemotePrevHash:        msg.PrevHash,

@@ -111,6 +111,15 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync when there is an equivocation",
 			func(t *testing.T, setup *updaterTestSetup) {
+				require.NoError(t, store.WithTx(setup.rs.DB, func(tx *leveldb.Transaction) error {
+					if err := store.SetInitialImportCompleteTx(tx); err != nil {
+						return err
+					}
+					if err := store.SetNameInfoTx(tx, name, setup.tp.LocalSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(10)
@@ -157,6 +166,7 @@ func TestUpdater(t *testing.T) {
 				}
 				err := UpdateBlob(cfg)
 				require.NotNil(t, err)
+				time.Sleep(time.Second)
 				require.True(t, errors.Is(err, ErrPayloadEquivocation))
 			},
 		},
