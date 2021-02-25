@@ -167,6 +167,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 							lgr.Trace("skipping update, equivocation exists")
 							break
 						}
+						// TODO: record timestamp and ban this name
 						header, err := store.GetHeader(opts.DB, msg.Name)
 						if err != nil {
 							lgr.Trace("error getting header", "err", err)
@@ -180,25 +181,16 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 								RemoteReservedRoot:    msg.ReservedRoot,
 								RemotePayload:         msg.Payload,
 								RemoteSignature:       msg.Signature,
-								LocalEpochHeight:   header.EpochHeight,
-								LocalSectorSize:    header.SectorSize,
-								LocalSectorTipHash: header.SectorTipHash,
-								LocalReservedRoot:  header.ReservedRoot,
-								LocalSignature:     header.Signature,
+								LocalEpochHeight:      header.EpochHeight,
+								LocalSectorSize:       header.SectorSize,
+								LocalSectorTipHash:    header.SectorTipHash,
+								LocalReservedRoot:     header.ReservedRoot,
+								LocalSignature:        header.Signature,
 							}
 							return store.SetEquivocationProofTx(tx, msg.Name, proof)
 						}); err != nil {
 							lgr.Trace("error writing equivocation proof", "err", err)
 						}
-						// TODO: handle equivocation proof
-						// local
-						// -> update { sectorSize: 0 }
-						// <- BlobReq { sectorSize: 0xff }
-						// -> BlobRes { payloadPosition: 0xff }
-						// remote
-						// <- update { sectorSize: 0 }
-						// -> BlobReq { sectorSize: 0xff }
-						// <- BlobRes { payloadPosition: 0xff }
 						update := &wire.Update{
 							Name:        msg.Name,
 							EpochHeight: msg.EpochHeight,
