@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"bytes"
 	"fmt"
 	"fnd/blob"
 	"fnd/config"
@@ -56,14 +57,22 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 
 	if reqMsg.SectorSize == blob.MaxSectors {
 		// handle equivocation proof
-		blobRes, err := store.GeEquivocationProof(s.db, reqMsg.Name)
+		raw, err := store.GetEquivocationProof(s.db, reqMsg.Name)
 		if err != nil {
 			lgr.Error(
 				"failed to fetch equivocation proof",
 				"err", err)
 			return
 		}
-		if err := s.mux.Send(peerID, blobRes); err != nil {
+		proof := &wire.EquivocationProof{}
+		buf := bytes.NewReader(raw)
+		if err := proof.Decode(buf); err != nil {
+			lgr.Error(
+				"failed to deserialize equivocation proof",
+				"err", err)
+			return
+		}
+		if err := s.mux.Send(peerID, proof); err != nil {
 			s.lgr.Error("error serving equivocation proof", "err", err)
 			return
 		}
