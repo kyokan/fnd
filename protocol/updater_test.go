@@ -30,15 +30,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"syncs sectors when the local node has never seen the blob",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
@@ -72,15 +63,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"syncs sectors when the local node has an older blob",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(10)
@@ -129,15 +111,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync when there is an equivocation",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(10)
@@ -190,16 +163,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync when there is a invalid payload signature",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					// TODO: ideally setup a fake signer
-					if err := store.SetNameInfoTx(tx, name, setup.tp.LocalSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(10)
@@ -215,9 +178,16 @@ func TestUpdater(t *testing.T) {
 					mockapp.NullReader,
 				)
 				// The sectors are generated from null reader, so there won't
-				// be an equivocation, however we used local signer on the
+				// be an equivocation, however we use local signer on the
 				// remote (instead of remote signer like other test cases
 				// above), so it generates an invalid signature.
+				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					// TODO: ideally setup a fake signer
+					if err := store.SetNameInfoTx(tx, name, setup.tp.LocalSigner.Pub(), 10); err != nil {
+						return err
+					}
+					return nil
+				}))
 				update := mockapp.FillBlobReader(
 					t,
 					setup.rs.DB,
@@ -252,15 +222,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync if the new sector size is equal to the stored sector size",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(0)
@@ -304,15 +265,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync if the name is locked",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				locker := util.NewMultiLocker()
 				require.True(t, locker.TryLock(name))
 				cfg := &UpdateConfig{
@@ -336,15 +288,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync if the new sector size is equal to the stored sector size",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
 				sectorSize := uint16(0)
@@ -388,15 +331,6 @@ func TestUpdater(t *testing.T) {
 		{
 			"aborts sync if the name is locked",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				locker := util.NewMultiLocker()
 				require.True(t, locker.TryLock(name))
 				cfg := &UpdateConfig{
@@ -429,6 +363,23 @@ func TestUpdater(t *testing.T) {
 			remoteSS := NewSectorServer(testPeers.RemoteMux, remoteStorage.DB, remoteStorage.BlobStore, util.NewMultiLocker())
 			require.NoError(t, remoteSS.Start())
 			defer require.NoError(t, remoteSS.Stop())
+			localSS := NewSectorServer(testPeers.LocalMux, localStorage.DB, localStorage.BlobStore, util.NewMultiLocker())
+			require.NoError(t, localSS.Start())
+			defer require.NoError(t, localSS.Stop())
+			go func() {
+				remoteUQ := NewUpdateQueue(testPeers.RemoteMux, localStorage.DB)
+				require.NoError(t, remoteUQ.Start())
+				defer require.NoError(t, remoteUQ.Stop())
+			}()
+			require.NoError(t, store.WithTx(localStorage.DB, func(tx *leveldb.Transaction) error {
+				if err := store.SetInitialImportCompleteTx(tx); err != nil {
+					return err
+				}
+				if err := store.SetNameInfoTx(tx, name, testPeers.RemoteSigner.Pub(), 10); err != nil {
+					return err
+				}
+				return nil
+			}))
 
 			tt.run(t, &updaterTestSetup{
 				tp: testPeers,
