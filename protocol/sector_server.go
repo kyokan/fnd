@@ -55,8 +55,30 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 		"peer_id", peerID,
 	)
 
+	header, err := store.GetHeader(s.db, reqMsg.Name)
+	if err != nil {
+		lgr.Error(
+			"failed to fetch header",
+			"err", err)
+		return
+	}
+
+	if header.EpochHeight < reqMsg.EpochHeight {
+		lgr.Error(
+			"request epoch height must be <= header epoch height",
+			"request_epoch_height", reqMsg.EpochHeight,
+			"header_epoch_height", header.EpochHeight)
+		return
+	}
+
 	if reqMsg.SectorSize == blob.MaxSectors {
-		// handle equivocation proof
+		if header.EpochHeight != reqMsg.EpochHeight {
+			lgr.Error(
+				"request epoch height must be == header epoch height",
+				"request_epoch_height", reqMsg.EpochHeight,
+				"header_epoch_height", header.EpochHeight)
+			return
+		}
 		raw, err := store.GetEquivocationProof(s.db, reqMsg.Name)
 		if err != nil {
 			lgr.Error(
@@ -81,14 +103,6 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 
 	if !s.nameLocker.TryRLock(reqMsg.Name) {
 		lgr.Info("dropping sector req for busy name")
-		return
-	}
-
-	header, err := store.GetHeader(s.db, reqMsg.Name)
-	if err != nil {
-		lgr.Error(
-			"failed to fetch header",
-			"err", err)
 		return
 	}
 
@@ -171,11 +185,32 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 		"name", msg.Name,
 		"peer_id", peerID,
 	)
+
 	lgr.Trace("handling equivocation response", "name", msg.Name)
 	if msg.LocalEpochHeight != msg.RemoteEpochHeight {
 		s.lgr.Warn("unexpected epoch height", "local_epoch_height", msg.LocalEpochHeight, "remote_epoch_height", msg.RemoteEpochHeight)
 		return
 	}
+
+	// Skip if equivocation already exists
+	if _, err := store.GetEquivocationProof(s.db, msg.Name); err == nil {
+		lgr.Trace("skipping equivocation proof, equivocation exists")
+		return
+	}
+
+	header, err := store.GetHeader(s.db, msg.Name)
+	if err != nil {
+		lgr.Error(
+			"failed to fetch header",
+			"err", err)
+		return
+	}
+
+	if header.EpochHeight > msg.RemoteEpochHeight {
+		s.lgr.Warn("remote epoch height must be <= header epoch heigth", "header_epoch_height", header.EpochHeight, "remote_epoch_height", msg.RemoteEpochHeight)
+		return
+	}
+
 	if msg.LocalSectorSize != msg.RemotePayloadPosition {
 		s.lgr.Warn("unexpected sector size", "local_sector_size", msg.LocalSectorSize, "remote_payload_position", msg.RemotePayloadPosition)
 		return
@@ -206,6 +241,10 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 		return
 	}
 	lgr.Trace("equivocation proof valid ", "name", msg.Name)
-	// TODO: log timestamp and ban name
+	if err := store.WithTx(s.db, func(tx *leveldb.Transaction) error {
+		return store.SetEquivocationProofTx(tx, msg.Name, msg)
+	}); err != nil {
+		lgr.Trace("error writing equivocation proof", "err", err)
+	}
 	return
 }

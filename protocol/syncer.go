@@ -162,7 +162,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 				if opts.PrevHash != msg.PrevHash {
 					lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
 					if opts.EpochHeight == msg.EpochHeight {
-						// skip if equivocation already exists
+						// Skip if equivocation already exists
 						if _, err := store.GetEquivocationProof(opts.DB, msg.Name); err == nil {
 							lgr.Trace("skipping update, equivocation exists")
 							break
@@ -173,6 +173,7 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 							lgr.Trace("error getting header", "err", err)
 							break
 						}
+						// TODO: rename A, B
 						if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
 							proof := &wire.EquivocationProof{
 								Name:                  msg.Name,
