@@ -115,7 +115,7 @@ func TestUpdater(t *testing.T) {
 					if err := store.SetInitialImportCompleteTx(tx); err != nil {
 						return err
 					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.LocalSigner.Pub(), 10); err != nil {
+					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
 						return err
 					}
 					return nil

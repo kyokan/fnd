@@ -205,6 +205,7 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 		lgr.Warn("remote signaure validation failed", "err", err)
 		return
 	}
+	lgr.Trace("equivocation proof valid ", "name", msg.Name)
 	// TODO: log timestamp and ban name
 	return
 }
