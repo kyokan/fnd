@@ -71,14 +71,9 @@ func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 		return
 	}
 
+	// Blob request with SectorSize == blob.MaxSectors is an equivocation
+	// request. Respond with equivocation proof.
 	if reqMsg.SectorSize == blob.MaxSectors {
-		if header.EpochHeight != reqMsg.EpochHeight {
-			lgr.Error(
-				"request epoch height must be == header epoch height",
-				"request_epoch_height", reqMsg.EpochHeight,
-				"header_epoch_height", header.EpochHeight)
-			return
-		}
 		raw, err := store.GetEquivocationProof(s.db, reqMsg.Name)
 		if err != nil {
 			lgr.Error(
@@ -192,17 +187,31 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 		return
 	}
 
-	// Skip if equivocation already exists
-	if _, err := store.GetEquivocationProof(s.db, msg.Name); err == nil {
-		lgr.Trace("skipping equivocation proof, equivocation exists")
-		return
-	}
-
 	header, err := store.GetHeader(s.db, msg.Name)
 	if err != nil {
 		lgr.Error(
 			"failed to fetch header",
 			"err", err)
+		return
+	}
+
+	bannedAt, err := store.GetHeaderBan(s.db, msg.Name)
+	if err != nil {
+		lgr.Error(
+			"failed to fetch header ban",
+			"err", err)
+		return
+	}
+
+	// Skip if name is already in equivocated state.
+	if !bannedAt.IsZero() && bannedAt.Add(7*24*time.Duration(time.Hour)).After(time.Now()) {
+		s.lgr.Warn("name banned", "name", msg.Name)
+		return
+	}
+
+	// Skip if equivocation proof was already used to ban.
+	if !bannedAt.IsZero() && header.EpochHeight == msg.RemoteEpochHeight {
+		s.lgr.Warn("already equivocated", "name", msg.Name)
 		return
 	}
 
@@ -235,7 +244,6 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 	// sector size, sector tip hash and other metadata. This data
 	// is first hashed and the signature is validated against the
 	// name's pubkey. See validateBlobRes.
-	// TODO: store the latest tip hash
 	if err := validateBlobRes(s.db, msg.Name, msg.RemoteEpochHeight, sectorSize, sectorTipHash, msg.RemoteReservedRoot, msg.RemoteSignature); err != nil {
 		lgr.Warn("remote signaure validation failed", "err", err)
 		return
@@ -245,6 +253,13 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 		return store.SetEquivocationProofTx(tx, msg.Name, msg)
 	}); err != nil {
 		lgr.Trace("error writing equivocation proof", "err", err)
+	}
+	err = store.WithTx(s.db, func(tx *leveldb.Transaction) error {
+		return store.SetHeaderBan(tx, msg.Name, time.Time{})
+	})
+	if err != nil {
+		lgr.Warn("error setting header banned", "err", err)
+		return
 	}
 	return
 }

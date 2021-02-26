@@ -173,6 +173,13 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 							lgr.Trace("error getting header", "err", err)
 							break
 						}
+						err = store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
+							return store.SetHeaderBan(tx, msg.Name, time.Time{})
+						})
+						if err != nil {
+							lgr.Trace("error setting header banned", "err", err)
+							break
+						}
 						// TODO: rename A, B
 						if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
 							proof := &wire.EquivocationProof{

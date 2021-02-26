@@ -381,6 +381,7 @@ func TestUpdater(t *testing.T) {
 				require.NoError(t, remoteUQ.Start())
 				defer require.NoError(t, remoteUQ.Stop())
 			}()
+
 			require.NoError(t, store.WithTx(localStorage.DB, func(tx *leveldb.Transaction) error {
 				if err := store.SetInitialImportCompleteTx(tx); err != nil {
 					return err
@@ -409,15 +410,6 @@ func TestEpoch(t *testing.T) {
 		{
 			"syncs sectors when the local node has never seen the name before",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
@@ -464,12 +456,14 @@ func TestEpoch(t *testing.T) {
 					},
 				}
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					err := store.SetHeaderBan(tx, name, time.Time{})
+					if err != nil {
+						return err
+					}
 					return store.SetHeaderTx(tx, &store.Header{
 						Name:        name,
 						EpochHeight: 0,
 						SectorSize:  10,
-						Banned:      true,
-						BannedAt:    time.Now().Add(-1 * 24 * time.Duration(time.Hour)),
 					}, blob.ZeroSectorHashes)
 				}))
 				err := UpdateBlob(cfg)
@@ -480,15 +474,6 @@ func TestEpoch(t *testing.T) {
 		{
 			"syncs sectors when the name ban has passed",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
@@ -496,7 +481,7 @@ func TestEpoch(t *testing.T) {
 					setup.rs.BlobStore,
 					setup.tp.RemoteSigner,
 					name,
-					0,
+					CurrentEpoch(name)+1,
 					blob.SectorBytes,
 					ts,
 				)
@@ -516,12 +501,14 @@ func TestEpoch(t *testing.T) {
 					},
 				}
 				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
+					err := store.SetHeaderBan(tx, name, time.Now().Add(-10*24*time.Duration(time.Hour)))
+					if err != nil {
+						return err
+					}
 					return store.SetHeaderTx(tx, &store.Header{
 						Name:        name,
 						EpochHeight: 0,
 						SectorSize:  0,
-						Banned:      true,
-						BannedAt:    time.Now().Add(-8 * 24 * time.Duration(time.Hour)),
 					}, blob.ZeroSectorHashes)
 				}))
 				require.NoError(t, UpdateBlob(cfg))
@@ -577,8 +564,6 @@ func TestEpoch(t *testing.T) {
 						Name:        name,
 						EpochHeight: CurrentEpoch(name),
 						SectorSize:  10,
-						Banned:      true,
-						BannedAt:    time.Now().Add(-1 * 24 * time.Duration(time.Hour)),
 					}, blob.ZeroSectorHashes)
 				}))
 				err := UpdateBlob(cfg)
@@ -616,15 +601,6 @@ func TestEpoch(t *testing.T) {
 		{
 			"rewrites partial blob with new blob on epoch rollover",
 			func(t *testing.T, setup *updaterTestSetup) {
-				require.NoError(t, store.WithTx(setup.ls.DB, func(tx *leveldb.Transaction) error {
-					if err := store.SetInitialImportCompleteTx(tx); err != nil {
-						return err
-					}
-					if err := store.SetNameInfoTx(tx, name, setup.tp.RemoteSigner.Pub(), 10); err != nil {
-						return err
-					}
-					return nil
-				}))
 				ts := time.Now()
 				update := mockapp.FillBlobRandom(
 					t,
@@ -674,6 +650,16 @@ func TestEpoch(t *testing.T) {
 			remoteSS := NewSectorServer(testPeers.RemoteMux, remoteStorage.DB, remoteStorage.BlobStore, util.NewMultiLocker())
 			require.NoError(t, remoteSS.Start())
 			defer require.NoError(t, remoteSS.Stop())
+
+			require.NoError(t, store.WithTx(localStorage.DB, func(tx *leveldb.Transaction) error {
+				if err := store.SetInitialImportCompleteTx(tx); err != nil {
+					return err
+				}
+				if err := store.SetNameInfoTx(tx, name, testPeers.RemoteSigner.Pub(), 10); err != nil {
+					return err
+				}
+				return nil
+			}))
 
 			tt.run(t, &updaterTestSetup{
 				tp: testPeers,

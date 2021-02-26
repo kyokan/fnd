@@ -151,13 +151,18 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		return ErrInvalidEpochBackdated
 	}
 
+	bannedAt, err := store.GetHeaderBan(cfg.DB, item.Name)
+	if err != nil {
+		return err
+	}
+
 	// If it is higher (skip if it's appending data to the same epoch)
 	if header != nil && item.EpochHeight > epochHeight {
 		// Recovery from banning must increment the epoch by at least 2 and one
 		// real week since the local node banned
-		if header.Banned {
+		if !bannedAt.IsZero() {
 			// Banned for at least a week
-			if header.BannedAt.Add(7 * 24 * time.Duration(time.Hour)).After(time.Now()) {
+			if bannedAt.Add(7 * 24 * time.Duration(time.Hour)).After(time.Now()) {
 				return ErrNameBanned
 			}
 

@@ -24,8 +24,6 @@ type Header struct {
 	Signature     crypto.Signature
 	ReservedRoot  crypto.Hash
 	EpochStartAt  time.Time
-	Banned        bool
-	BannedAt      time.Time
 }
 
 func (h *Header) MarshalJSON() ([]byte, error) {
@@ -37,8 +35,6 @@ func (h *Header) MarshalJSON() ([]byte, error) {
 		Signature     string    `json:"signature"`
 		ReservedRoot  string    `json:"reserved_root"`
 		EpochStartAt  time.Time `json:"epoch_start_at"`
-		Banned        bool      `json:"banned"`
-		BannedAt      time.Time `json:"banned_at"`
 	}{
 		h.Name,
 		h.EpochHeight,
@@ -47,8 +43,6 @@ func (h *Header) MarshalJSON() ([]byte, error) {
 		h.Signature.String(),
 		h.ReservedRoot.String(),
 		h.EpochStartAt,
-		h.Banned,
-		h.BannedAt,
 	}
 
 	return json.Marshal(out)
@@ -63,8 +57,6 @@ func (h *Header) UnmarshalJSON(b []byte) error {
 		Signature     string    `json:"signature"`
 		ReservedRoot  string    `json:"reserved_root"`
 		EpochStartAt  time.Time `json:"epoch_start_at"`
-		Banned        bool      `json:"banned"`
-		BannedAt      time.Time `json:"banned_at"`
 	}{}
 	if err := json.Unmarshal(b, in); err != nil {
 		return err
@@ -101,8 +93,6 @@ func (h *Header) UnmarshalJSON(b []byte) error {
 	h.Signature = sig
 	h.ReservedRoot = rr
 	h.EpochStartAt = in.EpochStartAt
-	h.Banned = in.Banned
-	h.BannedAt = in.BannedAt
 	return nil
 }
 
@@ -110,6 +100,7 @@ var (
 	headersPrefix            = Prefixer("headers")
 	headerCountKey           = Prefixer(string(headersPrefix("count")))()
 	headerSectorHashesPrefix = Prefixer(string(headersPrefix("sector-hashes")))
+	headerBanPrefix          = Prefixer(string(headersPrefix("banned")))
 	headerDataPrefix         = Prefixer(string(headersPrefix("header")))
 )
 
@@ -170,6 +161,32 @@ func GetSectorHashes(db *leveldb.DB, name string) (blob.SectorHashes, error) {
 		panic(err)
 	}
 	return base, nil
+}
+
+func GetHeaderBan(db *leveldb.DB, name string) (time.Time, error) {
+	exists, err := db.Has(headerBanPrefix(name), nil)
+	if err != nil {
+		return time.Time{}, errors.Wrap(err, "error checking header ban")
+	}
+	if !exists {
+		return time.Time{}, nil
+	}
+	bytes, err := db.Get(headerBanPrefix(name), nil)
+	if err != nil {
+		return time.Time{}, errors.Wrap(err, "error getting header ban")
+	}
+	timestamp := mustDecodeInt(bytes)
+	return time.Unix(int64(timestamp), 0), nil
+}
+
+func SetHeaderBan(tx *leveldb.Transaction, name string, at time.Time) error {
+	if at.IsZero() {
+		at = time.Now()
+	}
+	if err := tx.Put(headerBanPrefix(name), mustEncodeInt(int(at.Unix())), nil); err != nil {
+		return errors.Wrap(err, "error writing header tree")
+	}
+	return nil
 }
 
 func SetHeaderTx(tx *leveldb.Transaction, header *Header, sectorHashes blob.SectorHashes) error {
