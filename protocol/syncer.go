@@ -171,6 +171,7 @@ func SyncSectors(opts *SyncSectorsOpts) (*syncUpdate, error) {
 						// Skip if equivocation already exists
 						if _, err := store.GetEquivocationProof(opts.DB, msg.Name); err == nil {
 							lgr.Trace("skipping update, equivocation exists")
+							errs <- ErrPayloadEquivocation
 							break
 						}
 						// TODO: record timestamp and ban this name
