@@ -86,6 +86,7 @@ func (b *BlobWriter) Reset() error {
 	_, err := b.client.ResetEpoch(context.Background(), &apiv1.ResetEpochReq{
 		TxID: b.txID,
 	})
+	b.opened = false
 	return err
 }
 
