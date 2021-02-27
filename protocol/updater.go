@@ -136,11 +136,12 @@ func UpdateBlob(cfg *UpdateConfig) error {
 
 	var prevHash crypto.Hash = blob.ZeroHash
 	var epochHeight, sectorSize uint16
-	var epochUpdated bool
+	var epochUpdated bool = true
 	if header != nil {
 		epochHeight = header.EpochHeight
 		sectorSize = header.SectorSize
 		prevHash = header.SectorTipHash
+		epochUpdated = false
 	}
 
 	// header is the existing header/data in the db

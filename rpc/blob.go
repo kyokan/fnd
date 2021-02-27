@@ -83,7 +83,8 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 		SectorSize:    uint16(res.SectorSize),
 		SectorTipHash: merkleRoot,
 		ReservedRoot:  reservedRoot,
-		ReceivedAt:    time.Unix(int64(res.ReceivedAt), 0),
 		Signature:     sig,
+		ReceivedAt:    time.Unix(int64(res.ReceivedAt), 0),
+		BannedAt:      time.Unix(int64(res.BannedAt), 0),
 	}, nil
 }

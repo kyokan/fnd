@@ -139,8 +139,9 @@ message BlobInfoRes {
     uint32 sectorSize = 5; //  ditto ^
     bytes sectorTipHash = 6;
     bytes reservedRoot = 7;
-    uint64 receivedAt = 8;
-    bytes signature = 9;
+    bytes signature = 8;
+    uint64 receivedAt = 9;
+    uint64 bannedAt = 10;
 }
 
 message SendUpdateReq {

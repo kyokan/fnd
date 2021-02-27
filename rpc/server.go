@@ -464,8 +464,9 @@ func (s *Server) ListBlobInfo(req *apiv1.ListBlobInfoReq, srv apiv1.Footnotev1_L
 			SectorSize:    uint32(info.SectorSize),
 			SectorTipHash: info.SectorTipHash[:],
 			ReservedRoot:  info.ReservedRoot[:],
-			ReceivedAt:    uint64(info.ReceivedAt.Unix()),
 			Signature:     info.Signature[:],
+			ReceivedAt:    uint64(info.ReceivedAt.Unix()),
+			BannedAt:      uint64(info.BannedAt.Unix()),
 		}
 		if err = srv.Send(res); err != nil {
 			return errors.Wrap(err, "error sending info")

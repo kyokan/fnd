@@ -222,6 +222,7 @@ type BlobInfo struct {
 	Signature     crypto.Signature `json:"signature"`
 	ReservedRoot  crypto.Hash      `json:"reserved_root"`
 	ReceivedAt    time.Time        `json:"received_at"`
+	BannedAt      time.Time        `json:"banned_at"`
 }
 
 func (b *BlobInfo) MarshalJSON() ([]byte, error) {
@@ -235,6 +236,7 @@ func (b *BlobInfo) MarshalJSON() ([]byte, error) {
 		Signature     string    `json:"signature"`
 		ReservedRoot  string    `json:"reserved_root"`
 		ReceivedAt    time.Time `json:"received_at"`
+		BannedAt      time.Time `json:"banned_at"`
 	}{
 		b.Name,
 		hex.EncodeToString(b.PublicKey.SerializeCompressed()),
@@ -245,6 +247,7 @@ func (b *BlobInfo) MarshalJSON() ([]byte, error) {
 		hex.EncodeToString(b.Signature[:]),
 		hex.EncodeToString(b.ReservedRoot[:]),
 		b.ReceivedAt,
+		b.BannedAt,
 	}
 
 	return json.Marshal(jsonInfo)
@@ -266,6 +269,10 @@ func (bis *BlobInfoStream) Next() (*BlobInfo, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting name info")
 	}
+	bannedAt, err := GetHeaderBan(bis.db, header.Name)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting header ban info")
+	}
 	return &BlobInfo{
 		Name:          header.Name,
 		PublicKey:     nameInfo.PublicKey,
@@ -276,6 +283,7 @@ func (bis *BlobInfoStream) Next() (*BlobInfo, error) {
 		Signature:     header.Signature,
 		ReservedRoot:  header.ReservedRoot,
 		ReceivedAt:    header.EpochStartAt,
+		BannedAt:      bannedAt,
 	}, nil
 }
 
