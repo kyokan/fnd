@@ -188,12 +188,19 @@ func (u *UpdateQueue) validateUpdate(name string) error {
 	if err := primitives.ValidateName(name); err != nil {
 		return errors.Wrap(err, "update name is invalid")
 	}
-	banned, err := store.NameIsBanned(u.db, name)
+	nameBan, err := store.NameIsBanned(u.db, name)
 	if err != nil {
 		return errors.Wrap(err, "error reading name ban state")
 	}
-	if banned {
+	if nameBan {
 		return errors.New("name is banned")
+	}
+	headerBan, err := store.GetHeaderBan(u.db, name)
+	if err != nil {
+		return errors.Wrap(err, "error reading header ban state")
+	}
+	if !headerBan.IsZero() {
+		return errors.New("header is banned")
 	}
 	return nil
 }

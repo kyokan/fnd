@@ -367,7 +367,8 @@ func (s *Server) ResetEpoch(ctx context.Context, req *apiv1.ResetEpochReq) (*api
 		return nil, err
 	}
 
-	// double check epoch increment
+	// TODO: verify if epoch increments
+	// verify if header and ban is lifted on reset
 	if header.EpochHeight >= protocol.CurrentEpoch(name) {
 		return nil, errors.New("cannot reset epoch ahead of schedule")
 	}
