@@ -270,8 +270,6 @@ func UpdateBlob(cfg *UpdateConfig) error {
 			EpochHeight:   item.EpochHeight,
 			SectorSize:    item.SectorSize,
 			SectorTipHash: tree.Tip(),
-			Signature:     item.Signature,
-			ReservedRoot:  item.ReservedRoot,
 			EpochStartAt:  epochStart,
 		}, tree)
 	})

@@ -40,16 +40,13 @@ type UpdateQueue struct {
 }
 
 type UpdateQueueItem struct {
-	PeerIDs       *PeerSet
-	Name          string
-	EpochHeight   uint16
-	SectorSize    uint16
-	SectorTipHash crypto.Hash
-	ReservedRoot  crypto.Hash
-	Signature     crypto.Signature
-	Pub           *btcec.PublicKey
-	Height        int
-	Disposed      int32
+	PeerIDs     *PeerSet
+	Name        string
+	EpochHeight uint16
+	SectorSize  uint16
+	Pub         *btcec.PublicKey
+	Height      int
+	Disposed    int32
 }
 
 func (u *UpdateQueueItem) Dispose() {
