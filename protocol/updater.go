@@ -222,7 +222,7 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		return errors.Wrap(err, "error seeking transaction")
 	}
 
-	err = SyncSectors(&SyncSectorsOpts{
+	sectorMeta, err := SyncSectors(&SyncSectorsOpts{
 		Timeout:     DefaultSyncerBlobResTimeout,
 		Mux:         cfg.Mux,
 		Tx:          tx,
@@ -245,6 +245,13 @@ func UpdateBlob(cfg *UpdateConfig) error {
 			updaterLogger.Error("error rolling back blob transaction", "err", err)
 		}
 		return errors.Wrap(err, "error calculating new blob sector tip hash")
+	}
+
+	if sectorMeta.sectorTipHash != tree.Tip() {
+		if err := tx.Rollback(); err != nil {
+			updaterLogger.Error("error rolling back blob transaction", "err", err)
+		}
+		return errors.Wrap(err, "sector tip hash mismatch")
 	}
 
 	var sectorsNeeded uint16
@@ -270,6 +277,8 @@ func UpdateBlob(cfg *UpdateConfig) error {
 			EpochHeight:   item.EpochHeight,
 			SectorSize:    item.SectorSize,
 			SectorTipHash: tree.Tip(),
+			Signature:     sectorMeta.signature,
+			ReservedRoot:  sectorMeta.reservedRoot,
 			EpochStartAt:  epochStart,
 		}, tree)
 	})

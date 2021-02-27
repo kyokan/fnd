@@ -25,6 +25,12 @@ var (
 	ErrSyncerMaxAttempts       = errors.New("reached max sync attempts")
 )
 
+type syncUpdate struct {
+	sectorTipHash crypto.Hash
+	reservedRoot  crypto.Hash
+	signature     crypto.Signature
+}
+
 type SyncSectorsOpts struct {
 	Timeout     time.Duration
 	Mux         *p2p.PeerMuxer
@@ -64,11 +70,11 @@ func validateBlobRes(db *leveldb.DB, name string, epochHeight, sectorSize uint16
 	return nil
 }
 
-func SyncSectors(opts *SyncSectorsOpts) error {
+func SyncSectors(opts *SyncSectorsOpts) (*syncUpdate, error) {
 	lgr := log.WithModule("payload-syncer").Sub("name", opts.Name)
 	errs := make(chan error)
 	payloadResCh := make(chan *payloadRes)
-	payloadProcessedCh := make(chan struct{}, 1)
+	payloadProcessedCh := make(chan *syncUpdate, 1)
 	doneCh := make(chan struct{})
 	unsubRes := opts.Mux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeBlobRes, func(peerID crypto.Hash, envelope *wire.Envelope) {
 		payloadResCh <- &payloadRes{
@@ -217,7 +223,11 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 					}
 				}
 				receivedPayloads[msg.PayloadPosition] = true
-				payloadProcessedCh <- struct{}{}
+				payloadProcessedCh <- &syncUpdate{
+					sectorTipHash: sectorTipHash,
+					reservedRoot:  msg.ReservedRoot,
+					signature:     msg.Signature,
+				}
 			case <-doneCh:
 				return
 			}
@@ -225,12 +235,13 @@ func SyncSectors(opts *SyncSectorsOpts) error {
 	}()
 
 	var err error
+	var su *syncUpdate
 	timeout := time.NewTimer(opts.Timeout)
 payloadLoop:
 	for {
 		lgr.Debug("requesting payload")
 		select {
-		case <-payloadProcessedCh:
+		case su = <-payloadProcessedCh:
 			lgr.Debug("payload processed")
 			break payloadLoop
 		case <-timeout.C:
@@ -244,5 +255,5 @@ payloadLoop:
 
 	unsubRes()
 	close(doneCh)
-	return err
+	return su, err
 }
