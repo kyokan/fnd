@@ -192,7 +192,7 @@ func SetHeaderBan(tx *leveldb.Transaction, name string, at time.Time) error {
 func SetHeaderTx(tx *leveldb.Transaction, header *Header, sectorHashes blob.SectorHashes) error {
 	var buf bytes.Buffer
 	if err := sectorHashes.Encode(&buf); err != nil {
-		return errors.Wrap(err, "error encoding merkle tree")
+		return errors.Wrap(err, "error encoding sector hashes")
 	}
 	exists, err := tx.Has(headerDataPrefix(header.Name), nil)
 	if err != nil {

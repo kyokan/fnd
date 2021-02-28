@@ -48,6 +48,22 @@ func (s *SectorServer) Stop() error {
 	return nil
 }
 
+// onBlobReq handles a BlobReq and responds with a BlobRes
+//
+// In case the BlobReq contains SectorSize == MaxSectors, it is considered a
+// special case, which is a part of the equivocation proof flow. Note that in a
+// normal BlobReq/BlobRes flow, SectorSize may never be MaxSectors as it is the
+// start for the expected payload.
+//
+// In the special case where SectorSize = MaxSectors, the BlobReq is considered
+// an Equivocation Request. In response, the peer is sent an Equivocation Proof.
+//
+// Equivocation Proof flow:
+// Syncer - sees a conflicting update
+// - Writes equivocation proof locally to db
+// - Sends an equivocation Update (special case where Update.SectorSize = 0)
+// - Expects peers to reply with Equivocation Request i.e. BlobReq where SectorSize = MaxSectors
+// - Responds with Equivocation Proof
 func (s *SectorServer) onBlobReq(peerID crypto.Hash, envelope *wire.Envelope) {
 	reqMsg := envelope.Message.(*wire.BlobReq)
 	lgr := s.lgr.Sub(
@@ -224,7 +240,7 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 		s.lgr.Warn("unexpected sector size", "local_sector_size", msg.LocalSectorSize, "remote_payload_position", msg.RemotePayloadPosition)
 		return
 	}
-	if err := validateBlobRes(s.db, msg.Name, msg.LocalEpochHeight, msg.LocalSectorSize, msg.LocalSectorTipHash, msg.LocalReservedRoot, msg.LocalSignature); err != nil {
+	if err := validateBlobUpdate(s.db, msg.Name, msg.LocalEpochHeight, msg.LocalSectorSize, msg.LocalSectorTipHash, msg.LocalReservedRoot, msg.LocalSignature); err != nil {
 		lgr.Warn("local signaure validation failed", "err", err)
 		return
 	}
@@ -244,7 +260,7 @@ func (s *SectorServer) onEquivocationProof(peerID crypto.Hash, envelope *wire.En
 	// sector size, sector tip hash and other metadata. This data
 	// is first hashed and the signature is validated against the
 	// name's pubkey. See validateBlobRes.
-	if err := validateBlobRes(s.db, msg.Name, msg.RemoteEpochHeight, sectorSize, sectorTipHash, msg.RemoteReservedRoot, msg.RemoteSignature); err != nil {
+	if err := validateBlobUpdate(s.db, msg.Name, msg.RemoteEpochHeight, sectorSize, sectorTipHash, msg.RemoteReservedRoot, msg.RemoteSignature); err != nil {
 		lgr.Warn("remote signaure validation failed", "err", err)
 		return
 	}

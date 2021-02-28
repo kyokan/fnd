@@ -48,7 +48,12 @@ type payloadRes struct {
 	msg    *wire.BlobRes
 }
 
-func validateBlobRes(db *leveldb.DB, name string, epochHeight, sectorSize uint16, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) error {
+// validateBlobUpdate validates that the provided signature matches the
+// expected signature for given update metadata.  The metadata commits the
+// update to the latest sector size and tip hash, so effectively for a blob of
+// known sector size, there exists a _unique_ compact proof of the update in
+// the form of the signature.
+func validateBlobUpdate(db *leveldb.DB, name string, epochHeight, sectorSize uint16, sectorTipHash crypto.Hash, reservedRoot crypto.Hash, sig crypto.Signature) error {
 	if err := primitives.ValidateName(name); err != nil {
 		return errors.Wrap(err, "update name is invalid")
 	}
@@ -59,17 +64,27 @@ func validateBlobRes(db *leveldb.DB, name string, epochHeight, sectorSize uint16
 	if banned {
 		return errors.New("name is banned")
 	}
+	// TODO: should we check header ban state here?
 	info, err := store.GetNameInfo(db, name)
 	if err != nil {
 		return errors.Wrap(err, "error reading name info")
 	}
-	h := blob.SealHash(name, epochHeight, sectorSize, mr, rr)
+	h := blob.SealHash(name, epochHeight, sectorSize, sectorTipHash, reservedRoot)
 	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
 		return ErrInvalidPayloadSignature
 	}
 	return nil
 }
 
+// SyncSectors syncs the sectors for the options provided in opts. Syncing
+// happens by sending a BlobReq and expecting a BlobRes in return. Multiple
+// requests may be send to multiple peers but the first valid response will be
+// considered final.
+//
+// An invalid BlobRes which fails validation may trigger an equivocation proof,
+// which is the proof that are two conflicting updates at the same epoch and
+// sector size, and this proof will be stored locally and served to peers in
+// the equivocation proof flow. See sector_server.go for details.
 func SyncSectors(opts *SyncSectorsOpts) (*syncUpdate, error) {
 	lgr := log.WithModule("payload-syncer").Sub("name", opts.Name)
 	errs := make(chan error)
@@ -153,7 +168,7 @@ func SyncSectors(opts *SyncSectorsOpts) (*syncUpdate, error) {
 				// is first hashed and the signature is validated against the
 				// name's pubkey. See validateBlobRes.
 				// TODO: store the latest tip hash
-				if err := validateBlobRes(opts.DB, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
+				if err := validateBlobUpdate(opts.DB, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
 					lgr.Trace("blob res validation failed", "err", err)
 					// If prev hash matches, we have an invalid signature,
 					// which cannot be used as a proof of equivocation.

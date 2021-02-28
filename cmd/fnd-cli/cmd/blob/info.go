@@ -6,13 +6,14 @@ import (
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
+	"os"
+	"strconv"
+	"strings"
+
 	"fnd.localhost/handshake/primitives"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
-	"strconv"
-	"strings"
 )
 
 var infoCmd = &cobra.Command{
@@ -37,11 +38,11 @@ var infoCmd = &cobra.Command{
 			"Name",
 			"Public Key",
 			"Timestamp",
-			"Merkle Root",
+			"Sector Tip Hash",
 			"Reserved Root",
-			"Received At",
 			"Signature",
-			"Time Bank",
+			"Received At",
+			"Banned At",
 		})
 
 		for _, name := range names {
@@ -57,8 +58,9 @@ var infoCmd = &cobra.Command{
 				strconv.Itoa(int(res.SectorSize)),
 				res.SectorTipHash.String(),
 				res.ReservedRoot.String(),
-				res.ReceivedAt.String(),
 				res.Signature.String(),
+				res.ReceivedAt.String(),
+				res.BannedAt.String(),
 			})
 		}
 
