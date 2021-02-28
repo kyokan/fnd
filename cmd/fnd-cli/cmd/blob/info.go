@@ -37,7 +37,8 @@ var infoCmd = &cobra.Command{
 		table.SetHeader([]string{
 			"Name",
 			"Public Key",
-			"Timestamp",
+			"Epoch Height",
+			"Sector Size",
 			"Sector Tip Hash",
 			"Reserved Root",
 			"Signature",
