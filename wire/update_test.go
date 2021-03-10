@@ -6,11 +6,9 @@ import (
 
 func TestUpdate_Encoding(t *testing.T) {
 	update := &Update{
-		Name:         "testname",
-		Timestamp:    fixedTime,
-		MerkleRoot:   fixedHash,
-		ReservedRoot: fixedHash,
-		Signature:    fixedSig,
+		Name:        "testname",
+		EpochHeight: fixedEpochHeight,
+		SectorSize:  fixedSectorSize,
 	}
 
 	testMessageEncoding(t, "update", update, &Update{})

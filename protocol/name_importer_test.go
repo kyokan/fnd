@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"encoding/base64"
 	"fmt"
 	"fnd/testutil/testcrypto"
 	"github.com/stretchr/testify/require"
@@ -24,7 +25,7 @@ func TestParseFNRecord(t *testing.T) {
 	}
 
 	_, expPub := testcrypto.RandKey()
-	rec := fmt.Sprintf("f%x", expPub.SerializeCompressed())
+	rec := fmt.Sprintf("f%v", base64.StdEncoding.EncodeToString(expPub.SerializeCompressed()))
 	actPub, err := ParseFNRecord(rec)
 	require.NoError(t, err)
 	require.True(t, expPub.IsEqual(actPub))

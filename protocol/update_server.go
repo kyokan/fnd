@@ -7,6 +7,7 @@ import (
 	"fnd/store"
 	"fnd/util"
 	"fnd/wire"
+
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -38,7 +39,7 @@ func (u *UpdateServer) Stop() error {
 
 func (u *UpdateServer) UpdateReqHandler(peerID crypto.Hash, envelope *wire.Envelope) {
 	msg := envelope.Message.(*wire.UpdateReq)
-	u.lgr.Debug("receive update req", "name", msg.Name, "ts", msg.Timestamp)
+	u.lgr.Debug("receive update req", "name", msg.Name, "epoch", msg.EpochHeight, "sector", msg.SectorSize)
 
 	if !u.nameLocker.TryRLock(msg.Name) {
 		if err := u.mux.Send(peerID, wire.NewNilUpdate(msg.Name)); err != nil {
@@ -69,7 +70,7 @@ func (u *UpdateServer) UpdateReqHandler(peerID crypto.Hash, envelope *wire.Envel
 		return
 	}
 
-	if header.Timestamp.Before(msg.Timestamp) || header.Timestamp.Equal(msg.Timestamp) {
+	if header.SectorSize < msg.SectorSize || header.SectorSize == msg.SectorSize {
 		if err := u.mux.Send(peerID, wire.NewNilUpdate(msg.Name)); err != nil {
 			u.lgr.Error("error sending response to update req", "name", msg.Name, "err", err)
 		} else {
@@ -79,10 +80,9 @@ func (u *UpdateServer) UpdateReqHandler(peerID crypto.Hash, envelope *wire.Envel
 	}
 
 	err = u.mux.Send(peerID, &wire.Update{
-		Name:       msg.Name,
-		Timestamp:  header.Timestamp,
-		MerkleRoot: header.MerkleRoot,
-		Signature:  header.Signature,
+		Name:        msg.Name,
+		EpochHeight: header.EpochHeight,
+		SectorSize:  header.SectorSize,
 	})
 	if err != nil {
 		u.lgr.Error("error serving update", "name", msg.Name, "err", err)

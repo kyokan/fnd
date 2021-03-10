@@ -4,14 +4,14 @@ import (
 	"fnd/crypto"
 	"fnd.localhost/dwire"
 	"io"
-	"time"
 )
 
 type UpdateReq struct {
 	HashCacher
 
-	Name      string
-	Timestamp time.Time
+	Name        string
+	EpochHeight uint16
+	SectorSize  uint16
 }
 
 var _ Message = (*UpdateReq)(nil)
@@ -27,14 +27,16 @@ func (n *UpdateReq) Equals(other Message) bool {
 	}
 
 	return n.Name == cast.Name &&
-		n.Timestamp.Unix() == cast.Timestamp.Unix()
+		n.EpochHeight == cast.EpochHeight &&
+		n.SectorSize == cast.SectorSize
 }
 
 func (n *UpdateReq) Encode(w io.Writer) error {
 	return dwire.EncodeFields(
 		w,
 		n.Name,
-		n.Timestamp,
+		n.EpochHeight,
+		n.SectorSize,
 	)
 }
 
@@ -42,7 +44,8 @@ func (n *UpdateReq) Decode(r io.Reader) error {
 	return dwire.DecodeFields(
 		r,
 		&n.Name,
-		&n.Timestamp,
+		&n.EpochHeight,
+		&n.SectorSize,
 	)
 }
 

@@ -21,7 +21,7 @@ type ChainInfo struct {
 	Height   int       `json:"height"`
 	Tip      string    `json:"tip"`
 	TreeRoot string    `json:"treeRoot"`
-	Progress int       `json:"progress"`
+	Progress float64   `json:"progress"`
 	State    StateInfo `json:"state"`
 }
 

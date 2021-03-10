@@ -3,19 +3,17 @@ package wire
 import (
 	"bytes"
 	"fmt"
-	"fnd/blob"
 	"fnd/crypto"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"testing"
-	"time"
 )
 
 var (
 	fixedSig         crypto.Signature
 	fixedHash        crypto.Hash
-	fixedMerkleProof blob.MerkleProof
-	fixedTime        = time.Unix(1234567890, 0)
+	fixedEpochHeight = uint16(0)
+	fixedSectorSize  = uint16(0)
 )
 
 func testMessageEncoding(t *testing.T, fixtureName string, input Message, proto interface{}) {
@@ -47,5 +45,4 @@ func testMessageEncoding(t *testing.T, fixtureName string, input Message, proto 
 func init() {
 	fixedSig[1] = 0xff
 	fixedHash[1] = 0xff
-	fixedMerkleProof[1] = 0xff
 }

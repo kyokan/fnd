@@ -4,8 +4,6 @@ go 1.12
 
 replace fnd.localhost/dwire => ./vendor/fnd.localhost/dwire
 
-replace fnd.localhost/mstream => ./vendor/fnd.localhost/mstream
-
 replace fnd.localhost/handshake => ./vendor/fnd.localhost/handshake
 
 require (
@@ -30,7 +28,6 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/crypto v0.0.0-20200422194213-44a606286825
-	golang.org/x/net v0.0.0-20190923162816-aa69164e4478
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20191228213918-04cbcbbfeed8 // indirect
 	golang.org/x/text v0.3.2 // indirect

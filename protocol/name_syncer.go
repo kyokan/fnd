@@ -172,7 +172,7 @@ func (ns *NameSyncer) OnSyncError(cb func(name string, err error)) util.Unsubscr
 
 func (ns *NameSyncer) syncName(info *store.NameInfo) {
 	name := info.Name
-	ownTS := time.Unix(0, 0)
+	var epochHeight, sectorSize uint16
 	header, err := store.GetHeader(ns.db, info.Name)
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		ns.lgr.Error(
@@ -182,7 +182,8 @@ func (ns *NameSyncer) syncName(info *store.NameInfo) {
 		return
 	}
 	if err == nil {
-		ownTS = header.Timestamp
+		epochHeight = header.EpochHeight
+		sectorSize = header.SectorSize
 	}
 
 	isEnvelopeCh := make(chan bool)
@@ -197,7 +198,8 @@ func (ns *NameSyncer) syncName(info *store.NameInfo) {
 
 	recips, _ := p2p.BroadcastRandom(ns.mux, ns.SampleSize, &wire.UpdateReq{
 		Name:      name,
-		Timestamp: ownTS,
+		EpochHeight: epochHeight,
+		SectorSize: sectorSize,
 	})
 	sampleSize := len(recips)
 

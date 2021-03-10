@@ -61,7 +61,7 @@ func TestHandleIncomingHandshake_InvalidHelloSig(t *testing.T) {
 			Peer:            setup.outPeer,
 			Signer:          testcrypto.NewRandomSigner(),
 		})
-		require.True(t, errors.Is(err, ErrPeerClosed))
+		require.True(t, errors.Is(err, ErrPeerHangup))
 		doneCh <- struct{}{}
 	}()
 	<-doneCh

@@ -99,7 +99,7 @@ func TestBlob_Transaction_Remove(t *testing.T) {
 			return err
 		},
 		func() error {
-			return tx.WriteSector(0, ZeroSector)
+			return tx.WriteSector(ZeroSector)
 		},
 		func() error {
 			_, err := tx.WriteAt(make([]byte, 8, 8), 0)
@@ -176,7 +176,7 @@ func TestBlob_Transaction_Race(t *testing.T) {
 	for i := 0; i < 255; i++ {
 		wg.Add(1)
 		go func(id uint8) {
-			_ = tx.WriteSector(id, ZeroSector)
+			_ = tx.WriteSector(ZeroSector)
 			wg.Done()
 		}(uint8(i))
 	}
@@ -210,7 +210,7 @@ func requireTxMethodsClosed(t *testing.T, tx Transaction) {
 		{
 			"WriteSector",
 			func() error {
-				return tx.WriteSector(0, ZeroSector)
+				return tx.WriteSector(ZeroSector)
 			},
 		},
 		{

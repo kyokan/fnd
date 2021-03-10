@@ -2,13 +2,14 @@ package rpc
 
 import (
 	"context"
-	"github.com/btcsuite/btcd/btcec"
 	"fnd/crypto"
 	apiv1 "fnd/rpc/v1"
 	"fnd/store"
-	"github.com/pkg/errors"
 	"io"
 	"time"
+
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/pkg/errors"
 )
 
 func GetBlobInfo(client apiv1.Footnotev1Client, name string) (*store.BlobInfo, error) {
@@ -61,9 +62,9 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing public key")
 	}
-	merkleRoot, err := crypto.NewHashFromBytes(res.MerkleRoot)
+	sectorTipHash, err := crypto.NewHashFromBytes(res.SectorTipHash)
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing merkle root")
+		return nil, errors.Wrap(err, "error parsing sector tip hash")
 	}
 	reservedRoot, err := crypto.NewHashFromBytes(res.ReservedRoot)
 	if err != nil {
@@ -75,14 +76,15 @@ func parseBlobInfoRes(res *apiv1.BlobInfoRes) (*store.BlobInfo, error) {
 	}
 
 	return &store.BlobInfo{
-		Name:         res.Name,
-		PublicKey:    pub,
-		ImportHeight: int(res.ImportHeight),
-		Timestamp:    time.Unix(int64(res.Timestamp), 0),
-		MerkleRoot:   merkleRoot,
-		ReservedRoot: reservedRoot,
-		ReceivedAt:   time.Unix(int64(res.ReceivedAt), 0),
-		Signature:    sig,
-		Timebank:     int(res.Timebank),
+		Name:          res.Name,
+		PublicKey:     pub,
+		ImportHeight:  int(res.ImportHeight),
+		EpochHeight:   uint16(res.EpochHeight),
+		SectorSize:    uint16(res.SectorSize),
+		SectorTipHash: sectorTipHash,
+		ReservedRoot:  reservedRoot,
+		Signature:     sig,
+		ReceivedAt:    time.Unix(int64(res.ReceivedAt), 0),
+		BannedAt:      time.Unix(int64(res.BannedAt), 0),
 	}, nil
 }

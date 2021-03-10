@@ -4,23 +4,26 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"fnd/blob"
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
-	"github.com/mattn/go-isatty"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
+
+	"github.com/mattn/go-isatty"
+	"github.com/spf13/cobra"
 )
 
 const (
-	TruncateFlag  = "truncate"
-	BroadcastFlag = "broadcast"
+	BroadcastFlag  = "broadcast"
+	ResetEpochFlag = "reset-epoch"
 )
 
 var (
-	truncate  bool
-	broadcast bool
+	fndHome    string
+	broadcast  bool
+	resetEpoch bool
 )
 
 var writeCmd = &cobra.Command{
@@ -28,27 +31,37 @@ var writeCmd = &cobra.Command{
 	Short: "Write data to the specified blob.",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		name := args[0]
+
 		conn, err := cli.DialRPC(cmd)
 		if err != nil {
 			return err
 		}
+
 		homeDir := cli.GetHomeDir(cmd)
 		signer, err := cli.GetSigner(homeDir)
 		if err != nil {
 			return err
 		}
 
-		name := args[0]
 		wr := rpc.NewBlobWriter(apiv1.NewFootnotev1Client(conn), signer, name)
 
 		if err := wr.Open(); err != nil {
 			return err
 		}
-		if truncate {
-			if err := wr.Truncate(); err != nil {
+
+		if resetEpoch {
+			if err := wr.Reset(); err != nil {
+				return err
+			}
+			// For technical reasons, Open _must_ be called again after Reset
+			// This is to reset the initial state on the client and checkout
+			// the name afresh.
+			if err := wr.Open(); err != nil {
 				return err
 			}
 		}
+
 		var rd io.Reader
 		if len(args) < 2 {
 			if isatty.IsTerminal(os.Stdin.Fd()) {
@@ -59,14 +72,22 @@ var writeCmd = &cobra.Command{
 		} else {
 			rd = bufio.NewReader(bytes.NewReader([]byte(args[1])))
 		}
-		if _, err := io.Copy(wr, rd); err != nil {
-			return err
+		var sector blob.Sector
+		for i := 0; i < blob.MaxSectors; i++ {
+			if _, err := rd.Read(sector[:]); err != nil {
+				if err == io.EOF {
+					break
+				}
+				return err
+			}
+			wr.WriteSector(sector[:])
 		}
-		if err := wr.Commit(broadcast); err != nil {
+		sectorTipHash, err := wr.Commit(broadcast)
+		if err != nil {
 			return err
 		}
 
-		fmt.Println("Success.")
+		fmt.Printf("Success. Hash: %v\n", sectorTipHash)
 		return nil
 	},
 }
@@ -87,7 +108,8 @@ func readDataTTY() []byte {
 }
 
 func init() {
-	writeCmd.Flags().BoolVar(&truncate, TruncateFlag, false, "Truncate the blob before writing")
 	writeCmd.Flags().BoolVar(&broadcast, BroadcastFlag, true, "Broadcast data to the network upon completion")
+	writeCmd.Flags().BoolVar(&resetEpoch, ResetEpochFlag, false, "Increment the epoch and reset the blob before write.")
+	writeCmd.Flags().StringVar(&fndHome, "fnd-home", "~/.fnd", "Path to FootnoteD's home directory.")
 	cmd.AddCommand(writeCmd)
 }
