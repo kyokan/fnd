@@ -86,7 +86,24 @@ func (b *BlobWriter) Reset() error {
 	_, err := b.client.ResetEpoch(context.Background(), &apiv1.ResetEpochReq{
 		TxID: b.txID,
 	})
-	b.opened = false
+	if err != nil {
+		return errors.Wrap(err, "failed to reset blob")
+	}
+	checkoutRes, err := b.client.Checkout(context.Background(), &apiv1.CheckoutReq{
+		Name: b.name,
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to reset blob")
+	}
+	b.txID = checkoutRes.TxID
+	b.epochHeight = uint16(checkoutRes.EpochHeight)
+	b.sectorSize = uint16(checkoutRes.SectorSize)
+	sectorTipHash, err := crypto.NewHashFromBytes(checkoutRes.SectorTipHash)
+	if err != nil {
+		return errors.Wrap(err, "failed to reset blob")
+	}
+	b.sectorTipHash = sectorTipHash
+	b.epochHeight++
 	return err
 }
 
