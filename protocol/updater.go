@@ -194,9 +194,9 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		// Sync the entire blob on epoch rollover
 		epochUpdated = true
 		sectorSize = 0
+		epochHeight = item.EpochHeight
+		prevHash = crypto.ZeroHash
 	}
-
-	// check blob res prev hash and equivocate
 
 	if !cfg.NameLocker.TryLock(item.Name) {
 		return ErrNameLocked

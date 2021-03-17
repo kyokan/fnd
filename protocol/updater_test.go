@@ -61,7 +61,7 @@ func TestUpdater(t *testing.T) {
 			},
 		},
 		{
-			"syncs sectors when the local node has an older blob",
+			"syncs sectors when remote has a sector update",
 			func(t *testing.T, setup *updaterTestSetup) {
 				ts := time.Now()
 				epochHeight := CurrentEpoch(name)
@@ -86,6 +86,54 @@ func TestUpdater(t *testing.T) {
 					name,
 					epochHeight,
 					sectorSize+10,
+					ts,
+					mockapp.NullReader,
+				)
+				cfg := &UpdateConfig{
+					Mux:        setup.tp.LocalMux,
+					DB:         setup.ls.DB,
+					NameLocker: util.NewMultiLocker(),
+					BlobStore:  setup.ls.BlobStore,
+					Item: &UpdateQueueItem{
+						PeerIDs: NewPeerSet([]crypto.Hash{
+							crypto.HashPub(setup.tp.RemoteSigner.Pub()),
+						}),
+						Name:        name,
+						EpochHeight: update.EpochHeight,
+						SectorSize:  update.SectorSize,
+						Pub:         setup.tp.RemoteSigner.Pub(),
+					},
+				}
+				require.NoError(t, UpdateBlob(cfg))
+				mockapp.RequireBlobsEqual(t, setup.ls.BlobStore, setup.rs.BlobStore, name)
+			},
+		},
+		{
+			"syncs sectors when remote has a epoch update (rollover)",
+			func(t *testing.T, setup *updaterTestSetup) {
+				ts := time.Now()
+				epochHeight := CurrentEpoch(name)
+				sectorSize := uint16(10)
+				mockapp.FillBlobReader(
+					t,
+					setup.ls.DB,
+					setup.ls.BlobStore,
+					setup.tp.RemoteSigner,
+					name,
+					epochHeight,
+					sectorSize,
+					ts.Add(-48*time.Hour),
+					mockapp.NullReader,
+				)
+				// create the new blob remotely
+				update := mockapp.FillBlobReader(
+					t,
+					setup.rs.DB,
+					setup.rs.BlobStore,
+					setup.tp.RemoteSigner,
+					name,
+					epochHeight+1,
+					sectorSize,
 					ts,
 					mockapp.NullReader,
 				)
