@@ -54,12 +54,6 @@ var writeCmd = &cobra.Command{
 			if err := wr.Reset(); err != nil {
 				return err
 			}
-			// For technical reasons, Open _must_ be called again after Reset
-			// This is to reset the initial state on the client and checkout
-			// the name afresh.
-			if err := wr.Open(); err != nil {
-				return err
-			}
 		}
 
 		var rd io.Reader
