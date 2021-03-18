@@ -10,7 +10,6 @@ import (
 type Store interface {
 	Open(name string) (Blob, error)
 	Exists(name string) (bool, error)
-	Reset(name string) error
 }
 
 type storeImpl struct {
@@ -41,37 +40,6 @@ func (s *storeImpl) Open(name string) (Blob, error) {
 
 func (s *storeImpl) Exists(name string) (bool, error) {
 	return fileExists(path.Join(s.blobsPath, PathifyName(name)))
-}
-
-func (s *storeImpl) Reset(name string) error {
-	blobSubpath := PathifyName(name)
-	blobFile := path.Join(s.blobsPath, blobSubpath)
-	exists, err := fileExists(blobFile)
-	var f *os.File
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return nil
-	}
-	err = os.Remove(path.Join(s.blobsPath, PathifyName(name)))
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(blobFile), 0700); err != nil {
-		return err
-	}
-	f, err = os.OpenFile(blobFile, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		return err
-	}
-	if err := f.Truncate(Size); err != nil {
-		return err
-	}
-	if err := f.Close(); err != nil {
-		return err
-	}
-	return nil
 }
 
 func NewInStorePath(blobsPath string, name string) (Blob, error) {

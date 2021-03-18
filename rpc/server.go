@@ -226,6 +226,7 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 	}
 	var epochHeight, sectorSize uint16
 	var sectorTipHash crypto.Hash = blob.ZeroHash
+
 	header, err := store.GetHeader(s.db, req.Name)
 	if err != nil {
 		epochHeight = protocol.CurrentEpoch(req.Name)
@@ -238,6 +239,20 @@ func (s *Server) Checkout(ctx context.Context, req *apiv1.CheckoutReq) (*apiv1.C
 	tx, err := bl.Transaction()
 	if err != nil {
 		return nil, err
+	}
+
+	if req.ResetEpoch {
+		if epochHeight > protocol.CurrentEpoch(req.Name) {
+			return nil, errors.New("cannot reset epoch ahead of schedule")
+		}
+
+		if err := tx.Truncate(); err != nil {
+			return nil, err
+		}
+
+		epochHeight++
+		sectorSize = 0
+		sectorTipHash = crypto.ZeroHash
 	}
 
 	_, err = tx.Seek(int64(sectorSize)*int64(blob.SectorBytes), io.SeekStart)
@@ -289,6 +304,7 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 		return nil, errors.Wrap(err, "error getting name info")
 	}
 
+	// TODO: test if epoch was updated _after_ we checked out
 	epochHeight := uint16(req.EpochHeight)
 	sectorSize := uint16(req.SectorSize)
 	sectorTipHash, err := crypto.NewHashFromBytes(req.SectorTipHash)
@@ -351,35 +367,6 @@ func (s *Server) Commit(ctx context.Context, req *apiv1.CommitReq) (*apiv1.Commi
 	s.lgr.Info("committed blob", "name", name, "recipient_count", len(recips))
 
 	return &apiv1.CommitRes{}, nil
-}
-
-func (s *Server) ResetEpoch(ctx context.Context, req *apiv1.ResetEpochReq) (*apiv1.ResetEpochRes, error) {
-	id := strconv.FormatUint(uint64(req.TxID), 32)
-	awaiting := s.txStore.Get(id).(*awaitingTx)
-	if awaiting == nil {
-		return nil, errors.New("transaction ID not found")
-	}
-
-	tx := awaiting.tx
-	name := tx.Name()
-	header, err := store.GetHeader(s.db, name)
-	if err != nil {
-		return nil, err
-	}
-
-	if header.EpochHeight > protocol.CurrentEpoch(name) {
-		return nil, errors.New("cannot reset epoch ahead of schedule")
-	}
-
-	if err := s.bs.Reset(name); err != nil {
-		return nil, err
-	}
-
-	if err := store.TruncateHeaderName(s.db, name); err != nil {
-		return nil, err
-	}
-
-	return &apiv1.ResetEpochRes{}, nil
 }
 
 func (s *Server) ReadAt(_ context.Context, req *apiv1.ReadAtReq) (*apiv1.ReadAtRes, error) {
