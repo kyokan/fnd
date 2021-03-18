@@ -68,6 +68,9 @@ func (s *storeImpl) Reset(name string) error {
 	if err := f.Truncate(Size); err != nil {
 		return err
 	}
+	if err := f.Close(); err != nil {
+		return err
+	}
 	return nil
 }
 
