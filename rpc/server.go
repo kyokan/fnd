@@ -371,7 +371,7 @@ func (s *Server) ResetEpoch(ctx context.Context, req *apiv1.ResetEpochReq) (*api
 		return nil, errors.New("cannot reset epoch ahead of schedule")
 	}
 
-	if err := s.bs.Reset(name); err != nil {
+	if err := tx.Truncate(); err != nil {
 		return nil, err
 	}
 
