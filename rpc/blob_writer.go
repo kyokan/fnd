@@ -20,13 +20,15 @@ type BlobWriter struct {
 	txID          uint32
 	opened        bool
 	committed     bool
+	resetEpoch    bool
 }
 
-func NewBlobWriter(client apiv1.Footnotev1Client, signer crypto.Signer, name string) *BlobWriter {
+func NewBlobWriter(client apiv1.Footnotev1Client, signer crypto.Signer, name string, resetEpoch bool) *BlobWriter {
 	return &BlobWriter{
-		client: client,
-		signer: signer,
-		name:   name,
+		client:     client,
+		signer:     signer,
+		name:       name,
+		resetEpoch: resetEpoch,
 	}
 }
 
@@ -38,7 +40,8 @@ func (b *BlobWriter) Open() error {
 		panic("writer committed")
 	}
 	checkoutRes, err := b.client.Checkout(context.Background(), &apiv1.CheckoutReq{
-		Name: b.name,
+		Name:       b.name,
+		ResetEpoch: b.resetEpoch,
 	})
 	if err != nil {
 		return errors.Wrap(err, "failed to check out blob")
@@ -62,6 +65,7 @@ func (b *BlobWriter) WriteSector(p []byte) (crypto.Hash, error) {
 	if b.committed {
 		panic("writer committed")
 	}
+
 	var sector blob.Sector
 	copy(sector[:], p)
 
@@ -80,19 +84,6 @@ func (b *BlobWriter) WriteSector(p []byte) (crypto.Hash, error) {
 	b.sectorTipHash = blob.SerialHashSector(sector, b.sectorTipHash)
 
 	return b.sectorTipHash, nil
-}
-
-func (b *BlobWriter) Reset() error {
-	_, err := b.client.ResetEpoch(context.Background(), &apiv1.ResetEpochReq{
-		TxID: b.txID,
-	})
-	if err != nil {
-		return errors.Wrap(err, "failed to reset blob")
-	}
-	b.epochHeight++
-	b.sectorSize = 0
-	b.sectorTipHash = crypto.ZeroHash
-	return err
 }
 
 func (b *BlobWriter) Commit(broadcast bool) (crypto.Hash, error) {

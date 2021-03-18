@@ -12,7 +12,6 @@ service Footnotev1 {
     rpc Checkout (CheckoutReq) returns (CheckoutRes);
     rpc WriteSector (WriteSectorReq) returns (WriteSectorRes);
     rpc Commit (CommitReq) returns (CommitRes);
-    rpc ResetEpoch(ResetEpochReq) returns (ResetEpochRes);
 
     rpc ReadAt (ReadAtReq) returns (ReadAtRes);
 
@@ -74,6 +73,7 @@ message ListPeersRes {
 
 message CheckoutReq {
     string name = 1;
+    bool resetEpoch = 2;
 }
 
 message CheckoutRes {
