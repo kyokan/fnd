@@ -218,6 +218,16 @@ func UpdateBlob(cfg *UpdateConfig) error {
 		return errors.Wrap(err, "error starting transaction")
 	}
 
+	if epochUpdated {
+		if epochHeight > CurrentEpoch(item.Name)+1 {
+			return errors.New("cannot reset epoch ahead of schedule")
+		}
+
+		if err := tx.Truncate(); err != nil {
+			return err
+		}
+	}
+
 	_, err = tx.Seek(int64(sectorSize)*int64(blob.SectorBytes), io.SeekStart)
 	if err != nil {
 		return errors.Wrap(err, "error seeking transaction")

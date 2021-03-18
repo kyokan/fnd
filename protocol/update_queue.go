@@ -20,6 +20,7 @@ import (
 
 var (
 	ErrUpdateQueueMaxLen        = errors.New("update queue is at max length")
+	ErrUpdateQueueEpochUpdated  = errors.New("epoch already updated")
 	ErrUpdateQueueSectorUpdated = errors.New("sector already updated")
 	ErrUpdateQueueThrottled     = errors.New("update is throttled")
 	ErrUpdateQueueStaleSector   = errors.New("sector is stale")
@@ -117,21 +118,28 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 		return errors.Wrap(err, "error getting name info")
 	}
 
-	// FIXME: epochHeight?
-	var storedSectorSize uint16
+	var epochHeight, sectorSize uint16
 	header, err := store.GetHeader(u.db, update.Name)
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		return errors.Wrap(err, "error getting name header")
 	} else if err == nil {
-		storedSectorSize = header.SectorSize
+		epochHeight = header.EpochHeight
+		sectorSize = header.SectorSize
 	}
 
-	if storedSectorSize > update.SectorSize {
-		return ErrUpdateQueueStaleSector
+	if epochHeight > update.EpochHeight {
+		return ErrUpdateQueueEpochUpdated
 	}
-	if storedSectorSize == update.SectorSize {
-		return ErrUpdateQueueSectorUpdated
+
+	if epochHeight == update.EpochHeight {
+		if sectorSize > update.SectorSize {
+			return ErrUpdateQueueStaleSector
+		}
+		if sectorSize == update.SectorSize {
+			return ErrUpdateQueueSectorUpdated
+		}
 	}
+
 	u.mu.Lock()
 	defer u.mu.Unlock()
 	entry := u.entries[update.Name]
