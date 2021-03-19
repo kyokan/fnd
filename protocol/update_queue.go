@@ -127,10 +127,12 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 		sectorSize = header.SectorSize
 	}
 
+	// Ignore updates for epochs below ours
 	if epochHeight > update.EpochHeight {
 		return ErrUpdateQueueEpochUpdated
 	}
 
+	// Ignore updates for sectors below ours, same epoch
 	if epochHeight == update.EpochHeight {
 		if sectorSize > update.SectorSize {
 			return ErrUpdateQueueStaleSector
@@ -161,8 +163,14 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 		return nil
 	}
 
-	if entry.SectorSize > update.SectorSize {
-		return ErrUpdateQueueStaleSector
+	if entry.EpochHeight > update.EpochHeight {
+		return ErrUpdateQueueEpochUpdated
+	}
+
+	if entry.EpochHeight == update.EpochHeight {
+		if entry.SectorSize > update.SectorSize {
+			return ErrUpdateQueueStaleSector
+		}
 	}
 
 	u.lgr.Info("enqueued update", "name", update.Name, "epoch", update.EpochHeight, "sector", update.SectorSize)
