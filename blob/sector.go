@@ -2,7 +2,7 @@ package blob
 
 import "io"
 
-type Sector [SectorLen]byte
+type Sector [SectorBytes]byte
 
 var ZeroSector Sector
 

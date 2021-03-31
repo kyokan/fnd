@@ -22,8 +22,8 @@ func TestIngestBanLists(t *testing.T) {
 	require.NoError(t, bl.Close())
 
 	err = IngestBanLists(db, bs, []string{
-		"<path-to-your-banlist1>",
-		"<path-to-your-banlist2>",
+		"http://sprunge.us/fKKV87",
+		"http://sprunge.us/Ot8MYp",
 	})
 	require.NoError(t, err)
 

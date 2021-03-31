@@ -5,263 +5,271 @@ import (
 	"fnd/crypto"
 	"fnd/log"
 	"fnd/p2p"
+	"fnd/store"
 	"fnd/wire"
-	"github.com/pkg/errors"
-	"sync"
 	"time"
+
+	"fnd.localhost/handshake/primitives"
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (
-	DefaultSyncerTreeBaseResTimeout = 10 * time.Second
-	DefaultSyncerSectorResTimeout   = 15 * time.Second
+	DefaultSyncerBlobResTimeout = 15 * time.Second
 )
 
 var (
-	ErrNoTreeBaseCandidates = errors.New("no tree base candidates")
-	ErrSyncerNoProgress     = errors.New("sync not progressing")
-	ErrSyncerMaxAttempts    = errors.New("reached max sync attempts")
+	ErrInvalidPayloadSignature = errors.New("update signature is invalid")
+	ErrPayloadEquivocation     = errors.New("update payload is equivocated")
+	ErrSyncerNoProgress        = errors.New("sync not progressing")
+	ErrSyncerMaxAttempts       = errors.New("reached max sync attempts")
 )
 
-type SyncTreeBasesOpts struct {
-	Timeout    time.Duration
-	Mux        *p2p.PeerMuxer
-	Peers      *PeerSet
-	MerkleRoot crypto.Hash
-	Name       string
-}
-
-func SyncTreeBases(opts *SyncTreeBasesOpts) (blob.MerkleBase, error) {
-	lgr := log.WithModule("tree-base-syncer")
-	treeBaseResCh := make(chan *wire.TreeBaseRes, 1)
-	iter := opts.Peers.Iterator()
-	var newMerkleBase blob.MerkleBase
-	for {
-		peerID, ok := iter()
-		if !ok {
-			return newMerkleBase, ErrNoTreeBaseCandidates
-		}
-
-		var once sync.Once
-		unsubTreeBaseRes := opts.Mux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeTreeBaseRes, func(recvPeerID crypto.Hash, res *wire.Envelope) {
-			msg := res.Message.(*wire.TreeBaseRes)
-			if msg.Name != opts.Name {
-				return
-			}
-			if peerID != recvPeerID {
-				return
-			}
-			once.Do(func() {
-				treeBaseResCh <- msg
-			})
-		}))
-		err := opts.Mux.Send(peerID, &wire.TreeBaseReq{
-			Name: opts.Name,
-		})
-		if err != nil {
-			lgr.Warn("error fetching tree base from peer, trying another", "peer_id", peerID, "err", err)
-			unsubTreeBaseRes()
-			continue
-		}
-
-		timeout := 10 * time.Second
-		if opts.Timeout != 0 {
-			timeout = opts.Timeout
-		}
-		timer := time.NewTimer(timeout)
-
-		select {
-		case <-timer.C:
-			lgr.Warn("timed out fetching tree base from peer, trying another", "peer_id", peerID)
-			unsubTreeBaseRes()
-			continue
-		case msg := <-treeBaseResCh:
-			unsubTreeBaseRes()
-			candMerkleTree := blob.MakeTreeFromBase(msg.MerkleBase)
-			if candMerkleTree.Root() != opts.MerkleRoot {
-				lgr.Warn("received invalid merkle base from peer, trying another", "peer_id", peerID)
-				continue
-			}
-			newMerkleBase = candMerkleTree.ProtocolBase()
-			return newMerkleBase, nil
-		}
-	}
+type syncUpdate struct {
+	sectorTipHash crypto.Hash
+	reservedRoot  crypto.Hash
+	signature     crypto.Signature
 }
 
 type SyncSectorsOpts struct {
-	Timeout       time.Duration
-	Mux           *p2p.PeerMuxer
-	Tx            blob.Transaction
-	Peers         *PeerSet
-	MerkleBase    blob.MerkleBase
-	SectorsNeeded []uint8
-	Name          string
+	Timeout     time.Duration
+	Mux         *p2p.PeerMuxer
+	Tx          blob.Transaction
+	Peers       *PeerSet
+	EpochHeight uint16
+	SectorSize  uint16
+	PrevHash    crypto.Hash
+	Name        string
+	DB          *leveldb.DB
 }
 
-type sectorRes struct {
+type payloadRes struct {
 	peerID crypto.Hash
-	msg    *wire.SectorRes
+	msg    *wire.BlobRes
 }
 
-type reqdSectorsMap map[uint8][33]byte
-
-func SyncSectors(opts *SyncSectorsOpts) error {
-	l := log.WithModule("sector-syncer").Sub("name", opts.Name)
-	tx := opts.Tx
-	reqdSectors := make(reqdSectorsMap)
-	for _, id := range opts.SectorsNeeded {
-		hash := opts.MerkleBase[id]
-		if hash == blob.EmptyBlobBaseHash {
-			if err := tx.WriteSector(id, blob.ZeroSector); err != nil {
-				return errors.Wrap(err, "error writing zero sector")
-			}
-			continue
-		}
-		reqdSectors[id] = awaitingSectorHash(id, hash)
+// validateBlobUpdate validates that the provided signature matches the
+// expected signature for given update metadata.  The metadata commits the
+// update to the latest sector size and tip hash, so effectively for a blob of
+// known sector size, there exists a _unique_ compact proof of the update in
+// the form of the signature.
+func validateBlobUpdate(db *leveldb.DB, name string, epochHeight, sectorSize uint16, sectorTipHash crypto.Hash, reservedRoot crypto.Hash, sig crypto.Signature) error {
+	if err := primitives.ValidateName(name); err != nil {
+		return errors.Wrap(err, "update name is invalid")
 	}
-
-	neededLen := len(reqdSectors)
-	var attempts int
-	for {
-		if attempts == 3 {
-			return ErrSyncerMaxAttempts
-		}
-
-		l.Trace("performing sync attempt", "attempts", attempts+1)
-		reqdSectors = syncLoop(opts, reqdSectors)
-		remainingLen := len(reqdSectors)
-		l.Info(
-			"synced sectors",
-			"received", neededLen-remainingLen,
-			"remaining", remainingLen,
-		)
-		if remainingLen == 0 {
-			return nil
-		}
-		if neededLen == remainingLen {
-			return ErrSyncerNoProgress
-		}
-		neededLen = remainingLen
-		attempts++
+	banned, err := store.NameIsBanned(db, name)
+	if err != nil {
+		return errors.Wrap(err, "error reading name ban state")
 	}
+	if banned {
+		return errors.New("name is banned")
+	}
+	// TODO: should we check header ban state here?
+	info, err := store.GetNameInfo(db, name)
+	if err != nil {
+		return errors.Wrap(err, "error reading name info")
+	}
+	h := blob.SealHash(name, epochHeight, sectorSize, sectorTipHash, reservedRoot)
+	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
+		return ErrInvalidPayloadSignature
+	}
+	return nil
 }
 
-func syncLoop(opts *SyncSectorsOpts, reqdSectors reqdSectorsMap) reqdSectorsMap {
-	lgr := log.WithModule("sync-loop").Sub("name", opts.Name)
-
-	outReqdSectors := make(map[uint8][33]byte)
-	for k, v := range reqdSectors {
-		outReqdSectors[k] = v
-	}
-	sectorReqCh := make(chan uint8)
-	sectorResCh := make(chan *sectorRes)
-	sectorProcessedCh := make(chan struct{}, 1)
+// SyncSectors syncs the sectors for the options provided in opts. Syncing
+// happens by sending a BlobReq and expecting a BlobRes in return. Multiple
+// requests may be send to multiple peers but the first valid response will be
+// considered final.
+//
+// An invalid BlobRes which fails validation may trigger an equivocation proof,
+// which is the proof that are two conflicting updates at the same epoch and
+// sector size, and this proof will be stored locally and served to peers in
+// the equivocation proof flow. See sector_server.go for details.
+func SyncSectors(opts *SyncSectorsOpts) (*syncUpdate, error) {
+	lgr := log.WithModule("payload-syncer").Sub("name", opts.Name)
+	errs := make(chan error)
+	payloadResCh := make(chan *payloadRes)
+	payloadProcessedCh := make(chan *syncUpdate, 1)
 	doneCh := make(chan struct{})
-	unsubRes := opts.Mux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeSectorRes, func(peerID crypto.Hash, envelope *wire.Envelope) {
-		sectorResCh <- &sectorRes{
+	unsubRes := opts.Mux.AddMessageHandler(p2p.PeerMessageHandlerForType(wire.MessageTypeBlobRes, func(peerID crypto.Hash, envelope *wire.Envelope) {
+		payloadResCh <- &payloadRes{
 			peerID: peerID,
-			msg:    envelope.Message.(*wire.SectorRes),
+			msg:    envelope.Message.(*wire.BlobRes),
 		}
 	}))
 
 	go func() {
-		receivedSectors := make(map[uint8]bool)
-		awaitingSectorID := -1
+		receivedPayloads := make(map[uint16]bool)
 		for {
-			select {
-			case id := <-sectorReqCh:
-				awaitingSectorID = int(id)
-				iter := opts.Peers.Iterator()
-				var sendCount int
-				for {
-					peerID, ok := iter()
-					if !ok {
-						break
-					}
-					if sendCount == 7 {
-						break
-					}
-					err := opts.Mux.Send(peerID, &wire.SectorReq{
-						Name:     opts.Name,
-						SectorID: id,
-					})
-					if err != nil {
-						lgr.Warn("error fetching sector from peer, trying another", "peer_id", peerID, "err", err)
-						continue
-					}
-					lgr.Debug(
-						"requested sector from peer",
-						"id", id,
-						"peer_id", peerID,
-					)
-					sendCount++
-				}
-			case res := <-sectorResCh:
-				msg := res.msg
-				peerID := res.peerID
-				expHash, ok := reqdSectors[msg.SectorID]
-				if msg.Name != opts.Name {
-					lgr.Trace("received sector for extraneous name", "other_name", msg.Name, "sector_id", msg.SectorID)
-					continue
-				}
+			iter := opts.Peers.Iterator()
+			var sendCount int
+			for {
+				peerID, ok := iter()
 				if !ok {
-					lgr.Trace("received unnecessary sector", "sector_id", msg.SectorID, "peer_id", peerID)
+					break
+				}
+				if sendCount == 7 {
+					break
+				}
+				err := opts.Mux.Send(peerID, &wire.BlobReq{
+					Name:        opts.Name,
+					EpochHeight: opts.EpochHeight,
+					SectorSize:  opts.SectorSize,
+				})
+				if err != nil {
+					lgr.Warn("error fetching payload from peer, trying another", "peer_id", peerID, "err", err)
 					continue
 				}
-				if receivedSectors[msg.SectorID] {
-					lgr.Trace("already processed this sector", "sector_id", msg.SectorID, "peer_id", peerID)
-					continue
-				}
-				if awaitingSectorID != int(msg.SectorID) {
-					lgr.Trace("received unsolicited sector", "sector_id", msg.SectorID, "peer_id", peerID)
-					continue
-				}
-				hash := awaitingSectorHash(msg.SectorID, blob.HashSector(msg.Sector))
-				if expHash != hash {
-					lgr.Warn("invalid sector received", "sector_id", msg.SectorID, "peer_id", peerID)
-					continue
-				}
-				if err := opts.Tx.WriteSector(msg.SectorID, msg.Sector); err != nil {
-					lgr.Error("failed to write sector", "sector_id", msg.SectorID, "err", err)
-					continue
-				}
-				receivedSectors[msg.SectorID] = true
 				lgr.Debug(
-					"synced sector",
-					"name", opts.Name,
-					"sector_id", msg.SectorID,
+					"requested payload from peer",
 					"peer_id", peerID,
 				)
-				awaitingSectorID = -1
-				sectorProcessedCh <- struct{}{}
+				sendCount++
+			}
+			select {
+			case res := <-payloadResCh:
+				msg := res.msg
+				peerID := res.peerID
+				if msg.Name != opts.Name {
+					lgr.Trace("received payload for extraneous name", "other_name", msg.Name)
+					continue
+				}
+				if receivedPayloads[msg.PayloadPosition] {
+					lgr.Trace("already processed this payload", "payload_position", msg.PayloadPosition, "peer_id", peerID)
+					continue
+				}
+				// Verify that the remote is at the same epoch height or lower
+				if opts.EpochHeight > msg.EpochHeight {
+					lgr.Trace("received unexpected epoch height", "expected_epoch_height", opts.EpochHeight, "received_epoch_height", msg.EpochHeight)
+					continue
+				}
+				// Verify that we received the payload starting from the sector
+				// we requested in blob request.  opts.SectorSize contains our
+				// current known sector size, which is what we send in blob
+				// request.
+				if opts.SectorSize != msg.PayloadPosition {
+					lgr.Trace("received unexpected payload position", "sector_size", opts.SectorSize, "payload_position", msg.PayloadPosition)
+					continue
+				}
+				sectorSize := msg.PayloadPosition + uint16(len(msg.Payload))
+				// Additional sanity check: make sure that update does not overflow max sectors.
+				if int(sectorSize) > blob.MaxSectors {
+					lgr.Trace("received unexpected sector size", "sector_size", sectorSize, "max", blob.MaxSectors)
+					continue
+				}
+				// Generate the current tip hash from prev hash and the payload
+				// sectors.
+				var sectorTipHash crypto.Hash = msg.PrevHash
+				for i := 0; int(i) < len(msg.Payload); i++ {
+					sectorTipHash = blob.SerialHashSector(msg.Payload[i], sectorTipHash)
+				}
+				// Verify that the update is valid by using the recomputed
+				// sector size, sector tip hash and other metadata. This data
+				// is first hashed and the signature is validated against the
+				// name's pubkey. See validateBlobRes.
+				// TODO: store the latest tip hash
+				if err := validateBlobUpdate(opts.DB, msg.Name, msg.EpochHeight, sectorSize, sectorTipHash, msg.ReservedRoot, msg.Signature); err != nil {
+					lgr.Trace("blob res validation failed", "err", err)
+					// If prev hash matches, we have an invalid signature,
+					// which cannot be used as a proof of equivocation.
+					// TODO: ban the peer as it is clearly sending invalid data
+					errs <- errors.Wrap(ErrInvalidPayloadSignature, "signature validation failed")
+					break
+				}
+				// Verify that the prev hash from the remote matches our
+				// current tip hash i.e.  the update starts _after_ our
+				// latest sector and both the sector hashes match.  A
+				// mismatch indicates a proof of equivocation.
+				if opts.PrevHash != msg.PrevHash {
+					lgr.Trace("received unexpected prev hash", "expected_prev_hash", opts.PrevHash, "received_prev_hash", msg.PrevHash)
+					if opts.EpochHeight == msg.EpochHeight {
+						// Skip if equivocation already exists
+						if _, err := store.GetEquivocationProof(opts.DB, msg.Name); err == nil {
+							lgr.Trace("skipping update, equivocation exists")
+							errs <- ErrPayloadEquivocation
+							break
+						}
+						// TODO: record timestamp and ban this name
+						header, err := store.GetHeader(opts.DB, msg.Name)
+						if err != nil {
+							lgr.Trace("error getting header", "err", err)
+							break
+						}
+						err = store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
+							return store.SetHeaderBan(tx, msg.Name, time.Time{})
+						})
+						if err != nil {
+							lgr.Trace("error setting header banned", "err", err)
+							break
+						}
+						// TODO: rename A, B
+						if err := store.WithTx(opts.DB, func(tx *leveldb.Transaction) error {
+							proof := &wire.EquivocationProof{
+								Name:                  msg.Name,
+								RemoteEpochHeight:     msg.EpochHeight,
+								RemotePayloadPosition: msg.PayloadPosition,
+								RemotePrevHash:        msg.PrevHash,
+								RemoteReservedRoot:    msg.ReservedRoot,
+								RemotePayload:         msg.Payload,
+								RemoteSignature:       msg.Signature,
+								LocalEpochHeight:      header.EpochHeight,
+								LocalSectorSize:       header.SectorSize,
+								LocalSectorTipHash:    header.SectorTipHash,
+								LocalReservedRoot:     header.ReservedRoot,
+								LocalSignature:        header.Signature,
+							}
+							return store.SetEquivocationProofTx(tx, msg.Name, proof)
+						}); err != nil {
+							lgr.Trace("error writing equivocation proof", "err", err)
+						}
+						update := &wire.Update{
+							Name:        msg.Name,
+							EpochHeight: msg.EpochHeight,
+							SectorSize:  0,
+						}
+						p2p.GossipAll(opts.Mux, update)
+					}
+					errs <- ErrPayloadEquivocation
+					break
+				}
+				for i := 0; int(i) < len(msg.Payload); i++ {
+					if err := opts.Tx.WriteSector(msg.Payload[i]); err != nil {
+						lgr.Error("failed to write payload", "payload_id", i, "err", err)
+						continue
+					}
+				}
+				receivedPayloads[msg.PayloadPosition] = true
+				payloadProcessedCh <- &syncUpdate{
+					sectorTipHash: sectorTipHash,
+					reservedRoot:  msg.ReservedRoot,
+					signature:     msg.Signature,
+				}
 			case <-doneCh:
 				return
 			}
 		}
 	}()
 
-sectorLoop:
-	for id := range reqdSectors {
-		timeout := time.NewTimer(opts.Timeout)
-		lgr.Debug("requesting sector", "id", id)
-		sectorReqCh <- id
+	var err error
+	var su *syncUpdate
+	timeout := time.NewTimer(opts.Timeout)
+payloadLoop:
+	for {
+		lgr.Debug("requesting payload")
 		select {
-		case <-sectorProcessedCh:
-			lgr.Debug("sector processed", "id", id)
-			delete(outReqdSectors, id)
+		case su = <-payloadProcessedCh:
+			lgr.Debug("payload processed")
+			break payloadLoop
 		case <-timeout.C:
-			lgr.Warn("sector request timed out", "id", id)
-			break sectorLoop
+			lgr.Warn("payload request timed out")
+			break payloadLoop
+		case err = <-errs:
+			lgr.Warn("payload syncing failed")
+			break payloadLoop
 		}
 	}
 
 	unsubRes()
 	close(doneCh)
-	return outReqdSectors
-}
-
-func awaitingSectorHash(id uint8, hash crypto.Hash) [33]byte {
-	var buf [33]byte
-	buf[0] = id
-	copy(buf[1:], hash[:])
-	return buf
+	return su, err
 }

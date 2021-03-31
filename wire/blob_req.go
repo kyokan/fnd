@@ -1,13 +1,13 @@
 package wire
 
 import (
-	"fnd/crypto"
 	"io"
 
+	"fnd/crypto"
 	"fnd.localhost/dwire"
 )
 
-type Update struct {
+type BlobReq struct {
 	HashCacher
 
 	Name        string
@@ -15,14 +15,14 @@ type Update struct {
 	SectorSize  uint16
 }
 
-var _ Message = (*Update)(nil)
+var _ Message = (*BlobReq)(nil)
 
-func (u *Update) MsgType() MessageType {
-	return MessageTypeUpdate
+func (u *BlobReq) MsgType() MessageType {
+	return MessageTypeBlobReq
 }
 
-func (u *Update) Equals(other Message) bool {
-	cast, ok := other.(*Update)
+func (u *BlobReq) Equals(other Message) bool {
+	cast, ok := other.(*BlobReq)
 	if !ok {
 		return false
 	}
@@ -32,7 +32,7 @@ func (u *Update) Equals(other Message) bool {
 		u.SectorSize == cast.SectorSize
 }
 
-func (u *Update) Encode(w io.Writer) error {
+func (u *BlobReq) Encode(w io.Writer) error {
 	return dwire.EncodeFields(
 		w,
 		u.Name,
@@ -41,7 +41,7 @@ func (u *Update) Encode(w io.Writer) error {
 	)
 }
 
-func (u *Update) Decode(r io.Reader) error {
+func (u *BlobReq) Decode(r io.Reader) error {
 	return dwire.DecodeFields(
 		r,
 		&u.Name,
@@ -50,6 +50,6 @@ func (u *Update) Decode(r io.Reader) error {
 	)
 }
 
-func (u *Update) Hash() (crypto.Hash, error) {
+func (u *BlobReq) Hash() (crypto.Hash, error) {
 	return u.HashCacher.Hash(u)
 }

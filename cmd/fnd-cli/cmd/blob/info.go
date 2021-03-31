@@ -6,13 +6,14 @@ import (
 	"fnd/cli"
 	"fnd/rpc"
 	apiv1 "fnd/rpc/v1"
+	"os"
+	"strconv"
+	"strings"
+
 	"fnd.localhost/handshake/primitives"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
-	"strconv"
-	"strings"
 )
 
 var infoCmd = &cobra.Command{
@@ -36,12 +37,13 @@ var infoCmd = &cobra.Command{
 		table.SetHeader([]string{
 			"Name",
 			"Public Key",
-			"Timestamp",
-			"Merkle Root",
+			"Epoch Height",
+			"Sector Size",
+			"Sector Tip Hash",
 			"Reserved Root",
-			"Received At",
 			"Signature",
-			"Time Bank",
+			"Received At",
+			"Banned At",
 		})
 
 		for _, name := range names {
@@ -53,12 +55,13 @@ var infoCmd = &cobra.Command{
 			table.Append([]string{
 				res.Name,
 				hex.EncodeToString(res.PublicKey.SerializeCompressed()),
-				res.Timestamp.String(),
-				res.MerkleRoot.String(),
+				strconv.Itoa(int(res.EpochHeight)),
+				strconv.Itoa(int(res.SectorSize)),
+				res.SectorTipHash.String(),
 				res.ReservedRoot.String(),
-				res.ReceivedAt.String(),
 				res.Signature.String(),
-				strconv.Itoa(res.Timebank),
+				res.ReceivedAt.String(),
+				res.BannedAt.String(),
 			})
 		}
 

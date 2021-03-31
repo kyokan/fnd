@@ -1,8 +1,6 @@
 package protocol
 
 import (
-	"fmt"
-	"github.com/btcsuite/btcd/btcec"
 	"fnd/blob"
 	"fnd/config"
 	"fnd/crypto"
@@ -10,46 +8,45 @@ import (
 	"fnd/p2p"
 	"fnd/store"
 	"fnd/wire"
-	"fnd.localhost/handshake/primitives"
-	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"fnd.localhost/handshake/primitives"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
-	ErrUpdateQueueMaxLen             = errors.New("update queue is at max length")
-	ErrUpdateQueueIdenticalTimestamp = errors.New("timestamp is identical to stored")
-	ErrUpdateQueueThrottled          = errors.New("update is throttled")
-	ErrUpdateQueueStaleTimestamp     = errors.New("update is stale")
-	ErrUpdateQueueSpltBrain          = errors.New("split brain")
-	ErrInitialImportIncomplete       = errors.New("initial import incomplete")
+	ErrUpdateQueueMaxLen        = errors.New("update queue is at max length")
+	ErrUpdateQueueSectorUpdated = errors.New("sector already updated")
+	ErrUpdateQueueThrottled     = errors.New("update is throttled")
+	ErrUpdateQueueStaleSector   = errors.New("sector is stale")
+	ErrUpdateQueueSpltBrain     = errors.New("split brain")
+	ErrInitialImportIncomplete  = errors.New("initial import incomplete")
 )
 
 type UpdateQueue struct {
-	MaxLen            int32
-	MinUpdateInterval time.Duration
-	mux               *p2p.PeerMuxer
-	db                *leveldb.DB
-	entries           map[string]*UpdateQueueItem
-	quitCh            chan struct{}
-	queue             []string
-	queueLen          int32
-	mu                sync.Mutex
-	lgr               log.Logger
+	MaxLen   int32
+	mux      *p2p.PeerMuxer
+	db       *leveldb.DB
+	entries  map[string]*UpdateQueueItem
+	quitCh   chan struct{}
+	queue    []string
+	queueLen int32
+	mu       sync.Mutex
+	lgr      log.Logger
 }
 
 type UpdateQueueItem struct {
-	PeerIDs      *PeerSet
-	Name         string
-	Timestamp    time.Time
-	MerkleRoot   crypto.Hash
-	ReservedRoot crypto.Hash
-	Signature    crypto.Signature
-	Pub          *btcec.PublicKey
-	Height       int
-	Disposed     int32
+	PeerIDs     *PeerSet
+	Name        string
+	EpochHeight uint16
+	SectorSize  uint16
+	Pub         *btcec.PublicKey
+	Height      int
+	Disposed    int32
 }
 
 func (u *UpdateQueueItem) Dispose() {
@@ -58,13 +55,12 @@ func (u *UpdateQueueItem) Dispose() {
 
 func NewUpdateQueue(mux *p2p.PeerMuxer, db *leveldb.DB) *UpdateQueue {
 	return &UpdateQueue{
-		MaxLen:            int32(config.DefaultConfig.Tuning.UpdateQueue.MaxLen),
-		MinUpdateInterval: config.ConvertDuration(config.DefaultConfig.Tuning.Timebank.MinUpdateIntervalMS, time.Millisecond),
-		mux:               mux,
-		db:                db,
-		entries:           make(map[string]*UpdateQueueItem),
-		quitCh:            make(chan struct{}),
-		lgr:               log.WithModule("update-queue"),
+		MaxLen:  int32(config.DefaultConfig.Tuning.UpdateQueue.MaxLen),
+		mux:     mux,
+		db:      db,
+		entries: make(map[string]*UpdateQueueItem),
+		quitCh:  make(chan struct{}),
+		lgr:     log.WithModule("update-queue"),
 	}
 }
 
@@ -86,6 +82,7 @@ func (u *UpdateQueue) Stop() error {
 	return nil
 }
 
+// TODO: prioritize equivocations first, then higher epochs and sector sizes
 func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 	// use atomic below to prevent having to lock mu
 	// during expensive name validation calls when
@@ -102,65 +99,65 @@ func (u *UpdateQueue) Enqueue(peerID crypto.Hash, update *wire.Update) error {
 		return ErrInitialImportIncomplete
 	}
 
-	nameInfo, err := u.validateUpdate(update.Name, update.Timestamp, update.MerkleRoot, update.ReservedRoot, update.Signature)
-	if err != nil {
-		return errors.Wrap(err, "name failed validation")
+	if update.SectorSize == 0 {
+		err := u.mux.Send(peerID, &wire.BlobReq{
+			Name:        update.Name,
+			EpochHeight: update.EpochHeight,
+			SectorSize:  blob.MaxSectors,
+		})
+		return err
 	}
 
-	var storedTimestamp time.Time
-	var headerReceivedAt time.Time
+	if err := u.validateUpdate(update.Name); err != nil {
+		return err
+	}
+
+	nameInfo, err := store.GetNameInfo(u.db, update.Name)
+	if err != nil {
+		return errors.Wrap(err, "error getting name info")
+	}
+
+	// FIXME: epochHeight?
+	var storedSectorSize uint16
 	header, err := store.GetHeader(u.db, update.Name)
 	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		return errors.Wrap(err, "error getting name header")
 	} else if err == nil {
-		storedTimestamp = header.Timestamp
-		headerReceivedAt = header.ReceivedAt
+		storedSectorSize = header.SectorSize
 	}
 
-	fmt.Println(update)
-	fmt.Println(update.Timestamp)
-	fmt.Println(storedTimestamp)
-	if storedTimestamp.After(update.Timestamp) {
-		return ErrUpdateQueueStaleTimestamp
+	if storedSectorSize > update.SectorSize {
+		return ErrUpdateQueueStaleSector
 	}
-	if storedTimestamp.Equal(update.Timestamp) {
-		return ErrUpdateQueueIdenticalTimestamp
+	if storedSectorSize == update.SectorSize {
+		return ErrUpdateQueueSectorUpdated
 	}
-	if time.Now().Sub(headerReceivedAt) < u.MinUpdateInterval {
-		return ErrUpdateQueueThrottled
-	}
-
 	u.mu.Lock()
 	defer u.mu.Unlock()
 	entry := u.entries[update.Name]
-	if entry == nil || entry.Timestamp.Before(update.Timestamp) {
+	if entry == nil || entry.SectorSize < update.SectorSize {
 		u.entries[update.Name] = &UpdateQueueItem{
-			PeerIDs:      NewPeerSet([]crypto.Hash{peerID}),
-			Name:         update.Name,
-			Timestamp:    update.Timestamp,
-			MerkleRoot:   update.MerkleRoot,
-			ReservedRoot: update.ReservedRoot,
-			Signature:    update.Signature,
-			Pub:          nameInfo.PublicKey,
-			Height:       nameInfo.ImportHeight,
+			PeerIDs:     NewPeerSet([]crypto.Hash{peerID}),
+			Name:        update.Name,
+			EpochHeight: update.EpochHeight,
+			SectorSize:  update.SectorSize,
+			Pub:         nameInfo.PublicKey,
+			Height:      nameInfo.ImportHeight,
 		}
 
 		if entry == nil {
 			u.queue = append(u.queue, update.Name)
 			atomic.AddInt32(&u.queueLen, 1)
 		}
-		u.lgr.Info("enqueued update", "name", update.Name, "timestamp", update.Timestamp)
+		u.lgr.Info("enqueued update", "name", update.Name, "epoch", update.EpochHeight, "sector", update.SectorSize)
 		return nil
 	}
 
-	if entry.Timestamp.After(update.Timestamp) {
-		return ErrUpdateQueueStaleTimestamp
-	}
-	if entry.Signature != update.Signature {
-		return ErrUpdateQueueSpltBrain
+	if entry.SectorSize > update.SectorSize {
+		return ErrUpdateQueueStaleSector
 	}
 
-	u.lgr.Info("enqueued update", "name", update.Name, "timestamp", update.Timestamp)
+	u.lgr.Info("enqueued update", "name", update.Name, "epoch", update.EpochHeight, "sector", update.SectorSize)
 	entry.PeerIDs.Add(peerID)
 	return nil
 }
@@ -176,29 +173,8 @@ func (u *UpdateQueue) Dequeue() *UpdateQueueItem {
 	ret := u.entries[name]
 	u.queue = u.queue[1:]
 	atomic.AddInt32(&u.queueLen, -1)
+	delete(u.entries, name)
 	return ret
-}
-
-func (u *UpdateQueue) validateUpdate(name string, ts time.Time, mr crypto.Hash, rr crypto.Hash, sig crypto.Signature) (*store.NameInfo, error) {
-	if err := primitives.ValidateName(name); err != nil {
-		return nil, errors.Wrap(err, "update name is invalid")
-	}
-	banned, err := store.NameIsBanned(u.db, name)
-	if err != nil {
-		return nil, errors.Wrap(err, "error reading name ban state")
-	}
-	if banned {
-		return nil, errors.New("name is banned")
-	}
-	info, err := store.GetNameInfo(u.db, name)
-	if err != nil {
-		return nil, errors.Wrap(err, "error reading name info")
-	}
-	h := blob.SealHash(name, ts, mr, rr)
-	if !crypto.VerifySigPub(info.PublicKey, sig, h) {
-		return nil, errors.New("update signature is invalid")
-	}
-	return info, nil
 }
 
 func (u *UpdateQueue) onUpdate(peerID crypto.Hash, envelope *wire.Envelope) {
@@ -206,6 +182,27 @@ func (u *UpdateQueue) onUpdate(peerID crypto.Hash, envelope *wire.Envelope) {
 	if err := u.Enqueue(peerID, update); err != nil {
 		u.lgr.Info("update rejected", "name", update.Name, "reason", err)
 	}
+}
+
+func (u *UpdateQueue) validateUpdate(name string) error {
+	if err := primitives.ValidateName(name); err != nil {
+		return errors.Wrap(err, "update name is invalid")
+	}
+	nameBan, err := store.NameIsBanned(u.db, name)
+	if err != nil {
+		return errors.Wrap(err, "error reading name ban state")
+	}
+	if nameBan {
+		return errors.New("name is banned")
+	}
+	headerBan, err := store.GetHeaderBan(u.db, name)
+	if err != nil {
+		return errors.Wrap(err, "error reading header ban state")
+	}
+	if !headerBan.IsZero() {
+		return errors.New("header is banned")
+	}
+	return nil
 }
 
 func (u *UpdateQueue) reapDequeuedUpdates() {

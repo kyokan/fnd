@@ -110,7 +110,7 @@ func TestReadSector(t *testing.T) {
 		},
 		{
 			255,
-			16711680,
+			65280,
 		},
 	}
 	r := &readerWrapper{
@@ -180,7 +180,7 @@ func TestWriteBlobAt(t *testing.T) {
 
 func TestWriteSector(t *testing.T) {
 	tests := []struct {
-		id     uint8
+		id     uint16
 		offset int64
 	}{
 		{
@@ -189,7 +189,7 @@ func TestWriteSector(t *testing.T) {
 		},
 		{
 			255,
-			16711680,
+			65280,
 		},
 	}
 	w := &writerWrapper{
